@@ -257,13 +257,32 @@
         },
         "anzahl": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 1,
+          "description": "Nicht nötig bei ausgemittelt"
         },
         "d": {
           "type": "number"
         },
         "tiefe": {
           "type": "number"
+        },
+        "ausgemittelt": {
+          "type": "boolean",
+          "default": false,
+          "description": "Maschine verteilt gleichmäßig zwischen start und ende mit höchstens raster Abstand (TpaCAD CP)"
+        },
+        "gerade_anzahl": {
+          "type": "boolean",
+          "default": false,
+          "description": "Nur mit ausgemittelt: immer gerade Anzahl (TpaCAD QP)"
+        },
+        "ende": {
+          "type": "number",
+          "description": "Nur mit ausgemittelt: Endkoordinate entlang der Richtung (Mindestabstand zum Rand)"
+        },
+        "durch": {
+          "type": "boolean",
+          "default": false
         }
       },
       "required": [
@@ -271,10 +290,31 @@
         "start",
         "richtung",
         "raster",
-        "anzahl",
         "d",
         "tiefe"
-      ]
+      ],
+      "if": {
+        "not": {
+          "properties": {
+            "ausgemittelt": {
+              "const": true
+            }
+          },
+          "required": [
+            "ausgemittelt"
+          ]
+        }
+      },
+      "then": {
+        "required": [
+          "anzahl"
+        ]
+      },
+      "else": {
+        "required": [
+          "ende"
+        ]
+      }
     },
     "nut": {
       "allOf": [

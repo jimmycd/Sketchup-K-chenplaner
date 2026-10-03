@@ -51,7 +51,7 @@ Tests: `ruby test/test_exporter.rb` (12 Tests).
 | Konzept | TpaCAD | Stand |
 |---|---|---|
 | `bohrung` | `W#81 ::WTp` (nach Durchmesser, `#1002`) | fertig |
-| `bohrreihe` | in Einzelbohrungen aufgelöst | fertig |
+| `bohrreihe` | Makro `fittingx` (`W#1001`) / `fittingy` (`W#1003`); mit `ausgemittelt` verteilt die Maschine gleichmäßig (Rand `ende`, Abstand höchstens `raster`) | fertig, Parameter aus Beispielen abgeleitet |
 | `nut` achsparallel auf F1 | Säge X `W#1050` / Säge Y `W#1051` (Breite > Blatt: `#8503`); sonst Nutfräser, 2 Bahnen bei Breite > Fräser | fertig, ungetestet an Maschine |
 | `kontur` | `W#89 ::WTs` + `W#2201` Linie, `W#2101` Bogen, Fräserkorrektur `#40` | fertig, ungetestet an Maschine |
 | `tasche`, `saegeschnitt` | – | meldet „noch nicht implementiert" |
@@ -85,7 +85,7 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
   In den Beispieldateien kommt keine Säge vor, bleibt also ungeprüft.
 - Vorschubwerte (`#2005`, `#2002`, `#9012`, `#9013`) werden nicht geschrieben; die Beispieldateien enthalten sie bei
   `W#81` ebenfalls nicht.
-- Bohrreihe wird als Einzelbohrungen geschrieben; eure Dateien nutzen dafür das Makro `fittingx`/`fittingy`.
+- Bohrreihen laufen wie gewünscht über `fittingx`/`fittingy` (entschieden). Auf Kantenflächen gelten Koordinaten der Fläche: `start` = [entlang der Kante, Höhe in der Dicke], Richtung `+x`/`-x`.
 
 ## Noch offen
 
@@ -93,8 +93,8 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
   `examples/profile/werkstatt.tcnprofil.json` (`nummer`, bei Sägen auch Blattbreite `d`). Ohne sie bricht der
   Export von Nuten mit Meldung ab. Alle anderen Durchmesser sind laut dir vorhanden, Bohrungen brauchen keine Nummer.
 - **Beschläge:** später, die Entwurfswerte in `catalog/hardware/` bleiben bis dahin ungeprüft.
-- **Fragen zu den Beispielen:** (1) Sind die Maße im Kopf Fertig- oder Zuschnittmaß (Kanten)? (2) `squad` = Formatieren (laut Handbuch): soll es in jede Datei, und mit welchen Werten? (3) Sollen Bohrreihen und Dübelreihen künftig über `fittingx`/`fittingy` ausgegeben werden statt als Einzelbohrungen? (4) Bedeutung von `#8508`/`#8509`/`#8517`/`#8520`/`#8521`, falls es eine Makrodoku gibt. (5) Nuten: Beispiel mit Säge oder Fräser?
-- Annahme `/2` beim Fräsoffset und `bearbeitung_auf` bestätigen.
+- **Fragen zu den Beispielen:** (1) Sind die Maße im Kopf Fertig- oder Zuschnittmaß (Kanten)? (2) `squad` = Formatieren (laut Handbuch): soll es in jede Datei, und mit welchen Werten? (4) Bedeutung von `#8508`/`#8509`/`#8517`/`#8520`/`#8521`, falls es eine Makrodoku gibt. (5) Nuten: Beispiel mit Säge oder Fräser?
+- Fräsoffset `/2` ist bestätigt. Offen: wird vor oder nach dem Kantenanleimen bearbeitet (Profil `bearbeitung_auf`, Standard `fertigmass`)?
 
 ## Noch nicht begonnen (hängt an Antworten oder folgt als Code)
 

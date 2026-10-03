@@ -30,7 +30,7 @@ module Kp
         ctx = build_context(teil)
         setups = { 'A' => [], 'B' => [] } # A = Normallage, B = gewendet (F2 -> F1)
         teil['bearbeitungen'].each do |op|
-          expand(op).each do |e|
+          [op].each do |e|
             target = e['flaeche'] == 'F2' ? 'B' : 'A'
             begin
               setups[target].concat(emit(e, ctx, target == 'B'))
@@ -64,21 +64,10 @@ module Kp
           dl: rohteil ? z['l'] : f['l'], dh: rohteil ? z['w'] : f['w'], ds: f['d'] }
       end
 
-      # Bohrreihe -> Einzelbohrungen (Maschine setzt Reihenbohrkopf selbst ein)
-      def expand(op)
-        return [op] unless op['typ'] == 'bohrreihe'
-
-        dx, dy = { '+x' => [1, 0], '-x' => [-1, 0], '+y' => [0, 1], '-y' => [0, -1] }.fetch(op['richtung'])
-        (0...op['anzahl']).map do |i|
-          { 'id' => "#{op['id']}.#{i + 1}", 'typ' => 'bohrung', 'flaeche' => op['flaeche'],
-            'x' => op['start'][0] + dx * i * op['raster'], 'y' => op['start'][1] + dy * i * op['raster'],
-            'd' => op['d'], 'tiefe' => op['tiefe'] }
-        end
-      end
-
       def emit(op, ctx, gewendet)
         case op['typ']
         when 'bohrung' then drill(op, ctx, gewendet)
+        when 'bohrreihe' then drill_row(op, ctx, gewendet)
         when 'nut' then groove(op, ctx, gewendet)
         when 'kontur' then contour(op, ctx, gewendet)
         when 'makro' then macro(op, gewendet)
@@ -141,6 +130,51 @@ module Kp
         end
         [w("W#81{ ::WTp #1002=#{fmt(op['d'])} #1=#{fmt(x)} #2=#{fmt(y)} #3=#{fmt(-z)} " \
            "#8015=0 #201=1 #203=1 #1001=#{@tcn['bohrer_werkzeugtyp']} }W", face)]
+      end
+
+      # ---- Bohrreihe -> Makro fittingx (W#1001) / fittingy (W#1003) --------------
+      # Parameter abgeleitet aus den Beispieldateien, siehe docs/tpa_makros.md
+      def drill_row(op, ctx, gewendet)
+        id = op['id'] || 'bohrreihe'
+        face = tpa_face(op['flaeche'], gewendet)
+        durch = op['durch'] == true
+        check_depth(op['tiefe'].to_f, durch, face == 1 ? ctx[:d] : [ctx[:w], ctx[:l]].min, id)
+        richtung = op['richtung']
+        along_x = %w[+x -x].include?(richtung)
+        raise Unsupported, 'Bohrreihe auf Kantenfläche nur in Richtung x der Fläche' if face != 1 && !along_x
+
+        ausgemittelt = op['ausgemittelt'] == true
+        raise ArgumentError, 'anzahl fehlt' unless ausgemittelt || op['anzahl']
+        raise ArgumentError, 'ende fehlt bei ausgemittelter Reihe' if ausgemittelt && op['ende'].nil?
+
+        sx, sy = op['start']
+        n = op['anzahl']
+        if ausgemittelt
+          ex = along_x ? op['ende'] : sx
+          ey = along_x ? sy : op['ende']
+        else
+          sign = richtung.start_with?('-') ? -1 : 1
+          ex = along_x ? sx + sign * (n - 1) * op['raster'] : sx
+          ey = along_x ? sy : sy + sign * (n - 1) * op['raster']
+        end
+        if face == 1
+          a = plane_xy(sx, sy, ctx, gewendet)
+          b = plane_xy(ex, ey, ctx, gewendet)
+          check_inside(*a, ctx, id)
+          check_inside(*b, ctx, id)
+          lo, hi = [a, b].map { |q| along_x ? q[0] : q[1] }.minmax
+          cross = along_x ? a[1] : a[0]
+        else
+          lo, hi = [sx + ctx[:off][:x], ex + ctx[:off][:x]].minmax
+          cross = sy
+        end
+        tiefe = durch ? (face == 1 ? ctx[:d] : [ctx[:w], ctx[:l]].min) + @tcn['durchbohr_zugabe'] : op['tiefe']
+        p = { 8510 => lo, 8511 => hi, 8512 => op['raster'], 8513 => -tiefe, 8518 => cross, 8522 => op['d'] }
+        flags = "#8508=#{ausgemittelt ? 1 : 0} #8509=#{ausgemittelt && op['gerade_anzahl'] ? 1 : 0}"
+        nr, datei = along_x ? [1001, 'fittingx'] : [1003, 'fittingy']
+        [w("W##{nr}{ ::WT2 #8098=#{@tcn['makro_pfad'] || '..\\custom\\mcr\\'}#{datei}.tmcr #6=1 #{flags} " \
+           "#8510=#{fmt(p[8510])} #8511=#{fmt(p[8511])} #8512=#{fmt(p[8512])} #8513=#{fmt(p[8513])} #8517=0 " \
+           "#8518=#{fmt(p[8518])} #8520=1 #8521=1 #8522=#{fmt(p[8522])} #8525=0 }W", face)]
       end
 
       # ---- Makro (Maschinenmakros der Werkstatt, z. B. fittingx, inge100) -------

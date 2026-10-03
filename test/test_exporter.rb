@@ -40,12 +40,29 @@ class TestExporter < Minitest::Test
     assert_includes l, 'W#81{ ::WTp #1002=8 #1=9.5 #2=34 #3=-12 #8015=0 #201=1 #203=1 #1001=0 }W'
   end
 
-  def test_bohrreihe_expands_and_maps_face
+  def test_bohrreihe_uses_fittingx
     r = export([{ 'id' => 'r', 'typ' => 'bohrreihe', 'flaeche' => 'F1', 'start' => [83, 37], 'richtung' => '+x',
                   'raster' => 32, 'anzahl' => 3, 'd' => 5, 'tiefe' => 12 }])
-    holes = lines(r.files[0]).grep(/W#81/)
-    assert_equal 3, holes.size
-    assert_match(/#1=147 #2=37/, holes[2])
+    assert_empty r.fehler
+    row = lines(r.files[0]).grep(/W#1001/)[0]
+    assert_equal 'W#1001{ ::WT2 #8098=..\\custom\\mcr\\fittingx.tmcr #6=1 #8508=0 #8509=0 #8510=83 #8511=147 ' \
+                 '#8512=32 #8513=-12 #8517=0 #8518=37 #8520=1 #8521=1 #8522=5 #8525=0 }W', row
+  end
+
+  def test_bohrreihe_in_y_uses_fittingy_and_normalizes_direction
+    r = export([{ 'typ' => 'bohrreihe', 'flaeche' => 'F1', 'start' => [20, 100], 'richtung' => '-y', 'raster' => 32,
+                  'anzahl' => 3, 'd' => 8, 'tiefe' => 12 }])
+    row = lines(r.files[0]).grep(/W#1003/)[0]
+    assert_match(/fittingy\.tmcr .*#8510=36 #8511=100 #8512=32 #8513=-12 #8517=0 #8518=20 /, row)
+  end
+
+  def test_bohrreihe_ausgemittelt_edge_like_boden
+    r = export([{ 'typ' => 'bohrreihe', 'flaeche' => 'F4', 'start' => [30, 9.5], 'richtung' => '+x', 'raster' => 150,
+                  'ausgemittelt' => true, 'gerade_anzahl' => true, 'ende' => 528, 'd' => 8, 'tiefe' => 22 }])
+    l = lines(r.files[0])
+    assert_includes l, 'SIDE#5{'
+    assert_match(/#8508=1 #8509=1 #8510=30 #8511=528 #8512=150 #8513=-22 #8517=0 #8518=9.5 #8520=1 #8521=1 #8522=8/,
+                 l.grep(/W#1001/)[0])
   end
 
   def test_edge_hole_face_mapping_and_axes
