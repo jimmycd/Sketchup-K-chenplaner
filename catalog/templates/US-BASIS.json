@@ -4,38 +4,203 @@
   "kategorie": "unterschrank",
   "abstrakt": true,
   "parameter": {
-    "breite": { "default": 600, "werte": [300, 400, 450, 500, 600, 800, 900, 1000, 1200], "frei": true, "min": 150, "max": 1200 },
-    "hoehe":  { "default": "=P.hoehen.korpus_us" },
-    "tiefe":  { "default": "=P.tiefen.us" }
+    "breite": {
+      "default": 600,
+      "werte": [
+        300,
+        400,
+        450,
+        500,
+        600,
+        800,
+        900,
+        1000,
+        1200
+      ],
+      "frei": true,
+      "min": 150,
+      "max": 1200
+    },
+    "hoehe": {
+      "default": "=P.hoehen.korpus_us"
+    },
+    "tiefe": {
+      "default": "=P.tiefen.us"
+    }
   },
-  "variablen": { "innen_b": "=B-2*S" },
-  "sockel": { "art": "fuesse", "fuss_beschlag": "sockelfuss", "ruecksprung": 60 },
+  "variablen": {
+    "innen_b": "=B-2*S"
+  },
+  "sockel": {
+    "art": "fuesse",
+    "fuss_beschlag": "sockelfuss",
+    "ruecksprung": 60
+  },
   "teile": [
-    { "id": "sl", "rolle": "seite_l", "material": "P.korpus.material",
-      "abmessungen": { "laenge": "=H", "breite": "=T" },
-      "position": [0, 0, 0], "ausrichtung": { "x": "+z", "z": "+x" },
-      "kanten": { "vorne": "P.korpus.kante_sichtbar" } },
-    { "id": "sr", "rolle": "seite_r", "material": "P.korpus.material",
-      "abmessungen": { "laenge": "=H", "breite": "=T" },
-      "position": ["=B-S", 0, 0], "ausrichtung": { "x": "+z", "z": "+x" },
-      "kanten": { "vorne": "P.korpus.kante_sichtbar" } },
-    { "id": "bo", "rolle": "boden", "material": "P.korpus.material",
-      "abmessungen": { "laenge": "=V.innen_b", "breite": "=T" },
-      "position": ["=S", 0, 0], "ausrichtung": { "x": "+x", "z": "+z" },
-      "kanten": { "vorne": "P.korpus.kante_sichtbar" } },
-    { "id": "tv", "rolle": "traverse_vorne", "material": "P.korpus.material",
-      "abmessungen": { "laenge": "=V.innen_b", "breite": 100 },
-      "position": ["=S", 0, "=H-S"], "ausrichtung": { "x": "+x", "z": "+z" },
-      "kanten": { "vorne": "P.korpus.kante_sichtbar" } },
-    { "id": "th", "rolle": "traverse_hinten", "material": "P.korpus.material",
-      "abmessungen": { "laenge": "=V.innen_b", "breite": 100 },
-      "position": ["=S", "=T-P.rueckwand.abstand_hinten-100", "=H-S"], "ausrichtung": { "x": "+x", "z": "+z" } },
-    { "id": "rw", "rolle": "rueckwand", "material": "hdf_weiss_8",
+    {
+      "id": "sl",
+      "rolle": "seite_l",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=H",
+        "breite": "=T"
+      },
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "ausrichtung": {
+        "x": "+z",
+        "z": "+x"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "sr",
+      "rolle": "seite_r",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=H",
+        "breite": "=T"
+      },
+      "position": [
+        "=B-S",
+        0,
+        0
+      ],
+      "ausrichtung": {
+        "x": "+z",
+        "z": "+x"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "bo",
+      "rolle": "boden",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.innen_b",
+        "breite": "=T"
+      },
+      "position": [
+        "=S",
+        0,
+        0
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "tv",
+      "rolle": "traverse_vorne",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.innen_b",
+        "breite": 100
+      },
+      "position": [
+        "=S",
+        0,
+        "=H-S"
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "th",
+      "rolle": "traverse_hinten",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.innen_b",
+        "breite": 100
+      },
+      "position": [
+        "=S",
+        "=T-P.rueckwand.abstand_hinten-100",
+        "=H-S"
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "bedingung": "=P.rueckwand.art=='genutet'"
+    },
+    {
+      "id": "th_auf",
+      "rolle": "traverse_hinten",
+      "bedingung": "=P.rueckwand.art=='aufgesetzt'",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.innen_b",
+        "breite": 100
+      },
+      "position": [
+        "=S",
+        "=T-100",
+        "=H-S"
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      }
+    },
+    {
+      "id": "rw_genutet",
+      "rolle": "rueckwand",
+      "material": "hdf_weiss_8",
       "abmessungen": {
         "laenge": "=B-2*S+2*P.rueckwand.nuttiefe-2*P.rueckwand.luft",
         "breite": "=H-S+P.rueckwand.nuttiefe-P.rueckwand.luft",
-        "dicke": "=P.rueckwand.staerke" },
-      "position": ["=S-P.rueckwand.nuttiefe+P.rueckwand.luft", "=T-P.rueckwand.abstand_hinten-P.rueckwand.staerke", "=S-P.rueckwand.nuttiefe"],
-      "ausrichtung": { "x": "+x", "z": "+y" }, "maserung": "keine" }
+        "dicke": "=P.rueckwand.staerke"
+      },
+      "position": [
+        "=S-P.rueckwand.nuttiefe+P.rueckwand.luft",
+        "=T-P.rueckwand.abstand_hinten-P.rueckwand.staerke",
+        "=S-P.rueckwand.nuttiefe"
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+y"
+      },
+      "maserung": "keine",
+      "bedingung": "=P.rueckwand.art=='genutet'"
+    },
+    {
+      "id": "rw_aufgesetzt",
+      "rolle": "rueckwand",
+      "bedingung": "=P.rueckwand.art=='aufgesetzt'",
+      "material": "hdf_weiss_8",
+      "name": "Rückwand aufgesetzt, bündig über Korpus",
+      "abmessungen": {
+        "laenge": "=B",
+        "breite": "=H",
+        "dicke": "=P.rueckwand.staerke"
+      },
+      "position": [
+        0,
+        "=T",
+        0
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+y"
+      },
+      "maserung": "keine"
+    }
   ]
 }

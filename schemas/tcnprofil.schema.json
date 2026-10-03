@@ -190,7 +190,7 @@
         },
         "werkzeug": {
           "type": "integer",
-          "description": "Werkzeug-ID (#8502)"
+          "description": "Werkzeug-ID des Formatierfräsers (#8502), z. B. 1300"
         },
         "durchschnitt_zugabe": {
           "type": "number",
@@ -208,6 +208,16 @@
           "propertyNames": {
             "pattern": "^[0-9]+$"
           }
+        },
+        "nummer": {
+          "type": "integer",
+          "default": 1510,
+          "description": "W#-Nummer des Formatiermakros"
+        },
+        "datei": {
+          "type": "string",
+          "default": "squad",
+          "description": "Makroname ohne .tmcr"
         }
       }
     }

@@ -166,7 +166,7 @@ module Kp
         params[8503] = "-s-#{fmt(cfg['durchschnitt_zugabe'])}" if cfg['durchschnitt_zugabe']
         params.merge!((cfg['parameter'] || {}).transform_keys(&:to_i))
         list = params.sort.map { |k, v| "##{k}=#{v.is_a?(Numeric) ? fmt(v) : v}" }.join(' ')
-        [w("W#1510{ ::WT2 #8098=#{@tcn['makro_pfad'] || '..\\custom\\mcr\\'}squad.tmcr #{list} }W", 1)]
+        [w("W##{cfg['nummer'] || 1510}{ ::WT2 #8098=#{@tcn['makro_pfad'] || '..\\custom\\mcr\\'}#{cfg['datei'] || 'squad'}.tmcr #{list} }W", 1)]
       end
 
       # ---- Bohrreihe -> Makro fittingx (W#1001) / fittingy (W#1003) --------------

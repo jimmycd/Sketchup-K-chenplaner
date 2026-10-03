@@ -69,21 +69,21 @@
     {
       "id": "nutsaege_x",
       "art": "nutsaege_x",
-      "d": null,
+      "d": 4,
       "flaechen": [
         "F1"
       ],
-      "notiz": "Sägeblattbreite erfassen",
+      "notiz": "Sägeblattbreite 4 mm",
       "nummer": 1161
     },
     {
       "id": "nutsaege_y",
       "art": "nutsaege_y",
-      "d": null,
+      "d": 4,
       "flaechen": [
         "F1"
       ],
-      "notiz": "Sägeblattbreite erfassen",
+      "notiz": "Sägeblattbreite 4 mm",
       "nummer": 1162
     },
     {
@@ -113,6 +113,16 @@
         "F1"
       ],
       "nummer": null
+    },
+    {
+      "id": "formatierfraeser",
+      "art": "fraeser",
+      "d": null,
+      "nummer": 1300,
+      "flaechen": [
+        "F1"
+      ],
+      "notiz": "Wendeplattenfräser zum Formatieren"
     }
   ],
   "pruefungen": {
@@ -132,7 +142,9 @@
   },
   "formatieren": {
     "aktiv": true,
-    "werkzeug": 1037,
+    "nummer": 1510,
+    "datei": "squad",
+    "werkzeug": 1300,
     "ausser_rollen": []
   }
 }
