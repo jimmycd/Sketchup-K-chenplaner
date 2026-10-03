@@ -93,8 +93,8 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
   `examples/profile/werkstatt.tcnprofil.json` (`nummer`, bei Sägen auch Blattbreite `d`). Ohne sie bricht der
   Export von Nuten mit Meldung ab. Alle anderen Durchmesser sind laut dir vorhanden, Bohrungen brauchen keine Nummer.
 - **Beschläge:** später, die Entwurfswerte in `catalog/hardware/` bleiben bis dahin ungeprüft.
-- **Fragen zu den Beispielen:** (1) Sind die Maße im Kopf Fertig- oder Zuschnittmaß (Kanten)? (2) `squad` = Formatieren (laut Handbuch): soll es in jede Datei, und mit welchen Werten? (4) Bedeutung von `#8508`/`#8509`/`#8517`/`#8520`/`#8521`, falls es eine Makrodoku gibt. (5) Nuten: Beispiel mit Säge oder Fräser?
-- Fräsoffset `/2` ist bestätigt. Offen: wird vor oder nach dem Kantenanleimen bearbeitet (Profil `bearbeitung_auf`, Standard `fertigmass`)?
+- **Fragen zu den Beispielen:** (1) Kopfmaße sind Fertigmaße (beantwortet). (2) `squad` = Formatieren (laut Handbuch): soll es in jede Datei, und mit welchen Werten? (4) Bedeutung von `#8508`/`#8509`/`#8517`/`#8520`/`#8521`, falls es eine Makrodoku gibt. (5) Nuten: Beispiel mit Säge oder Fräser?
+- Fräsoffset `/2` ist bestätigt. `DL/DH/DS` im Kopf sind Fertigmaße (bestätigt), das Profil bleibt bei `bearbeitung_auf: fertigmass`. Offen: wo der Offset `(Zuschnitt − Fräsmaß)/2` dann gebraucht wird (vermutlich beim Formatieren/`squad` oder bei Fräsungen am Rand) und woher die 558 mm Tiefe kommen.
 
 ## Noch nicht begonnen (hängt an Antworten oder folgt als Code)
 
