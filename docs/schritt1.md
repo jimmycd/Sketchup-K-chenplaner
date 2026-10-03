@@ -60,7 +60,7 @@ Tests: `ruby test/test_exporter.rb` (12 Tests).
 | `nut` achsparallel auf F1 | Säge X `W#1050` / Säge Y `W#1051` (Breite > Blatt: `#8503`); sonst Nutfräser, 2 Bahnen bei Breite > Fräser | fertig, ungetestet an Maschine |
 | `kontur` | `W#89 ::WTs` + `W#2201` Linie, `W#2101` Bogen, Fräserkorrektur `#40` | fertig, ungetestet an Maschine |
 | `tasche`, `saegeschnitt` | – | meldet „noch nicht implementiert" |
-| Formatieren | `W#1510` Makro `squad`, erste Bearbeitung jeder Datei (Profil `formatieren`), Fräser 1300 (Wendeplattenfräser) als `#8502` | fertig; offen: Makro g1037 vs. `squad` |
+| Formatieren | `W#1510` Makro `squad`, erste Bearbeitung jeder Datei (Profil `formatieren`), Fräser 1300 (Wendeplattenfräser) als `#8502` | fertig; g1037 ist vermutlich der Editor-Name von `squad` |
 
 Prüfungen vor dem Schreiben: Position im Teil, Restwand (`pruefungen.min_restwand`), Werkzeug im Profil vorhanden.
 Teile mit Fehlern werden nicht geschrieben, die Fehlerliste nennt Teil und Bearbeitung.
@@ -93,19 +93,19 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
 
 ## Noch offen
 
-- **Formatiermakro:** Du nennst es g1037, die Beispieldateien verwenden `squad.tmcr` (`W#1510`). Sind das zwei verschiedene Makros? Falls ja, welche Parameter hat g1037? (Profil: `formatieren.nummer`, `formatieren.datei`.)
+- **Formatiermakro:** g1037 ist laut dir die Bezeichnung im TpaCAD-Editor; im TCN steht `squad.tmcr` (`W#1510`). Sollte die Maschine es nicht erkennen, Profil `formatieren.nummer`/`datei` anpassen.
 - **Beschläge:** später, die Entwurfswerte in `catalog/hardware/` bleiben bis dahin ungeprüft.
 - **Fragen zu den Beispielen:** (2) `squad` = Formatieren (laut Handbuch): soll es in jede Datei, und mit welchen Werten? (4) Bedeutung von `#8508`/`#8509`/`#8517`/`#8520`/`#8521`, falls es eine Makrodoku gibt. (5) Nuten: Beispiel mit Säge oder Fräser?
 - Anleimerlogik ist geklärt (siehe oben). Offen: ob die Kantenseiten der Seitenteile (Seite: oben und unten je 2 mm?) so stimmen und wie der Generator die OCL-Kanten pro Teil in `kantenstaerke` übersetzt.
 
 ## Festlegungen aus der Konstruktion (Stand jetzt)
 
-- **Rückwand beim Unterschrank: 8 mm aufgesetzt, keine Nut.** Projektstandard `rueckwand.art = aufgesetzt`.
-  `US-BASIS` enthält dafür `rw_aufgesetzt` (B × H, 8 mm HDF, hinter dem Korpus bei `y = T`) und `th_auf`
-  (hintere Traverse bündig, `y = T − 100`). Die genutete Variante (`rw_genutet`, `th`) bleibt per Bedingung im Katalog,
-  ist aber ausgeschaltet; die Regel `r_rueckwand_nut` greift dann nicht. Die hintere Lochreihe bezieht sich bei
-  aufgesetzter Rückwand auf die Hinterkante (`W − Abstand`). **Annahme:** Die Gesamttiefe ist Korpustiefe `T` plus
-  8 mm Rückwand. Falls die Rückwand in der Tiefe 560 enthalten sein soll, müssen die Seiten um 8 mm kürzer werden.
+- **Rückwand beim Unterschrank: 8 mm aufgesetzt, keine Nut, in der Gesamttiefe enthalten.** Projektstandard
+  `rueckwand.art = aufgesetzt`. `US-BASIS` rechnet mit `V.tk = T − Rückwandstärke`: Seiten, Boden und Traversen sind `tk`
+  tief, die Rückwand (B × H, 8 mm HDF) sitzt bei `y = tk`, die hintere Traverse bündig bei `tk − 100`. Die hintere Lochreihe
+  misst von der Hinterkante der Seite. Die genutete Variante ist aus `US-BASIS` entfernt; die Regel `r_rueckwand_nut`
+  bleibt im Katalog und greift nur bei `art = genutet`. Hinweis: In den Maschinenbeispielen ist die Tiefe 558 (= 560 − 2 mm Kante),
+  dort ist die Rückwand also nicht abgezogen; sie stammen vermutlich aus einer anderen Bauweise.
 - **Sägen:** Beide Nutsägen haben 4 mm Blattbreite. Breitere Nuten gibt der Exporter als `#8503` (Nutbreite) an die Säge;
   die Säge hat Vorrang vor dem Fräser. Der Fräser 2200 (8 mm) bleibt für `ausfuehrung = fraeser`.
 - **Formatieren:** In jeder Datei, Fräser 1300.
