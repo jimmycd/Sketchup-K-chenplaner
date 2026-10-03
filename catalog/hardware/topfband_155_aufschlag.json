@@ -1,0 +1,62 @@
+{
+  "id": "topfband_155_aufschlag",
+  "hersteller": "<Hersteller>",
+  "kategorie": "topfband",
+  "parameter": {
+    "tb": {
+      "default": 4,
+      "werte": [
+        3,
+        4,
+        5,
+        6
+      ]
+    }
+  },
+  "verteilung": {
+    "achse": "x",
+    "randabstand": 100,
+    "anzahl_tabelle": [
+      {
+        "bis": 900,
+        "anzahl": 2
+      },
+      {
+        "bis": 1600,
+        "anzahl": 3
+      },
+      {
+        "bis": 2000,
+        "anzahl": 4
+      },
+      {
+        "bis": 2400,
+        "anzahl": 5
+      }
+    ],
+    "raster_fangen": true
+  },
+  "bohrbilder": [
+    {
+      "teil": "front_tuer",
+      "bezug": {
+        "flaeche": "F2",
+        "punkt": "montagepunkt"
+      },
+      "bearbeitungen": [
+        {
+          "typ": "bohrung",
+          "x": 0,
+          "y": "=V.tb+17.5",
+          "d": 35,
+          "tiefe": "<Topftiefe>"
+        }
+      ]
+    }
+  ],
+  "geprueft": {
+    "von": null,
+    "am": null,
+    "quelle": "<Datenblatt>"
+  }
+}

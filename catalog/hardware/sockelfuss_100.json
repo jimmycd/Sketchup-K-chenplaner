@@ -1,0 +1,35 @@
+{
+  "id": "sockelfuss_100",
+  "hersteller": "<Hersteller>",
+  "bezeichnung": "Sockelfuß 100 mm",
+  "kategorie": "sockelfuss",
+  "artikelnummern": [
+    {
+      "artnr": "<artnr>",
+      "menge": 4
+    }
+  ],
+  "bohrbilder": [
+    {
+      "teil": "boden",
+      "bezug": {
+        "flaeche": "F2",
+        "punkt": "montagepunkt"
+      },
+      "bearbeitungen": [
+        {
+          "typ": "bohrung",
+          "x": 0,
+          "y": 0,
+          "d": "<d>",
+          "tiefe": "<tiefe>"
+        }
+      ]
+    }
+  ],
+  "geprueft": {
+    "von": null,
+    "am": null,
+    "quelle": "<Datenblatt>"
+  }
+}
