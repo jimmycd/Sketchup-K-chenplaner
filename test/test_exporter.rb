@@ -33,10 +33,11 @@ class TestExporter < Minitest::Test
     r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F1', 'x' => 9.5, 'y' => 34, 'd' => 8, 'tiefe' => 12 }])
     assert_empty r.fehler
     l = lines(r.files[0])
-    assert_equal 'TPA\\ALBATROS\\EDICAD\\01.00', l[0]
+    assert_equal 'TPA\\ALBATROS\\EDICAD\\02.00:1224:r0w0h0s1', l[0]
+    assert_equal '::SIDE=1;', l[1]
     assert_equal '::UNm DL=720 DH=560 DS=19', l[2]
     assert_includes l, 'SIDE#1{'
-    assert_includes l, 'W#81{ ::WTp #1002=8 #1=9.5 #2=34 #3=-12 #8015=0 #1001=1 }W'
+    assert_includes l, 'W#81{ ::WTp #1002=8 #1=9.5 #2=34 #3=-12 #8015=0 #201=1 #203=1 #1001=0 }W'
   end
 
   def test_bohrreihe_expands_and_maps_face
@@ -52,20 +53,20 @@ class TestExporter < Minitest::Test
     r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F5', 'y' => 34, 'z' => 9.5, 'd' => 8, 'tiefe' => 22 }])
     l = lines(r.files[0])
     assert_includes l, 'SIDE#6{'
-    assert_includes l, 'W#81{ ::WTp #1002=8 #1=34 #2=9.5 #3=-22 #8015=0 #1001=1 }W'
+    assert_includes l, 'W#81{ ::WTp #1002=8 #1=34 #2=9.5 #3=-22 #8015=0 #201=1 #203=1 #1001=0 }W'
     # F4 (hinten) -> 5, entlang x; F6 (rechts) -> 4
     r2 = export([{ 'typ' => 'bohrung', 'flaeche' => 'F4', 'x' => 100, 'd' => 8, 'tiefe' => 22 },
                  { 'typ' => 'bohrung', 'flaeche' => 'F6', 'y' => 100, 'd' => 8, 'tiefe' => 22 }])
     l2 = lines(r2.files[0])
     assert_includes l2, 'SIDE#5{'
     assert_includes l2, 'SIDE#4{'
-    assert_includes l2, 'W#81{ ::WTp #1002=8 #1=100 #2=9.5 #3=-22 #8015=0 #1001=1 }W'
+    assert_includes l2, 'W#81{ ::WTp #1002=8 #1=100 #2=9.5 #3=-22 #8015=0 #201=1 #203=1 #1001=0 }W'
   end
 
   def test_f2_goes_to_second_setup_mirrored
     r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F2', 'x' => 100, 'y' => 100, 'd' => 35, 'tiefe' => 12.5 }])
     assert_equal ['p_A1_t_B.tcn'], r.files.map(&:name)
-    assert_includes lines(r.files[0]), 'W#81{ ::WTp #1002=35 #1=100 #2=460 #3=-12.5 #8015=0 #1001=1 }W'
+    assert_includes lines(r.files[0]), 'W#81{ ::WTp #1002=35 #1=100 #2=460 #3=-12.5 #8015=0 #201=1 #203=1 #1001=0 }W'
   end
 
   def test_through_hole_depth
@@ -128,7 +129,26 @@ class TestExporter < Minitest::Test
                'zuschnittmass' => { 'l' => 722, 'w' => 562, 'd' => 19 })
     l = lines(r.files[0])
     assert_equal '::UNm DL=722 DH=562 DS=19', l[2]
-    assert_includes l, 'W#81{ ::WTp #1002=5 #1=11 #2=11 #3=-5 #8015=0 #1001=1 }W'
+    assert_includes l, 'W#81{ ::WTp #1002=5 #1=11 #2=11 #3=-5 #8015=0 #201=1 #203=1 #1001=0 }W'
+  end
+
+  # Zeilen aus examples/tcn_referenz/T_rR.tcn und Boden.tcn werden über das Makro-Durchgriff exakt erzeugt
+  def test_macro_passthrough_matches_reference_files
+    r = export([{ 'typ' => 'makro', 'flaeche' => 'F1', 'nummer' => 1506, 'datei' => 'inge100',
+                  'parameter' => { '8500' => 35, '8501' => 8, '8502' => 45, '8503' => '9,5', '8504' => 14, '8505' => 14,
+                                   '8506' => 1, '8507' => '55+2+16', '8508' => 'y-21,5' } }])
+    ref = File.read(File.join(ROOT, 'examples/tcn_referenz/T_rR.tcn')).split("\r\n").grep(/W#1506/)[0]
+    got = lines(r.files[0]).grep(/W#1506/)[0]
+    assert_equal ref.sub(/ WS=\d+ /, ' ').squeeze(' '), got.squeeze(' ')
+  end
+
+  def test_file_skeleton_matches_reference_layout
+    r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F4', 'x' => 30, 'd' => 8, 'tiefe' => 22 }])
+    l = lines(r.files[0])
+    ref = File.read(File.join(ROOT, 'examples/tcn_referenz/Seite.tcn')).split("\r\n")
+    sides = ->(a) { a.grep(/\ASIDE#|\A\}SIDE/) }
+    assert_equal sides.call(ref), sides.call(l)
+    assert_equal ref[ref.index('EXE{')..ref.index('}LINK')], l[l.index('EXE{')..l.index('}LINK')]
   end
 
   def test_contour_arc

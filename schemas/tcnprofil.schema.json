@@ -129,7 +129,7 @@
       "properties": {
         "kopfzeile": {
           "type": "string",
-          "default": "TPA\\ALBATROS\\EDICAD\\01.00"
+          "default": "TPA\\ALBATROS\\EDICAD\\02.00:1224:r0w0h0s1"
         },
         "zeilenende": {
           "enum": [
@@ -140,7 +140,7 @@
         },
         "bohrer_werkzeugtyp": {
           "type": "integer",
-          "default": 1,
+          "default": 0,
           "description": "#1001 bei Bohrung nach Durchmesser"
         },
         "saege_makro": {
@@ -152,6 +152,14 @@
           "type": "number",
           "default": 1,
           "description": "Zusätzliche Tiefe bei Durchgangsbohrung"
+        },
+        "tcn_version": {
+          "type": "string",
+          "default": "2.6.14"
+        },
+        "makro_pfad": {
+          "type": "string",
+          "default": "..\\custom\\mcr\\"
         }
       }
     },

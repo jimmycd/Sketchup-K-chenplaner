@@ -20,8 +20,8 @@ module Kp
 
       def initialize(profil)
         @p = profil
-        @tcn = { 'kopfzeile' => 'TPA\\ALBATROS\\EDICAD\\01.00', 'zeilenende' => 'crlf',
-                 'bohrer_werkzeugtyp' => 1, 'saege_makro' => '..\\custom\\mcr\\lame.tmcr',
+        @tcn = { 'kopfzeile' => 'TPA\\ALBATROS\\EDICAD\\02.00:1224:r0w0h0s1', 'zeilenende' => 'crlf',
+                 'tcn_version' => '2.6.14', 'bohrer_werkzeugtyp' => 0, 'saege_makro' => '..\\custom\\mcr\\lame.tmcr',
                  'durchbohr_zugabe' => 1 }.merge(profil['tcn'] || {})
       end
 
@@ -81,6 +81,7 @@ module Kp
         when 'bohrung' then drill(op, ctx, gewendet)
         when 'nut' then groove(op, ctx, gewendet)
         when 'kontur' then contour(op, ctx, gewendet)
+        when 'makro' then macro(op, gewendet)
         else raise Unsupported, "Bearbeitung '#{op['typ']}' noch nicht implementiert"
         end
       end
@@ -139,7 +140,17 @@ module Kp
           z = durch ? depth_axis + @tcn['durchbohr_zugabe'] : tiefe
         end
         [w("W#81{ ::WTp #1002=#{fmt(op['d'])} #1=#{fmt(x)} #2=#{fmt(y)} #3=#{fmt(-z)} " \
-           "#8015=0 #1001=#{@tcn['bohrer_werkzeugtyp']} }W", face)]
+           "#8015=0 #201=1 #203=1 #1001=#{@tcn['bohrer_werkzeugtyp']} }W", face)]
+      end
+
+      # ---- Makro (Maschinenmakros der Werkstatt, z. B. fittingx, inge100) -------
+
+      # Reicht Parameter unverändert durch; Ausdrücke wie 'y-21,5' bleiben Strings (x, y, s = Flächenmaße).
+      def macro(op, gewendet)
+        face = tpa_face(op['flaeche'], gewendet)
+        params = (op['parameter'] || {}).map { |k, v| "##{k}=#{v.is_a?(Numeric) ? fmt(v) : v}" }
+        [w("W##{op['nummer']}{ ::WT2 #8098=#{@tcn['makro_pfad'] || '..\\custom\\mcr\\'}#{op['datei']}.tmcr " \
+           "#{params.join(' ')} }W", face)]
       end
 
       # ---- Nut ----------------------------------------------------------------
@@ -272,13 +283,26 @@ module Kp
         [face, line]
       end
 
+      RUMPF = [
+        'EXE{', '#0=0', '#1=0', '#2=0', '#3=0', '#4=0', '}EXE',
+        'OFFS{', '#0=0|0', '#1=0|0', '#2=0|0', '}OFFS',
+        'VARV{', '#0=1|1', '#1=2|2', '#2=3|3', '#3=4|4', '#4=0|0', '#5=0|0', '#6=0|0', '#7=0|0', '}VARV',
+        'VAR{', '}VAR', 'SPEC{', '}SPEC', 'INFO{', '}INFO',
+        'OPTI{',
+        ':: OPTDEF=1 OPTIMIZE=%;0 OPTMIN=0 OPT3=0 OPT0=0 OPTTOOL=0 OPT2=0 OPTX=0 OPTY=0 OPTR=0 OPT4=0 OPT6=0 OPT7=0 ' \
+        'LSTCOD=0%1%2%3 LTOOLFR=0 LTOOLPN=0 OPTF1=0 OOO=0.5',
+        '}OPTI', 'LINK{', '}LINK'
+      ].freeze
+
+      # Aufbau wie die Beispieldateien der Maschine (examples/tcn_referenz)
       def render(teil, ctx, workings, name)
         by_face = Hash.new { |h, k| h[k] = [] }
         workings.each { |face, line| by_face[face] << line }
-        lines = [@tcn['kopfzeile'], "$=#{teil['bezeichnung'] || teil['uid']}",
-                 "::UNm DL=#{fmt(ctx[:dl])} DH=#{fmt(ctx[:dh])} DS=#{fmt(ctx[:ds])}"]
-        by_face.keys.sort.each do |f|
-          lines << "SIDE##{f}{"
+        used = by_face.keys.sort.map { |f| "#{f};" }.join
+        lines = [@tcn['kopfzeile'], "::SIDE=#{used}", "::UNm DL=#{fmt(ctx[:dl])} DH=#{fmt(ctx[:dh])} DS=#{fmt(ctx[:ds])}",
+                 "'tcn version=#{@tcn['tcn_version']}", "'code=ansi", *RUMPF]
+        [0, 1, 3, 4, 5, 6].each do |f|
+          lines << "SIDE##{f}{" << "$=F ##{f}"
           lines.concat(by_face[f])
           lines << '}SIDE'
         end

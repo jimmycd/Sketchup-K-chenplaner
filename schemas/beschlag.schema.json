@@ -3,39 +3,102 @@
   "$id": "kp/beschlag.schema.json",
   "title": "Beschlag-Definition",
   "type": "object",
-  "required": ["id", "hersteller", "kategorie", "bohrbilder"],
+  "required": [
+    "id",
+    "hersteller",
+    "kategorie",
+    "bohrbilder"
+  ],
   "properties": {
-    "id": { "$ref": "common.schema.json#/$defs/id" },
-    "hersteller": { "type": "string" },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "hersteller": {
+      "type": "string"
+    },
     "artikelnummern": {
       "description": "Bestellpositionen je Stück Beschlag",
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["artnr"],
+        "required": [
+          "artnr"
+        ],
         "properties": {
-          "artnr": { "type": "string" },
-          "bezeichnung": { "type": "string" },
-          "menge": { "$ref": "common.schema.json#/$defs/mass", "default": 1 },
-          "bedingung": { "$ref": "common.schema.json#/$defs/bedingung" }
+          "artnr": {
+            "type": "string"
+          },
+          "bezeichnung": {
+            "type": "string"
+          },
+          "menge": {
+            "$ref": "common.schema.json#/$defs/mass",
+            "default": 1
+          },
+          "bedingung": {
+            "$ref": "common.schema.json#/$defs/bedingung"
+          }
         }
       }
     },
-    "bezeichnung": { "type": "string" },
-    "kategorie": { "enum": ["verbinder", "duebel", "topfband", "montageplatte", "schubkastenfuehrung", "schubkastensystem",
-                            "klappenbeschlag", "bodentraeger", "sockelfuss", "schrankaufhaenger", "griff", "sonstiges"] },
-    "datenblatt": { "type": "string", "format": "uri" },
+    "bezeichnung": {
+      "type": "string"
+    },
+    "kategorie": {
+      "enum": [
+        "verbinder",
+        "duebel",
+        "topfband",
+        "montageplatte",
+        "schubkastenfuehrung",
+        "schubkastensystem",
+        "klappenbeschlag",
+        "bodentraeger",
+        "sockelfuss",
+        "schrankaufhaenger",
+        "griff",
+        "sonstiges"
+      ]
+    },
+    "datenblatt": {
+      "type": "string",
+      "format": "uri"
+    },
     "geprueft": {
       "type": "object",
       "description": "Wer das Bohrbild gegen das Datenblatt geprüft hat",
-      "properties": { "von": { "type": ["string", "null"] }, "am": { "type": ["string", "null"], "format": "date" }, "quelle": { "type": "string" } }
+      "properties": {
+        "von": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "am": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "quelle": {
+          "type": "string"
+        }
+      }
     },
     "modell_3d": {
       "type": "object",
       "properties": {
-        "datei": { "type": "string", "description": ".skp im Bibliotheksordner" },
-        "einfuegepunkt": { "$ref": "common.schema.json#/$defs/vec3" },
-        "bezug_teil": { "$ref": "common.schema.json#/$defs/rolle" }
+        "datei": {
+          "type": "string",
+          "description": ".skp im Bibliotheksordner"
+        },
+        "einfuegepunkt": {
+          "$ref": "common.schema.json#/$defs/vec3"
+        },
+        "bezug_teil": {
+          "$ref": "common.schema.json#/$defs/rolle"
+        }
       }
     },
     "parameter": {
@@ -44,9 +107,21 @@
       "additionalProperties": {
         "type": "object",
         "properties": {
-          "default": { "$ref": "common.schema.json#/$defs/mass" },
-          "werte": { "type": "array", "items": { "type": ["number", "string"] } },
-          "beschreibung": { "type": "string" }
+          "default": {
+            "$ref": "common.schema.json#/$defs/mass"
+          },
+          "werte": {
+            "type": "array",
+            "items": {
+              "type": [
+                "number",
+                "string"
+              ]
+            }
+          },
+          "beschreibung": {
+            "type": "string"
+          }
         }
       }
     },
@@ -55,11 +130,23 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["bedingung", "setze"],
+        "required": [
+          "bedingung",
+          "setze"
+        ],
         "properties": {
-          "name": { "type": "string" },
-          "bedingung": { "$ref": "common.schema.json#/$defs/bedingung" },
-          "setze": { "type": "object", "additionalProperties": { "$ref": "common.schema.json#/$defs/mass" } }
+          "name": {
+            "type": "string"
+          },
+          "bedingung": {
+            "$ref": "common.schema.json#/$defs/bedingung"
+          },
+          "setze": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "common.schema.json#/$defs/mass"
+            }
+          }
         }
       }
     },
@@ -67,60 +154,146 @@
       "description": "Wie viele Stück und wo, z. B. Topfbänder nach Türhöhe",
       "type": "object",
       "properties": {
-        "achse": { "enum": ["x", "y"] },
-        "randabstand": { "$ref": "common.schema.json#/$defs/mass" },
+        "achse": {
+          "enum": [
+            "x",
+            "y"
+          ]
+        },
+        "randabstand": {
+          "$ref": "common.schema.json#/$defs/mass"
+        },
         "anzahl_tabelle": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["bis", "anzahl"],
-            "properties": { "bis": { "type": "number" }, "anzahl": { "type": "integer" } }
+            "required": [
+              "bis",
+              "anzahl"
+            ],
+            "properties": {
+              "bis": {
+                "type": "number"
+              },
+              "anzahl": {
+                "type": "integer"
+              }
+            }
           }
         },
-        "raster_fangen": { "type": "boolean", "default": false, "description": "Auf 32er-Lochreihe einrasten" }
+        "raster_fangen": {
+          "type": "boolean",
+          "default": false,
+          "description": "Auf 32er-Lochreihe einrasten"
+        }
       }
     },
     "bohrbilder": {
       "description": "Je betroffenes Teil ein Bohrbild",
       "type": "array",
-      "items": { "$ref": "#/$defs/bohrbild" }
+      "items": {
+        "$ref": "#/$defs/bohrbild"
+      }
     }
   },
   "$defs": {
     "bohrbild": {
       "type": "object",
-      "required": ["teil", "bezug", "bearbeitungen"],
+      "required": [
+        "teil",
+        "bezug",
+        "bearbeitungen"
+      ],
       "properties": {
-        "teil": { "description": "Welches Teil der Verbindung: Rolle oder 'a'/'b' aus der Regel", "type": "string" },
+        "teil": {
+          "description": "Welches Teil der Verbindung: Rolle oder 'a'/'b' aus der Regel",
+          "type": "string"
+        },
         "bezug": {
           "type": "object",
           "description": "Ursprung der Bohrbild-Koordinaten auf dem Teil",
-          "required": ["flaeche", "punkt"],
+          "required": [
+            "flaeche",
+            "punkt"
+          ],
           "properties": {
-            "flaeche": { "$ref": "common.schema.json#/$defs/flaeche" },
-            "punkt": { "enum": ["ecke_vorne_unten", "ecke_vorne_oben", "ecke_hinten_unten", "ecke_hinten_oben",
-                                "kante_vorne", "kante_hinten", "mitte", "verbindungsachse", "montagepunkt"] },
-            "spiegeln": { "enum": ["keins", "x", "y", "auto"], "default": "auto", "description": "auto = links/rechts nach Teilrolle" }
+            "flaeche": {
+              "$ref": "common.schema.json#/$defs/flaeche"
+            },
+            "punkt": {
+              "enum": [
+                "ecke_vorne_unten",
+                "ecke_vorne_oben",
+                "ecke_hinten_unten",
+                "ecke_hinten_oben",
+                "kante_vorne",
+                "kante_hinten",
+                "mitte",
+                "verbindungsachse",
+                "montagepunkt"
+              ]
+            },
+            "spiegeln": {
+              "enum": [
+                "keins",
+                "x",
+                "y",
+                "auto"
+              ],
+              "default": "auto",
+              "description": "auto = links/rechts nach Teilrolle"
+            }
           }
         },
         "bearbeitungen": {
           "description": "Wie Schema 4, aber Koordinaten dürfen Formeln sein",
           "type": "array",
-          "items": { "$ref": "#/$defs/bearbeitung_vorlage" }
+          "items": {
+            "$ref": "#/$defs/bearbeitung_vorlage"
+          }
         }
       }
     },
     "bearbeitung_vorlage": {
       "type": "object",
-      "required": ["typ"],
+      "required": [
+        "typ"
+      ],
       "properties": {
-        "typ": { "enum": ["bohrung", "bohrreihe", "nut", "tasche", "kontur", "saegeschnitt"] },
-        "flaeche": { "$ref": "common.schema.json#/$defs/flaeche" },
-        "bedingung": { "$ref": "common.schema.json#/$defs/bedingung" }
+        "typ": {
+          "enum": [
+            "bohrung",
+            "bohrreihe",
+            "nut",
+            "tasche",
+            "kontur",
+            "saegeschnitt",
+            "makro"
+          ]
+        },
+        "flaeche": {
+          "$ref": "common.schema.json#/$defs/flaeche"
+        },
+        "bedingung": {
+          "$ref": "common.schema.json#/$defs/bedingung"
+        }
       },
       "additionalProperties": {
         "description": "Felder wie in teil.schema.json, Zahlen oder Formeln",
-        "anyOf": [ { "$ref": "common.schema.json#/$defs/mass" }, { "type": "array" }, { "type": "boolean" }, { "type": "string" } ]
+        "anyOf": [
+          {
+            "$ref": "common.schema.json#/$defs/mass"
+          },
+          {
+            "type": "array"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "string"
+          }
+        ]
       }
     }
   }

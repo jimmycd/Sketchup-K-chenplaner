@@ -59,23 +59,41 @@ Tests: `ruby test/test_exporter.rb` (12 Tests).
 Prüfungen vor dem Schreiben: Position im Teil, Restwand (`pruefungen.min_restwand`), Werkzeug im Profil vorhanden.
 Teile mit Fehlern werden nicht geschrieben, die Fehlerliste nennt Teil und Bearbeitung.
 
-### Auffälligkeiten in der Spezifikation (bitte an der Maschine prüfen)
+### Abgleich mit den Beispieldateien (`examples/tcn_referenz/`)
 
-- Säge-Typ `#8509`: Die Tabelle nennt für Säge X „=1", das Beispiel nutzt 0 (Säge X), 1 (Säge Y), 2 (Säge XY).
-  Ich verwende 0/1 wie in den Beispielen.
-- Werkzeug bei Bohrungen: Beispiel `#1001=1` plus Durchmesser `#1002`; ich verwende `#1001=1` (Profil: `tcn.bohrer_werkzeugtyp`).
-  Vorschubwerte (`#2005`, `#2002`, `#9012`, `#9013`) werden nicht geschrieben, es gelten die Werkzeugvorgaben.
-- Zeilenende CRLF (Profil: `tcn.zeilenende`), Kopfzeile `TPA\ALBATROS\EDICAD\01.00` wie im Beispiel.
-- Bohrreihe als Einzelbohrungen: ob die Maschine daraus den Reihenbohrkopf nutzt, entscheidet TpaCAD.
+Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
+
+- **Flächen und Achsen bestätigt:** Kantenbohrungen am Boden liegen auf SIDE 4 und 6 mit `#8518=9.5` (= Dicke/2) und
+  `x-30` entlang der Kante; SIDE 2 wird nie verwendet. Das passt zu Mapping, Achsen und „z von F2, Default Mitte".
+- **CRLF** bestätigt. Dateikopf, `::SIDE=`, `'tcn version`, die Blöcke `EXE … LINK` und `SIDE#0,1,3,4,5,6` mit
+  `$=F #n` schreibt der Exporter jetzt wie die Maschinendateien (Test vergleicht gegen `Seite.tcn`).
+- **Bohrung `W#81`:** `#201=1 #203=1 #1001=0` (statt `#1001=1`), wie in `Seite.tcn`.
+- **Makros:** Die Werkstatt arbeitet mit Makros: `fittingx`/`fittingy` (`W#1001`/`W#1003`, Bohrreihen und verteilte
+  Bohrungen, z. B. `#8512=150` mit `#8508=1` = gleichmäßig mit max. 150 mm Abstand, `#8518` = Querposition,
+  `#8522` = Durchmesser, `#8513` = Tiefe), `inge100` (`W#1506`, Topfband: Ø35, Tiefe 8, Position `#8507`/`#8508`)
+  und `squad` (`W#1510`, steht in jeder Datei außer der Tür; sieht nach Formatieren/Besäumen aus).
+  Neu: Bearbeitungstyp **`makro`** (Schema 4 und Beschlag-Bohrbild) reicht Nummer, Makroname und Parameter 1:1
+  durch; ein Test erzeugt die `T_rR`-Zeile damit exakt. So können Beschläge (Topfband, Verbinderreihe) später
+  direkt auf eure Makros zeigen, ohne dass ich deren Bedeutung raten muss.
+- **Maße im Kopf:** `Boden` 862 × 558, `Seite` 716 × 558, `Strebe` 562 × 100. 862 und 562 entsprechen Innenbreite
+  (B − 2·19); 558 ist 2 mm weniger als die Tiefe 560. Ob das Fertig- oder Zuschnittmaß ist, kann ich daraus nicht sicher
+  ablesen (siehe Fragen).
+
+### Weitere Auffälligkeiten der Spezifikation
+
+- Säge-Typ `#8509`: Tabelle nennt für Säge X „=1", das Beispiel nutzt 0 (X), 1 (Y), 2 (XY). Ich verwende 0/1.
+  In den Beispieldateien kommt keine Säge vor, bleibt also ungeprüft.
+- Vorschubwerte (`#2005`, `#2002`, `#9012`, `#9013`) werden nicht geschrieben; die Beispieldateien enthalten sie bei
+  `W#81` ebenfalls nicht.
+- Bohrreihe wird als Einzelbohrungen geschrieben; eure Dateien nutzen dafür das Makro `fittingx`/`fittingy`.
 
 ## Noch offen
 
 - **Werkzeugnummern** (TpaCAD-Nummer von Nutsäge X, Nutsäge Y, Nutfräser 8 mm, ggf. weiteren Fräsern) in
   `examples/profile/werkstatt.tcnprofil.json` (`nummer`, bei Sägen auch Blattbreite `d`). Ohne sie bricht der
   Export von Nuten mit Meldung ab. Alle anderen Durchmesser sind laut dir vorhanden, Bohrungen brauchen keine Nummer.
-- **Referenzdatei:** Eine echte, von der Maschine gelesene `.tcn` (Bohrung, Nut, Kantenbohrung) wäre ein guter Test,
-  um die Ausgabe zu vergleichen.
 - **Beschläge:** später, die Entwurfswerte in `catalog/hardware/` bleiben bis dahin ungeprüft.
+- **Fragen zu den Beispielen:** (1) Sind die Maße im Kopf Fertig- oder Zuschnittmaß (Kanten)? (2) Was macht `squad` genau, und soll es in jede Datei? (3) Sollen Bohrreihen und Dübelreihen künftig über `fittingx`/`fittingy` ausgegeben werden statt als Einzelbohrungen? (4) Bedeutung von `#8508`/`#8509`/`#8517`/`#8520`/`#8521`, falls es eine Makrodoku gibt. (5) Nuten: Beispiel mit Säge oder Fräser?
 - Annahme `/2` beim Fräsoffset und `bearbeitung_auf` bestätigen.
 
 ## Noch nicht begonnen (hängt an Antworten oder folgt als Code)
