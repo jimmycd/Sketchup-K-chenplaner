@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kp/tcnprofil.schema.json",
+  "title": "TCN-Exporter-Profil",
+  "type": "object",
+  "required": ["id", "flaechen", "abbildung"],
+  "properties": {
+    "id": { "type": "string" },
+    "maschine": { "type": "string" },
+    "vorlage_kopf": { "type": "string", "description": "Pfad zur TCN-Kopfvorlage mit Platzhaltern {L} {W} {D} {NAME}" },
+    "flaechen": {
+      "description": "F1..F6 -> Flächennummer der Maschine",
+      "type": "object",
+      "propertyNames": { "$ref": "common.schema.json#/$defs/flaeche" },
+      "additionalProperties": { "type": "integer" }
+    },
+    "ursprung": {
+      "type": "object",
+      "properties": {
+        "ecke": { "enum": ["links_vorne", "links_hinten", "rechts_vorne", "rechts_hinten"] },
+        "x_spiegeln": { "type": "boolean" },
+        "y_spiegeln": { "type": "boolean" }
+      }
+    },
+    "werkzeuge": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "art", "d"],
+        "properties": {
+          "id": { "type": "string" },
+          "art": { "enum": ["bohrer_durch", "bohrer_flach", "topfbohrer", "fraeser", "saege"] },
+          "d": { "type": "number" },
+          "max_tiefe": { "type": "number" },
+          "flaechen": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/flaeche" } }
+        }
+      }
+    },
+    "abbildung": {
+      "description": "Bearbeitungstyp -> TCN-Baustein (Vorlagenzeilen mit Platzhaltern aus csv2tcn)",
+      "type": "object",
+      "propertyNames": { "enum": ["bohrung", "bohrung_kante", "bohrreihe", "nut", "tasche", "kontur", "saegeschnitt"] },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["baustein"],
+        "properties": {
+          "baustein": { "type": "string" },
+          "aufloesen": { "type": "boolean", "description": "z. B. Bohrreihe in Einzelbohrungen zerlegen, wenn die Maschine keine Reihe kennt" }
+        }
+      }
+    },
+    "sammelliste": {
+      "type": "object",
+      "properties": {
+        "format": { "type": "string", "description": "z. B. XMLST wie in csv2tcn" },
+        "dateiname": { "type": "string" }
+      }
+    },
+    "pruefungen": {
+      "type": "object",
+      "properties": {
+        "min_randabstand": { "type": "number" },
+        "min_restwand": { "type": "number", "description": "Mindestmaterial unter Sackbohrung" },
+        "kollision_toleranz": { "type": "number" }
+      }
+    }
+  }
+}

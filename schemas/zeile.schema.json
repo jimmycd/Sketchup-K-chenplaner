@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kp/zeile.schema.json",
+  "title": "Küchenzeile",
+  "type": "object",
+  "required": ["id", "elemente"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "name": { "type": "string", "description": "z. B. 'Zeile A Fensterwand'" },
+    "ebene": { "enum": ["unten", "oben", "hoch"], "default": "unten" },
+    "start": { "$ref": "common.schema.json#/$defs/vec3", "description": "Weltkoordinate links vorne unten" },
+    "richtung_grad": { "type": "number", "default": 0, "description": "Drehung um z" },
+    "wandlaenge": { "type": "number", "description": "Für Restmaß- und Passleistenprüfung" },
+    "kurzform": {
+      "type": "string",
+      "description": "Alternative Eingabe: Typcodes mit '|' getrennt. Wird in elemente expandiert.",
+      "examples": ["PL50 | US45-T1-L | US60-S2 | US60-SPUE | US80-S3 | PL20"]
+    },
+    "elemente": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/instanz" }
+    },
+    "arbeitsplatte": {
+      "type": "object",
+      "properties": {
+        "material": { "type": "string" },
+        "ueberstand_vorne": { "type": "number", "default": 20 },
+        "ausschnitte": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "typ": { "enum": ["spuele", "kochfeld", "sonstig"] },
+              "ueber_element": { "type": "string", "description": "pos der Instanz" },
+              "schablone": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "instanz": {
+      "type": "object",
+      "required": ["vorlage"],
+      "properties": {
+        "pos": { "type": "string", "description": "Positionsnummer, z. B. 'A3'; wird sonst vergeben" },
+        "vorlage": { "type": "string", "description": "Vorlagen-Code oder vollständiger Typcode" },
+        "breite": { "type": "number" },
+        "hoehe": { "type": "number" },
+        "tiefe": { "type": "number" },
+        "abstand_links": { "type": "number", "default": 0 },
+        "overrides": { "$ref": "common.schema.json#/$defs/override" },
+        "seitenwand_sichtbar": {
+          "type": "object",
+          "properties": { "links": { "type": "boolean" }, "rechts": { "type": "boolean" } }
+        },
+        "bemerkung": { "type": "string" },
+        "gesperrt": { "type": "boolean", "default": false, "description": "Nicht neu generieren" }
+      }
+    }
+  }
+}

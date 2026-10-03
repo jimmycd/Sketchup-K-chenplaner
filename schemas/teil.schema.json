@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kp/teil.schema.json",
+  "title": "Fertigungsteil mit Bearbeitungen",
+  "type": "object",
+  "required": ["uid", "rolle", "material", "fertigmass", "bearbeitungen"],
+  "properties": {
+    "uid": { "type": "string", "description": "Stabil über Neugenerierung: <projekt>/<pos>/<teil-id>" },
+    "pos": { "type": "string", "description": "Schrankposition, z. B. 'A2'" },
+    "teil_id": { "type": "string", "description": "id aus der Vorlage, z. B. 'sl'" },
+    "rolle": { "$ref": "common.schema.json#/$defs/rolle" },
+    "bezeichnung": { "type": "string", "description": "z. B. 'A2 Seite links'" },
+    "material": { "type": "string" },
+    "fertigmass": { "$ref": "#/$defs/mass3", "description": "L x W x D inkl. Kanten" },
+    "zuschnittmass": { "$ref": "#/$defs/mass3", "description": "Optional; sonst rechnet OCL" },
+    "maserung": { "enum": ["laenge", "breite", "keine"] },
+    "kanten": {
+      "type": "object",
+      "propertyNames": { "$ref": "common.schema.json#/$defs/kantenseite" },
+      "additionalProperties": { "type": ["string", "null"] }
+    },
+    "sichtseite": { "$ref": "common.schema.json#/$defs/flaeche" },
+    "wenden": {
+      "type": "boolean",
+      "description": "true, wenn Bearbeitungen auf F1 und F2 nötig sind (zweite Aufspannung)"
+    },
+    "bearbeitungen": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/bearbeitung" }
+    },
+    "herkunft": {
+      "type": "object",
+      "properties": {
+        "vorlage": { "type": "string" },
+        "generator_version": { "type": "string" },
+        "erzeugt": { "type": "string", "format": "date-time" },
+        "hash": { "type": "string", "description": "Prüfsumme der Eingaben, erkennt manuelle Änderungen" }
+      }
+    }
+  },
+  "$defs": {
+    "mass3": {
+      "type": "object",
+      "required": ["l", "w", "d"],
+      "properties": { "l": { "type": "number" }, "w": { "type": "number" }, "d": { "type": "number" } }
+    },
+    "basis": {
+      "type": "object",
+      "required": ["typ", "flaeche"],
+      "properties": {
+        "id": { "type": "string" },
+        "flaeche": { "$ref": "common.schema.json#/$defs/flaeche" },
+        "quelle": {
+          "type": "object",
+          "description": "Woher die Bearbeitung kommt; für Rückverfolgung und Kollisionsmeldungen",
+          "properties": {
+            "regel": { "type": "string" },
+            "beschlag": { "type": "string" },
+            "partner_uid": { "type": "string", "description": "Gegenstück der Verbindung" }
+          }
+        },
+        "werkzeug": { "type": "string", "description": "Optional; sonst wählt das Exporter-Profil" },
+        "gruppe": { "type": "string", "description": "Zusammengehörige Bearbeitungen, z. B. ein Topfband" }
+      }
+    },
+    "bearbeitung": {
+      "oneOf": [
+        { "$ref": "#/$defs/bohrung" },
+        { "$ref": "#/$defs/bohrreihe" },
+        { "$ref": "#/$defs/nut" },
+        { "$ref": "#/$defs/tasche" },
+        { "$ref": "#/$defs/kontur" },
+        { "$ref": "#/$defs/saegeschnitt" }
+      ]
+    },
+    "bohrung": {
+      "allOf": [ { "$ref": "#/$defs/basis" } ],
+      "properties": {
+        "typ": { "const": "bohrung" },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "z": { "type": "number", "description": "Nur Kantenbohrung (F3-F6): Höhe in der Dicke" },
+        "d": { "type": "number", "exclusiveMinimum": 0 },
+        "tiefe": { "type": "number" },
+        "durch": { "type": "boolean", "default": false },
+        "senkung": {
+          "type": "object",
+          "properties": { "d": { "type": "number" }, "tiefe": { "type": "number" } }
+        }
+      },
+      "required": ["typ", "d", "tiefe"]
+    },
+    "bohrreihe": {
+      "allOf": [ { "$ref": "#/$defs/basis" } ],
+      "properties": {
+        "typ": { "const": "bohrreihe" },
+        "start": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+        "richtung": { "enum": ["+x", "-x", "+y", "-y"] },
+        "raster": { "type": "number" },
+        "anzahl": { "type": "integer", "minimum": 1 },
+        "d": { "type": "number" },
+        "tiefe": { "type": "number" }
+      },
+      "required": ["typ", "start", "richtung", "raster", "anzahl", "d", "tiefe"]
+    },
+    "nut": {
+      "allOf": [ { "$ref": "#/$defs/basis" } ],
+      "properties": {
+        "typ": { "const": "nut" },
+        "von": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+        "bis": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+        "breite": { "type": "number" },
+        "tiefe": { "type": "number" },
+        "bezug": { "enum": ["mitte", "links", "rechts"], "default": "mitte", "description": "Lage von von/bis zur Nutbreite" },
+        "ausfuehrung": { "enum": ["saege", "fraeser", "egal"], "default": "egal" },
+        "durchgehend": { "type": "boolean", "default": true }
+      },
+      "required": ["typ", "von", "bis", "breite", "tiefe"]
+    },
+    "tasche": {
+      "allOf": [ { "$ref": "#/$defs/basis" } ],
+      "properties": {
+        "typ": { "const": "tasche" },
+        "x": { "type": "number" }, "y": { "type": "number" },
+        "laenge": { "type": "number" }, "breite": { "type": "number" },
+        "tiefe": { "type": "number" },
+        "eckradius": { "type": "number", "default": 0 },
+        "winkel": { "type": "number", "default": 0 }
+      },
+      "required": ["typ", "x", "y", "laenge", "breite", "tiefe"]
+    },
+    "kontur": {
+      "allOf": [ { "$ref": "#/$defs/basis" } ],
+      "properties": {
+        "typ": { "const": "kontur" },
+        "pfad": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["x", "y"],
+            "properties": {
+              "x": { "type": "number" }, "y": { "type": "number" },
+              "bogen": { "type": "object", "properties": { "r": { "type": "number" }, "cw": { "type": "boolean" } } }
+            }
+          },
+          "minItems": 2
+        },
+        "geschlossen": { "type": "boolean", "default": false },
+        "tiefe": { "type": "number" },
+        "korrektur": { "enum": ["links", "rechts", "keine"], "default": "keine" }
+      },
+      "required": ["typ", "pfad", "tiefe"]
+    },
+    "saegeschnitt": {
+      "allOf": [ { "$ref": "#/$defs/basis" } ],
+      "properties": {
+        "typ": { "const": "saegeschnitt" },
+        "von": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+        "bis": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+        "tiefe": { "type": "number" },
+        "neigung": { "type": "number", "default": 0 }
+      },
+      "required": ["typ", "von", "bis", "tiefe"]
+    }
+  }
+}

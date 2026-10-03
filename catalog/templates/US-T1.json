@@ -1,0 +1,15 @@
+{
+  "code": "US-T1",
+  "basis": "US-BASIS",
+  "name": "Unterschrank, 1 Tür, 1 Einlegeboden",
+  "kategorie": "unterschrank",
+  "suchbegriffe": ["1 tür", "tür", "türenschrank", "einlegeboden"],
+  "einbauten": [
+    { "art": "einlegeboden", "anzahl": 1, "verteilung": "gleichmaessig", "beschlag": "set:bodentraeger" }
+  ],
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [ { "art": "tuer", "anteil": 1, "anschlag": "rechts", "beschlag": "topfband" } ]
+  }
+}

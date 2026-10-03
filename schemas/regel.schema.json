@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kp/regel.schema.json",
+  "title": "Konstruktionsregel",
+  "type": "object",
+  "required": ["id", "art"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "name": { "type": "string" },
+    "art": { "enum": ["verbindung", "teil"] },
+    "prioritaet": { "type": "integer", "default": 100, "description": "Niedrig = früher; spätere Regeln sehen frühere Bearbeitungen" },
+    "bedingung": { "$ref": "common.schema.json#/$defs/bedingung" },
+    "gilt_fuer": {
+      "type": "object",
+      "properties": {
+        "kategorien": { "type": "array", "items": { "type": "string" } },
+        "bauweise": { "type": "array", "items": { "type": "string" } },
+        "vorlagen_ausser": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "art": { "const": "verbindung" } } },
+      "then": {
+        "required": ["teil_a", "teil_b", "stoss", "elemente"],
+        "properties": {
+          "teil_a": {
+            "description": "Das Teil, auf dessen Fläche das andere stößt (z. B. Seite)",
+            "type": "array", "items": { "$ref": "common.schema.json#/$defs/rolle" }
+          },
+          "teil_b": {
+            "description": "Das Teil, das mit seiner Kante stößt (z. B. Boden)",
+            "type": "array", "items": { "$ref": "common.schema.json#/$defs/rolle" }
+          },
+          "stoss": { "enum": ["stumpf_flaeche_kante", "eingenutet", "gefalzt", "auf_gehrung"] },
+          "elemente": {
+            "description": "Was entlang der Kontaktkante gesetzt wird",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["beschlag", "verteilung"],
+              "properties": {
+                "beschlag": { "type": "string", "description": "'set:<funktion>' oder Beschlag-ID" },
+                "bedingung": { "$ref": "common.schema.json#/$defs/bedingung" },
+                "verteilung": {
+                  "type": "object",
+                  "required": ["modus"],
+                  "properties": {
+                    "modus": { "enum": ["randabstand_max", "fest", "raster", "liste"] },
+                    "randabstand": { "$ref": "common.schema.json#/$defs/mass" },
+                    "max_abstand": { "$ref": "common.schema.json#/$defs/mass" },
+                    "min_anzahl": { "type": "integer", "default": 2 },
+                    "raster": { "$ref": "common.schema.json#/$defs/mass" },
+                    "positionen": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/mass" } },
+                    "versatz": { "$ref": "common.schema.json#/$defs/mass", "default": 0, "description": "Gegenüber anderem Element, z. B. Dübel neben Verbinder" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "art": { "const": "teil" } } },
+      "then": {
+        "required": ["rollen", "bearbeitungen"],
+        "properties": {
+          "rollen": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/rolle" } },
+          "bearbeitungen": {
+            "type": "array",
+            "items": { "$ref": "beschlag.schema.json#/$defs/bearbeitung_vorlage" }
+          },
+          "aussparen": {
+            "description": "Bereiche ohne Bearbeitung, z. B. Lochreihe nicht hinter Schubkästen",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "wo": { "enum": ["frontfeld_art", "bereich"] },
+                "art": { "type": "array", "items": { "type": "string" } },
+                "von": { "$ref": "common.schema.json#/$defs/mass" },
+                "bis": { "$ref": "common.schema.json#/$defs/mass" }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

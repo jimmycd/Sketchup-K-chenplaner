@@ -1,0 +1,15 @@
+{
+  "id": "haefele_minifix15",
+  "hersteller": "Häfele",
+  "bezeichnung": "Minifix 15 mit Bolzen",
+  "kategorie": "verbinder",
+  "artikelnummern": [ { "artnr": "<Gehäuse>", "menge": 1 }, { "artnr": "<Bolzen>", "menge": 1 } ],
+  "parameter": { "b": { "werte": [], "beschreibung": "<Bohrmaß b> Abstand Gehäusebohrung zur Kante, aus Datenblatt; default offen" } },
+  "bohrbilder": [
+    { "teil": "a", "bezug": { "flaeche": "F1", "punkt": "verbindungsachse" },
+      "bearbeitungen": [ { "typ": "bohrung", "x": "=V.b", "y": 0, "d": 15, "tiefe": "<Tiefe>" } ] },
+    { "teil": "b", "bezug": { "flaeche": "F5", "punkt": "verbindungsachse" },
+      "bearbeitungen": [ { "typ": "bohrung", "y": 0, "z": "=D/2", "d": 8, "tiefe": "<Tiefe>" } ] }
+  ],
+  "geprueft": { "von": null, "am": null }
+}

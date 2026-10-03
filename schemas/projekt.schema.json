@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kp/projekt.schema.json",
+  "title": "Küchenprojekt",
+  "type": "object",
+  "required": ["schema_version", "id", "name", "standards"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "name": { "type": "string" },
+    "kunde": { "type": "string" },
+    "kataloge": {
+      "description": "Pfade zu Katalogordnern, Reihenfolge = Priorität",
+      "type": "array", "items": { "type": "string" }
+    },
+    "standards": { "$ref": "#/$defs/standards" },
+    "zeilen": {
+      "type": "array",
+      "items": { "$ref": "zeile.schema.json" }
+    }
+  },
+  "$defs": {
+    "standards": {
+      "type": "object",
+      "required": ["korpus", "rueckwand", "hoehen", "tiefen", "lochreihe", "beschlag_set", "materialien"],
+      "properties": {
+        "bauweise": {
+          "description": "Verbindung Seite/Boden/Deckel",
+          "enum": ["seiten_durchgehend", "boden_durchgehend", "seiten_durchgehend_deckel_aufgesetzt"],
+          "default": "seiten_durchgehend"
+        },
+        "korpus": {
+          "type": "object",
+          "required": ["staerke", "material"],
+          "properties": {
+            "staerke": { "type": "number", "default": 19 },
+            "material": { "type": "string", "description": "Schlüssel in materialien" },
+            "kante_sichtbar": { "type": "string", "description": "Schlüssel in kanten" },
+            "kante_verdeckt": { "type": ["string", "null"] }
+          }
+        },
+        "front": {
+          "type": "object",
+          "properties": {
+            "staerke": { "type": "number", "default": 19 },
+            "material": { "type": "string" },
+            "kante": { "type": "string" },
+            "fuge": { "type": "number", "default": 3 },
+            "ueberstand_unten": { "type": "number", "default": 0 },
+            "griff": { "type": "string", "description": "Beschlag-ID oder 'grifflos'" }
+          }
+        },
+        "rueckwand": {
+          "type": "object",
+          "required": ["art", "staerke"],
+          "properties": {
+            "art": { "enum": ["genutet", "gefalzt", "aufgesetzt", "eingestellt"] },
+            "staerke": { "type": "number", "default": 8 },
+            "material": { "type": "string" },
+            "nuttiefe": { "type": "number", "default": 10 },
+            "abstand_hinten": { "type": "number", "description": "Nutabstand von Hinterkante", "default": 16 },
+            "luft": { "type": "number", "description": "Spiel pro Seite in der Nut", "default": 1 }
+          }
+        },
+        "hoehen": {
+          "type": "object",
+          "properties": {
+            "sockel": { "type": "number", "default": 100 },
+            "arbeitsplatte_staerke": { "type": "number", "default": 38 },
+            "arbeitshoehe": { "type": "number", "default": 910 },
+            "korpus_us": { "$ref": "common.schema.json#/$defs/mass", "default": "=P.hoehen.arbeitshoehe-P.hoehen.sockel-P.hoehen.arbeitsplatte_staerke" },
+            "oberkante_hs": { "type": "number", "default": 2200 },
+            "korpus_hs": { "type": "number", "default": 720 },
+            "korpus_hoch": { "type": "number", "default": 2100 }
+          }
+        },
+        "tiefen": {
+          "type": "object",
+          "properties": {
+            "us": { "type": "number", "default": 560 },
+            "hs": { "type": "number", "default": 350 },
+            "hoch": { "type": "number", "default": 560 }
+          }
+        },
+        "lochreihe": {
+          "type": "object",
+          "properties": {
+            "aktiv": { "type": "boolean", "default": true },
+            "durchmesser": { "type": "number", "default": 5 },
+            "tiefe": { "type": "number", "default": 12 },
+            "raster": { "type": "number", "default": 32 },
+            "abstand_vorne": { "type": "number", "default": 37 },
+            "abstand_hinten": { "$ref": "common.schema.json#/$defs/mass", "default": 37, "description": "0 = keine hintere Reihe" },
+            "bezug_z": { "enum": ["unterkante_seite", "oberkante_boden"], "default": "oberkante_boden" },
+            "start": { "type": "number", "description": "Erstes Loch ab Bezug", "default": 64 },
+            "rand_oben_min": { "type": "number", "default": 64 }
+          }
+        },
+        "verbindung": {
+          "type": "object",
+          "properties": {
+            "korpus": { "type": "string", "description": "Funktion im Beschlag-Set, z. B. 'verbinder'", "default": "verbinder" },
+            "duebel": { "type": "boolean", "default": true },
+            "randabstand": { "type": "number", "default": 34 },
+            "max_abstand": { "type": "number", "default": 320 }
+          }
+        },
+        "beschlag_set": { "$ref": "common.schema.json#/$defs/id" },
+        "materialien": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["name", "staerke"],
+            "properties": {
+              "name": { "type": "string" },
+              "staerke": { "type": "number" },
+              "maserung": { "type": "boolean", "default": false },
+              "ocl_material": { "type": "string", "description": "Name des SketchUp/OCL-Materials" },
+              "farbe": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+            }
+          }
+        },
+        "kanten": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["staerke"],
+            "properties": {
+              "name": { "type": "string" },
+              "staerke": { "type": "number" },
+              "hoehe": { "type": "number" },
+              "vorher_abziehen": { "type": "boolean", "default": true, "description": "Zuschnittmaß um Kantenstärke reduzieren" },
+              "ocl_material": { "type": "string" }
+            }
+          }
+        },
+        "maschine": {
+          "type": "object",
+          "properties": {
+            "exporter_profil": { "type": "string", "description": "Pfad zum TCN-Exporter-Profil" },
+            "ausgabeordner": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

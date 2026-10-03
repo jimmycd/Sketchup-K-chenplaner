@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "id": "kueche_mueller_2026",
+  "name": "Küche Müller",
+  "kataloge": ["catalog"],
+  "standards": {
+    "bauweise": "seiten_durchgehend",
+    "korpus": { "staerke": 19, "material": "spano_weiss_19", "kante_sichtbar": "abs_weiss_1" },
+    "front": { "staerke": 19, "material": "mdf_lack_19", "kante": "abs_lack_1", "fuge": 3, "griff": "grifflos" },
+    "rueckwand": { "art": "genutet", "staerke": 8, "nuttiefe": 10, "abstand_hinten": 16 },
+    "hoehen": { "sockel": 100, "arbeitsplatte_staerke": 38, "arbeitshoehe": 910 },
+    "tiefen": { "us": 560, "hs": 350, "hoch": 560 },
+    "lochreihe": { "raster": 32, "abstand_vorne": 37, "abstand_hinten": 37 },
+    "beschlag_set": "haefele_standard",
+    "materialien": {
+      "spano_weiss_19": { "name": "Spanplatte melaminbeschichtet weiß", "staerke": 19 },
+      "mdf_lack_19": { "name": "MDF lackiert", "staerke": 19 },
+      "hdf_weiss_8": { "name": "HDF weiß", "staerke": 8 }
+    },
+    "kanten": {
+      "abs_weiss_1": { "name": "ABS weiß 1 mm", "staerke": 1, "hoehe": 23 },
+      "abs_lack_1": { "name": "ABS lackfähig 1 mm", "staerke": 1, "hoehe": 23 }
+    },
+    "maschine": { "exporter_profil": "profile/werkstatt.tcnprofil.json" }
+  },
+  "zeilen": [
+    { "id": "zeile_a", "name": "Zeile A Fensterwand", "ebene": "unten", "start": [0, 0, 0], "wandlaenge": 3200,
+      "elemente": [ { "pos": "A1", "vorlage": "US-T1", "breite": 450 } ] }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kp/beschlagset.schema.json",
+  "title": "Beschlag-Set",
+  "type": "object",
+  "required": ["id", "zuordnung"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "name": { "type": "string" },
+    "basis": { "type": "string", "description": "Anderes Set, von dem geerbt wird" },
+    "zuordnung": {
+      "description": "Funktion -> Beschlag-ID. Funktionen frei wählbar, werden in Vorlagen/Regeln als 'set:<funktion>' genutzt",
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "array",
+            "description": "Bedingte Auswahl, erste passende gewinnt",
+            "items": {
+              "type": "object",
+              "required": ["beschlag"],
+              "properties": {
+                "bedingung": { "$ref": "common.schema.json#/$defs/bedingung" },
+                "beschlag": { "type": "string" },
+                "parameter": { "type": "object" }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

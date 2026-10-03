@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kp/common.schema.json",
+  "title": "Gemeinsame Typen",
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_.-]*$" },
+    "formel": { "type": "string", "pattern": "^=.+" },
+    "mass": {
+      "description": "Zahl in mm oder Formel",
+      "oneOf": [ { "type": "number" }, { "$ref": "#/$defs/formel" } ]
+    },
+    "flaeche": { "enum": ["F1", "F2", "F3", "F4", "F5", "F6"] },
+    "kantenseite": { "enum": ["vorne", "hinten", "links", "rechts"] },
+    "rolle": {
+      "description": "Funktion eines Teils im Schrank",
+      "enum": ["seite_l", "seite_r", "boden", "deckel", "traverse_vorne", "traverse_hinten",
+               "rueckwand", "einlegeboden", "mittelwand", "zwischenboden", "sockelblende",
+               "front_tuer", "front_schublade", "front_klappe", "blende", "passleiste",
+               "sk_seite", "sk_rueckwand", "sk_boden", "sonstiges"]
+    },
+    "bedingung": {
+      "description": "Boolesche Formel; Teil/Regel gilt nur, wenn wahr. Beispiel: '=B>=600'",
+      "$ref": "#/$defs/formel"
+    },
+    "vec2": { "type": "array", "items": { "$ref": "#/$defs/mass" }, "minItems": 2, "maxItems": 2 },
+    "vec3": { "type": "array", "items": { "$ref": "#/$defs/mass" }, "minItems": 3, "maxItems": 3 },
+    "override": {
+      "description": "Punkt-Pfad -> Wert, z. B. { 'front.felder.0.hoehe': 280 }",
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z0-9_]+(\\.[a-z0-9_]+)*$" }
+    }
+  }
+}

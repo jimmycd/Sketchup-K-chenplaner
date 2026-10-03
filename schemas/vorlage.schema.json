@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kp/vorlage.schema.json",
+  "title": "Schranktyp-Vorlage",
+  "type": "object",
+  "required": ["code", "name", "kategorie"],
+  "properties": {
+    "code": { "type": "string", "pattern": "^[A-Z]{2,5}(-[A-Z0-9]+)*$", "description": "Katalogcode, z. B. US-S2" },
+    "name": { "type": "string" },
+    "beschreibung": { "type": "string" },
+    "basis": { "type": "string", "description": "Code der Elternvorlage" },
+    "abstrakt": { "type": "boolean", "default": false, "description": "Nur zum Erben, nicht wählbar" },
+    "kategorie": { "enum": ["unterschrank", "haengeschrank", "hochschrank", "eckschrank", "sonderschrank", "blende"] },
+    "suchbegriffe": {
+      "description": "Für Freitextsuche, z. B. 'schubladenschrank', '2 schubladen'",
+      "type": "array", "items": { "type": "string" }
+    },
+    "vorschau": { "type": "string", "description": "Pfad zu PNG/SVG für den Katalogdialog" },
+    "parameter": {
+      "type": "object",
+      "properties": {
+        "breite": { "$ref": "#/$defs/param" },
+        "hoehe": { "$ref": "#/$defs/param" },
+        "tiefe": { "$ref": "#/$defs/param" }
+      },
+      "additionalProperties": { "$ref": "#/$defs/param" }
+    },
+    "variablen": {
+      "description": "Abgeleitete Größen, in Formeln als V.<name> nutzbar",
+      "type": "object",
+      "additionalProperties": { "$ref": "common.schema.json#/$defs/mass" }
+    },
+    "sockel": {
+      "type": "object",
+      "properties": {
+        "art": { "enum": ["keiner", "fuesse", "sockelblende", "korpussockel"] },
+        "fuss_beschlag": { "type": "string", "description": "Funktion im Beschlag-Set" },
+        "ruecksprung": { "type": "number", "default": 60 }
+      }
+    },
+    "aufhaengung": {
+      "description": "Nur Hängeschränke",
+      "type": "object",
+      "properties": { "beschlag": { "type": "string" } }
+    },
+    "teile": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/teil_vorlage" }
+    },
+    "einbauten": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/einbau" }
+    },
+    "front": { "$ref": "#/$defs/front" },
+    "regeln": {
+      "description": "Regel-IDs zusätzlich zu den automatisch passenden; '-id' schließt eine Regel aus",
+      "type": "array", "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "param": {
+      "type": "object",
+      "properties": {
+        "default": { "$ref": "common.schema.json#/$defs/mass" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "werte": { "type": "array", "items": { "type": "number" }, "description": "Erlaubte Standardmaße" },
+        "frei": { "type": "boolean", "default": false, "description": "Auch Maße außerhalb von werte erlaubt" }
+      }
+    },
+    "teil_vorlage": {
+      "type": "object",
+      "required": ["rolle", "abmessungen", "position"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/id" },
+        "rolle": { "$ref": "common.schema.json#/$defs/rolle" },
+        "name": { "type": "string" },
+        "bedingung": { "$ref": "common.schema.json#/$defs/bedingung" },
+        "anzahl": { "$ref": "common.schema.json#/$defs/mass", "default": 1 },
+        "material": { "type": "string", "description": "Materialschlüssel oder Pfad wie 'P.korpus.material'" },
+        "abmessungen": {
+          "type": "object",
+          "required": ["laenge", "breite"],
+          "description": "Fertigmaß inkl. Kante",
+          "properties": {
+            "laenge": { "$ref": "common.schema.json#/$defs/mass" },
+            "breite": { "$ref": "common.schema.json#/$defs/mass" },
+            "dicke": { "$ref": "common.schema.json#/$defs/mass", "description": "Default: Stärke des Materials" }
+          }
+        },
+        "position": { "$ref": "common.schema.json#/$defs/vec3", "description": "Lage des Teil-Ursprungs im Schrank-System" },
+        "ausrichtung": {
+          "description": "Welche Schrankachse die Teilachsen x und z zeigen",
+          "type": "object",
+          "properties": {
+            "x": { "enum": ["+x", "-x", "+y", "-y", "+z", "-z"] },
+            "z": { "enum": ["+x", "-x", "+y", "-y", "+z", "-z"] }
+          },
+          "required": ["x", "z"]
+        },
+        "maserung": { "enum": ["laenge", "breite", "keine"], "default": "laenge" },
+        "kanten": {
+          "type": "object",
+          "propertyNames": { "$ref": "common.schema.json#/$defs/kantenseite" },
+          "additionalProperties": { "type": ["string", "null"], "description": "Kantenschlüssel, Pfad oder null" }
+        },
+        "sichtseite": { "$ref": "common.schema.json#/$defs/flaeche" }
+      }
+    },
+    "einbau": {
+      "type": "object",
+      "required": ["art"],
+      "properties": {
+        "art": { "enum": ["einlegeboden", "zwischenboden", "mittelwand", "auszug_innen", "geraet"] },
+        "anzahl": { "$ref": "common.schema.json#/$defs/mass" },
+        "verteilung": { "enum": ["gleichmaessig", "raster", "fest"], "default": "gleichmaessig" },
+        "positionen_z": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/mass" } },
+        "beschlag": { "type": "string", "description": "z. B. 'set:bodentraeger'" },
+        "geraet": {
+          "type": "object",
+          "properties": {
+            "typ": { "type": "string" },
+            "nischenmass": { "$ref": "common.schema.json#/$defs/vec3" }
+          }
+        }
+      }
+    },
+    "front": {
+      "type": "object",
+      "properties": {
+        "typ": { "enum": ["aufschlagend", "einliegend", "keine"], "default": "aufschlagend" },
+        "aufteilung": { "enum": ["anteile", "fest", "raster"], "default": "anteile" },
+        "raster_hoehe": { "type": "number", "description": "Bei aufteilung=raster, z. B. 1/5 der Frontfläche" },
+        "felder": {
+          "description": "Von unten nach oben",
+          "type": "array",
+          "items": { "$ref": "#/$defs/frontfeld" }
+        }
+      }
+    },
+    "frontfeld": {
+      "type": "object",
+      "required": ["art"],
+      "properties": {
+        "art": { "enum": ["tuer", "tuer_doppelt", "schublade", "auszug", "klappe_oben", "klappe_unten", "blende", "offen"] },
+        "anteil": { "type": "number", "description": "Relative Höhe bei aufteilung=anteile" },
+        "hoehe": { "$ref": "common.schema.json#/$defs/mass", "description": "Fronthöhe bei aufteilung=fest" },
+        "anschlag": { "enum": ["links", "rechts", "oben", "unten"], "description": "Nur Türen/Klappen" },
+        "beschlag": { "type": "string", "description": "Funktion im Set oder Beschlag-ID; Default nach art" },
+        "innenschubkasten": { "type": "integer", "minimum": 0, "default": 0 },
+        "griff": { "type": "string" }
+      }
+    }
+  }
+}
