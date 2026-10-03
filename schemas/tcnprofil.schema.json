@@ -5,8 +5,7 @@
   "type": "object",
   "required": [
     "id",
-    "flaechen",
-    "abbildung"
+    "flaechen"
   ],
   "properties": {
     "id": {
@@ -15,12 +14,8 @@
     "maschine": {
       "type": "string"
     },
-    "vorlage_kopf": {
-      "type": "string",
-      "description": "Pfad zur TCN-Kopfvorlage mit Platzhaltern {L} {W} {D} {NAME}"
-    },
     "flaechen": {
-      "description": "F1..F6 -> Flächennummer der Maschine",
+      "description": "Konzept-Fläche F1..F6 -> TpaCAD-Flächennummer (1 oben, 2 unten, 3 vorne, 4 rechts, 5 hinten, 6 links). Fehlende Fläche = nicht bearbeitbar",
       "type": "object",
       "propertyNames": {
         "$ref": "common.schema.json#/$defs/flaeche"
@@ -82,7 +77,7 @@
               "number",
               "null"
             ],
-            "description": "null = noch zu erfassen"
+            "description": "Durchmesser bzw. Sägeblattbreite; null = unbekannt"
           },
           "max_tiefe": {
             "type": "number"
@@ -95,49 +90,14 @@
           },
           "notiz": {
             "type": "string"
-          }
-        }
-      }
-    },
-    "abbildung": {
-      "description": "Bearbeitungstyp -> TCN-Baustein (Vorlagenzeilen mit Platzhaltern aus csv2tcn)",
-      "type": "object",
-      "propertyNames": {
-        "enum": [
-          "bohrung",
-          "bohrung_kante",
-          "bohrreihe",
-          "nut",
-          "tasche",
-          "kontur",
-          "saegeschnitt"
-        ]
-      },
-      "additionalProperties": {
-        "type": "object",
-        "required": [
-          "baustein"
-        ],
-        "properties": {
-          "baustein": {
-            "type": "string"
           },
-          "aufloesen": {
-            "type": "boolean",
-            "description": "z. B. Bohrreihe in Einzelbohrungen zerlegen, wenn die Maschine keine Reihe kennt"
+          "nummer": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Werkzeugnummer in TpaCAD (#205 bzw. #8516); null = noch zu erfassen"
           }
-        }
-      }
-    },
-    "sammelliste": {
-      "type": "object",
-      "properties": {
-        "format": {
-          "type": "string",
-          "description": "z. B. XMLST wie in csv2tcn"
-        },
-        "dateiname": {
-          "type": "string"
         }
       }
     },
@@ -162,6 +122,60 @@
     },
     "achsen": {
       "type": "integer"
+    },
+    "tcn": {
+      "type": "object",
+      "description": "Dateiformat TpaCAD TCN",
+      "properties": {
+        "kopfzeile": {
+          "type": "string",
+          "default": "TPA\\ALBATROS\\EDICAD\\01.00"
+        },
+        "zeilenende": {
+          "enum": [
+            "crlf",
+            "lf"
+          ],
+          "default": "crlf"
+        },
+        "bohrer_werkzeugtyp": {
+          "type": "integer",
+          "default": 1,
+          "description": "#1001 bei Bohrung nach Durchmesser"
+        },
+        "saege_makro": {
+          "type": "string",
+          "default": "..\\custom\\mcr\\lame.tmcr",
+          "description": "#8098 bei Säge X/Y"
+        },
+        "durchbohr_zugabe": {
+          "type": "number",
+          "default": 1,
+          "description": "Zusätzliche Tiefe bei Durchgangsbohrung"
+        }
+      }
+    },
+    "wenden": {
+      "type": "object",
+      "description": "Zweite Aufspannung für Bearbeitungen auf F2 (nicht bearbeitbar)",
+      "properties": {
+        "spiegeln": {
+          "enum": [
+            "x",
+            "y"
+          ],
+          "default": "y",
+          "description": "Drehachse: y = um die Längsachse wenden, y' = W - y"
+        }
+      }
+    },
+    "bearbeitung_auf": {
+      "enum": [
+        "fertigmass",
+        "zuschnittmass"
+      ],
+      "default": "fertigmass",
+      "description": "zuschnittmass: Rohteil wird vor dem Kantenanleimen bearbeitet; Koordinaten werden um (Zuschnitt - Fertig)/2 verschoben"
     }
   }
 }

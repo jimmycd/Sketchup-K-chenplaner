@@ -3,30 +3,131 @@
   "maschine": "Profit H200",
   "steuerung": "TpaCAD (Format 4, TPACAD 4.0)",
   "achsen": 4,
-  "vorlage_kopf": "<Pfad TCN-Kopfvorlage>",
-  "flaechen": { "F1": 1, "F3": 3, "F4": 4, "F5": 5, "F6": 6 },
-  "ursprung": { "ecke": "links_vorne" },
-  "werkzeuge": [
-    { "id": "bohrer_f1", "art": "bohrer_durch", "d": null, "flaechen": ["F1"], "notiz": "Alle benötigten Durchmesser vorhanden; Liste erfassen" },
-    { "id": "lochreihe_f1", "art": "lochreihenbohrer", "d": 5, "flaechen": ["F1"], "notiz": "Durchmesser des Reihenbohrkopfs bestätigen" },
-    { "id": "forstner_topf", "art": "topfbohrer", "d": 35, "flaechen": ["F1"], "notiz": "Forstnerbohrer für Topfband; 35 mm angenommen" },
-    { "id": "horizontal", "art": "horizontalbohrer", "d": null, "flaechen": ["F3", "F4", "F5", "F6"], "notiz": "Durchmesser erfassen" },
-    { "id": "schlosskasten", "art": "schlosskastenaggregat", "d": null, "flaechen": ["F3", "F4", "F5", "F6"] },
-    { "id": "nutsaege_x", "art": "nutsaege_x", "d": null, "flaechen": ["F1"], "notiz": "Sägeblattbreite erfassen" },
-    { "id": "nutsaege_y", "art": "nutsaege_y", "d": null, "flaechen": ["F1"], "notiz": "Sägeblattbreite erfassen" },
-    { "id": "nutfraeser_8", "art": "nutfraeser", "d": 8, "flaechen": ["F1"] },
-    { "id": "gravur_v", "art": "graviermesser_v", "d": null, "flaechen": ["F1"] },
-    { "id": "gravur_rund", "art": "graviermesser_rund", "d": null, "flaechen": ["F1"] }
-  ],
-  "abbildung": {
-    "bohrung":       { "baustein": "<TPA Bohrung>" },
-    "bohrung_kante": { "baustein": "<TPA Horizontalbohrung>" },
-    "bohrreihe":     { "baustein": "<TPA Bohrreihe>", "aufloesen": false },
-    "nut":           { "baustein": "<TPA Nut>" },
-    "tasche":        { "baustein": "<TPA Tasche>" },
-    "kontur":        { "baustein": "<TPA Kontur>" },
-    "saegeschnitt":  { "baustein": "<TPA Nutsäge>" }
+  "flaechen": {
+    "F1": 1,
+    "F3": 3,
+    "F4": 5,
+    "F5": 6,
+    "F6": 4
   },
-  "sammelliste": { "format": "<offen>", "dateiname": "<offen>" },
-  "pruefungen": { "min_randabstand": 8, "min_restwand": 3, "kollision_toleranz": 0.1 }
+  "werkzeuge": [
+    {
+      "id": "bohrer_f1",
+      "art": "bohrer_durch",
+      "d": null,
+      "flaechen": [
+        "F1"
+      ],
+      "notiz": "Alle benötigten Durchmesser vorhanden; Liste erfassen",
+      "nummer": null
+    },
+    {
+      "id": "lochreihe_f1",
+      "art": "lochreihenbohrer",
+      "d": 5,
+      "flaechen": [
+        "F1"
+      ],
+      "notiz": "Durchmesser des Reihenbohrkopfs bestätigen",
+      "nummer": null
+    },
+    {
+      "id": "forstner_topf",
+      "art": "topfbohrer",
+      "d": 35,
+      "flaechen": [
+        "F1"
+      ],
+      "notiz": "Forstnerbohrer für Topfband; 35 mm angenommen",
+      "nummer": null
+    },
+    {
+      "id": "horizontal",
+      "art": "horizontalbohrer",
+      "d": null,
+      "flaechen": [
+        "F3",
+        "F4",
+        "F5",
+        "F6"
+      ],
+      "notiz": "Durchmesser erfassen",
+      "nummer": null
+    },
+    {
+      "id": "schlosskasten",
+      "art": "schlosskastenaggregat",
+      "d": null,
+      "flaechen": [
+        "F3",
+        "F4",
+        "F5",
+        "F6"
+      ],
+      "nummer": null
+    },
+    {
+      "id": "nutsaege_x",
+      "art": "nutsaege_x",
+      "d": null,
+      "flaechen": [
+        "F1"
+      ],
+      "notiz": "Sägeblattbreite erfassen",
+      "nummer": null
+    },
+    {
+      "id": "nutsaege_y",
+      "art": "nutsaege_y",
+      "d": null,
+      "flaechen": [
+        "F1"
+      ],
+      "notiz": "Sägeblattbreite erfassen",
+      "nummer": null
+    },
+    {
+      "id": "nutfraeser_8",
+      "art": "nutfraeser",
+      "d": 8,
+      "flaechen": [
+        "F1"
+      ],
+      "nummer": null,
+      "notiz": "Nutfräser 8 mm"
+    },
+    {
+      "id": "gravur_v",
+      "art": "graviermesser_v",
+      "d": null,
+      "flaechen": [
+        "F1"
+      ],
+      "nummer": null
+    },
+    {
+      "id": "gravur_rund",
+      "art": "graviermesser_rund",
+      "d": null,
+      "flaechen": [
+        "F1"
+      ],
+      "nummer": null
+    }
+  ],
+  "pruefungen": {
+    "min_randabstand": 8,
+    "min_restwand": 3,
+    "kollision_toleranz": 0.1
+  },
+  "tcn": {
+    "kopfzeile": "TPA\\ALBATROS\\EDICAD\\01.00",
+    "zeilenende": "crlf",
+    "bohrer_werkzeugtyp": 1,
+    "durchbohr_zugabe": 1
+  },
+  "wenden": {
+    "spiegeln": "y"
+  },
+  "bearbeitung_auf": "fertigmass"
 }

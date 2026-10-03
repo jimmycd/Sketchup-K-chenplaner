@@ -18,7 +18,10 @@ Siehe `docs/schritt1.md` für den Plan, was vorbereitet ist und was noch blockie
 | `catalog/rules/` | Konstruktionsregeln |
 | `catalog/hardware/`, `catalog/hardware_sets/` | Beschläge und Sets (Bohrbilder noch Platzhalter) |
 | `examples/` | Beispielprojekt |
+| `lib/kp/tcn/` | TCN-Exporter (TpaCAD Format 4) |
+| `test/` | Tests des Exporters (`ruby test/test_exporter.rb`) |
 | `tools/validate.py` | Prüft alle Daten gegen die Schemata |
+| `tools/export_tcn.rb` | Teil + Profil -> TCN-Dateien |
 
 ## Prüfen
 

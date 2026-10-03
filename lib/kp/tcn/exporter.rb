@@ -1,0 +1,299 @@
+# frozen_string_literal: true
+
+require 'json'
+
+module Kp
+  module Tcn
+    # Schreibt aus einem Teil (Schema 4, kp_part.data) TpaCAD-TCN-Dateien (Format 4).
+    # Reines Ruby ohne SketchUp-Abhängigkeit. Spezifikation: docs/tpacad_format4_spec.pdf
+    #
+    # Teil-System (Konzept): x = Länge, y = Breite, z = Dicke, Ursprung links vorne unten.
+    # TpaCAD-Stück: l = Länge, h = Breite, s = Dicke, gleiche Achsen und Ursprung.
+    class Exporter
+      Result = Struct.new(:files, :fehler, keyword_init: true)
+      File = Struct.new(:name, :content, keyword_init: true)
+
+      # Konzept-Fläche -> Kantenebene: [Achse entlang der Kante]
+      EDGE_ALONG = { 'F3' => :x, 'F4' => :x, 'F5' => :y, 'F6' => :y }.freeze
+
+      class Unsupported < StandardError; end
+
+      def initialize(profil)
+        @p = profil
+        @tcn = { 'kopfzeile' => 'TPA\\ALBATROS\\EDICAD\\01.00', 'zeilenende' => 'crlf',
+                 'bohrer_werkzeugtyp' => 1, 'saege_makro' => '..\\custom\\mcr\\lame.tmcr',
+                 'durchbohr_zugabe' => 1 }.merge(profil['tcn'] || {})
+      end
+
+      def export(teil)
+        fehler = []
+        ctx = build_context(teil)
+        setups = { 'A' => [], 'B' => [] } # A = Normallage, B = gewendet (F2 -> F1)
+        teil['bearbeitungen'].each do |op|
+          expand(op).each do |e|
+            target = e['flaeche'] == 'F2' ? 'B' : 'A'
+            begin
+              setups[target].concat(emit(e, ctx, target == 'B'))
+            rescue Unsupported, ArgumentError => err
+              fehler << "#{teil['uid']} #{e['id'] || e['typ']}: #{err.message}"
+            end
+          end
+        end
+        return Result.new(files: [], fehler: fehler) unless fehler.empty?
+
+        name = safe_name(teil['uid'])
+        files = []
+        files << render(teil, ctx, setups['A'], name) unless setups['A'].empty?
+        files << render(teil, ctx, setups['B'], "#{name}_B") unless setups['B'].empty?
+        Result.new(files: files, fehler: [])
+      end
+
+      # Versatz je Achse, wenn auf dem Rohteil (Zuschnittmaß) statt auf dem Fertigmaß bearbeitet wird.
+      def self.offset(fertig, zuschnitt)
+        { x: (zuschnitt['l'] - fertig['l']) / 2.0, y: (zuschnitt['w'] - fertig['w']) / 2.0 }
+      end
+
+      private
+
+      def build_context(teil)
+        f = teil['fertigmass']
+        z = teil['zuschnittmass']
+        rohteil = @p['bearbeitung_auf'] == 'zuschnittmass' && z
+        off = rohteil ? self.class.offset(f, z) : { x: 0.0, y: 0.0 }
+        { l: f['l'], w: f['w'], d: f['d'], off: off,
+          dl: rohteil ? z['l'] : f['l'], dh: rohteil ? z['w'] : f['w'], ds: f['d'] }
+      end
+
+      # Bohrreihe -> Einzelbohrungen (Maschine setzt Reihenbohrkopf selbst ein)
+      def expand(op)
+        return [op] unless op['typ'] == 'bohrreihe'
+
+        dx, dy = { '+x' => [1, 0], '-x' => [-1, 0], '+y' => [0, 1], '-y' => [0, -1] }.fetch(op['richtung'])
+        (0...op['anzahl']).map do |i|
+          { 'id' => "#{op['id']}.#{i + 1}", 'typ' => 'bohrung', 'flaeche' => op['flaeche'],
+            'x' => op['start'][0] + dx * i * op['raster'], 'y' => op['start'][1] + dy * i * op['raster'],
+            'd' => op['d'], 'tiefe' => op['tiefe'] }
+        end
+      end
+
+      def emit(op, ctx, gewendet)
+        case op['typ']
+        when 'bohrung' then drill(op, ctx, gewendet)
+        when 'nut' then groove(op, ctx, gewendet)
+        when 'kontur' then contour(op, ctx, gewendet)
+        else raise Unsupported, "Bearbeitung '#{op['typ']}' noch nicht implementiert"
+        end
+      end
+
+      # ---- Koordinaten --------------------------------------------------------
+
+      def tpa_face(flaeche, gewendet)
+        key = gewendet ? 'F1' : flaeche
+        n = @p['flaechen'][key]
+        raise Unsupported, "Fläche #{flaeche} ist an der Maschine nicht bearbeitbar" unless n
+
+        n
+      end
+
+      def plane_xy(x, y, ctx, gewendet)
+        y = ctx[:w] - y if gewendet && @p.dig('wenden', 'spiegeln') != 'x'
+        x = ctx[:l] - x if gewendet && @p.dig('wenden', 'spiegeln') == 'x'
+        [x + ctx[:off][:x], y + ctx[:off][:y]]
+      end
+
+      def check_inside(x, y, ctx, id)
+        tol = 1e-6
+        return if x.between?(-tol, ctx[:dl] + tol) && y.between?(-tol, ctx[:dh] + tol)
+
+        raise ArgumentError, "Position (#{fmt(x)}; #{fmt(y)}) liegt außerhalb des Teils"
+      end
+
+      def check_depth(tiefe, durch, limit, id)
+        return if durch
+
+        rest = @p.dig('pruefungen', 'min_restwand') || 0
+        return if tiefe <= limit - rest + 1e-6
+
+        raise ArgumentError, "Tiefe #{fmt(tiefe)} lässt weniger als #{fmt(rest)} mm Restwand"
+      end
+
+      # ---- Bohrung ------------------------------------------------------------
+
+      def drill(op, ctx, gewendet)
+        id = op['id'] || 'bohrung'
+        face = tpa_face(op['flaeche'], gewendet)
+        durch = op['durch'] == true
+        tiefe = op['tiefe'].to_f
+        if face == 1
+          check_depth(tiefe, durch, ctx[:d], id)
+          x, y = plane_xy(op['x'], op['y'], ctx, gewendet)
+          check_inside(x, y, ctx, id)
+          z = durch ? ctx[:d] + @tcn['durchbohr_zugabe'] : tiefe
+        else
+          along = EDGE_ALONG.fetch(op['flaeche'])
+          pos = op[along.to_s] || raise(ArgumentError, "Koordinate #{along} fehlt")
+          x = pos + ctx[:off][along]
+          y = op['z'] || ctx[:d] / 2.0
+          depth_axis = along == :x ? ctx[:w] : ctx[:l]
+          check_depth(tiefe, durch, depth_axis, id)
+          z = durch ? depth_axis + @tcn['durchbohr_zugabe'] : tiefe
+        end
+        [w("W#81{ ::WTp #1002=#{fmt(op['d'])} #1=#{fmt(x)} #2=#{fmt(y)} #3=#{fmt(-z)} " \
+           "#8015=0 #1001=#{@tcn['bohrer_werkzeugtyp']} }W", face)]
+      end
+
+      # ---- Nut ----------------------------------------------------------------
+
+      def groove(op, ctx, gewendet)
+        id = op['id'] || 'nut'
+        raise Unsupported, 'Nut nur auf F1 (F2 wird gewendet)' unless tpa_face(op['flaeche'], gewendet) == 1
+
+        vx, vy = op['von']
+        bx, by = op['bis']
+        raise Unsupported, 'Nut nur achsparallel' unless (vx - bx).abs < 1e-9 || (vy - by).abs < 1e-9
+
+        horizontal = (vy - by).abs < 1e-9
+        # Mittellinie aus Bezug (Nutseite links/rechts in Fahrtrichtung)
+        dirx = (bx - vx).zero? ? 0 : (bx - vx) <=> 0
+        diry = (by - vy).zero? ? 0 : (by - vy) <=> 0
+        shift = case op['bezug'] || 'mitte'
+                when 'links' then op['breite'] / 2.0
+                when 'rechts' then -op['breite'] / 2.0
+                else 0.0
+                end
+        cx = vx + (-diry) * shift
+        cy = vy + dirx * shift
+        ex = bx + (-diry) * shift
+        ey = by + dirx * shift
+        a = plane_xy(cx, cy, ctx, gewendet)
+        b = plane_xy(ex, ey, ctx, gewendet)
+        check_depth(op['tiefe'], false, ctx[:d], id)
+
+        saw = tool('nutsaege_x', 'nutsaege_y').find { |t| t['art'] == (horizontal ? 'nutsaege_x' : 'nutsaege_y') && t['nummer'] }
+        use_saw = saw && op['ausfuehrung'] != 'fraeser' && saw_width_ok?(saw, op['breite'])
+        raise Unsupported, 'Nut ausfuehrung=saege, aber keine passende Säge (nummer/d im Profil)' if op['ausfuehrung'] == 'saege' && !use_saw
+        return saw_cut(saw, horizontal, a, b, op, ctx) if use_saw
+
+        mill_groove(op, horizontal, a, b, id)
+      end
+
+      def tool(*arten)
+        (@p['werkzeuge'] || []).select { |t| arten.include?(t['art']) }
+      end
+
+      def saw_width_ok?(saw, breite)
+        saw['d'] && breite >= saw['d'] - 1e-6
+      end
+
+      def saw_cut(saw, horizontal, a, b, op, _ctx)
+        width = op['breite'] - saw['d'] > 1e-6 ? op['breite'] : 0
+        common = "#8098=#{@tcn['saege_makro']} #6=1 #8503=#{fmt(width)} #8504=subang"
+        tech = "#8514=1 #8515=1 #8516=#{saw['nummer']} #8525=0 #8526=0 #8527=0"
+        z = fmt(-op['tiefe'])
+        if horizontal
+          [w("W#1050{ ::WT2 #{common} #8509=0 #8510=#{fmt(a[0])} #8517=#{fmt(b[0])} #8511=#{fmt(a[1])} #8512=#{z} #{tech} }W")]
+        else
+          [w("W#1051{ ::WT2 #{common} #8509=1 #8510=#{fmt(a[0])} #8511=#{fmt(a[1])} #8518=#{fmt(b[1])} #8512=#{z} #{tech} }W")]
+        end
+      end
+
+      def mill_groove(op, horizontal, a, b, id)
+        mill = tool('nutfraeser', 'fraeser').find { |t| t['nummer'] && t['d'] && t['d'] <= op['breite'] + 1e-6 }
+        raise Unsupported, "weder Säge noch Fräser (nummer im Profil fehlt)" unless mill
+
+        extra = op['durchgehend'] == false ? 0 : mill['d'] / 2.0 + 1
+        passes = op['breite'] - mill['d'] > 1e-6 ? [-(op['breite'] - mill['d']) / 2.0, (op['breite'] - mill['d']) / 2.0] : [0.0]
+        out = []
+        passes.each_with_index do |off, i|
+          pa = a.dup
+          pb = b.dup
+          idx = horizontal ? 1 : 0
+          pa[idx] += off
+          pb[idx] += off
+          ax = horizontal ? 0 : 1
+          pa[ax] -= extra * (pb[ax] <=> a[ax]) if op['durchgehend'] != false
+          pb[ax] += extra * (pb[ax] <=> a[ax]) if op['durchgehend'] != false
+          pa, pb = pb, pa if i.odd?
+          out << mill_setup(mill, pa[0], pa[1], op['tiefe'])
+          out << w("W#2201{ ::WTl #1=#{fmt(pb[0])} #2=#{fmt(pb[1])} #3=#{fmt(-op['tiefe'])} }W")
+        end
+        out
+      end
+
+      def mill_setup(mill, x, y, tiefe, comp = 0)
+        w("W#89{ ::WTs #8015=0 #1=#{fmt(x)} #2=#{fmt(y)} #3=#{fmt(-tiefe)} #201=1 #203=1 " \
+          "#205=#{mill['nummer']} #1001=100 #40=#{comp} }W")
+      end
+
+      # ---- Kontur -------------------------------------------------------------
+
+      def contour(op, ctx, gewendet)
+        raise Unsupported, 'Kontur nur auf F1 (F2 wird gewendet)' unless tpa_face(op['flaeche'], gewendet) == 1
+
+        mill = tool('fraeser', 'nutfraeser').find { |t| t['nummer'] }
+        raise Unsupported, 'kein Fräser mit nummer im Profil' unless mill
+
+        pts = op['pfad'].map { |q| plane_xy(q['x'], q['y'], ctx, gewendet).then { |x, y| q.merge('x' => x, 'y' => y) } }
+        pts << pts.first.merge('bogen' => nil) if op['geschlossen']
+        comp = { 'links' => 1, 'rechts' => 2 }.fetch(op['korrektur'] || 'keine', 0)
+        out = [mill_setup(mill, pts[0]['x'], pts[0]['y'], op['tiefe'], comp)]
+        pts.each_cons(2) do |p0, p1|
+          if p1['bogen']
+            cx, cy = arc_center(p0, p1, p1['bogen']['r'], p1['bogen']['cw'])
+            out << w("W#2101{ ::WTa #1=#{fmt(p1['x'])} #2=#{fmt(p1['y'])} #3=#{fmt(-op['tiefe'])} " \
+                     "#31=#{fmt(cx - p0['x'])} #32=#{fmt(cy - p0['y'])} #34=#{p1['bogen']['cw'] ? 0 : 1} }W")
+          else
+            out << w("W#2201{ ::WTl #1=#{fmt(p1['x'])} #2=#{fmt(p1['y'])} #3=#{fmt(-op['tiefe'])} }W")
+          end
+        end
+        out
+      end
+
+      # Mittelpunkt eines Kreisbogens p0 -> p1 mit Radius r (cw = Uhrzeigersinn, kleiner Bogen)
+      def arc_center(p0, p1, r, cw)
+        dx = p1['x'] - p0['x']
+        dy = p1['y'] - p0['y']
+        len = Math.hypot(dx, dy)
+        raise ArgumentError, 'Bogenradius kleiner als halbe Sehne' if r < len / 2.0 - 1e-9
+
+        h = Math.sqrt([r * r - (len / 2.0)**2, 0].max)
+        mx = (p0['x'] + p1['x']) / 2.0
+        my = (p0['y'] + p1['y']) / 2.0
+        nx = -dy / len
+        ny = dx / len
+        sign = cw ? -1 : 1 # Zentrum links der Sehne bei Gegenuhrzeigersinn
+        [mx + sign * nx * h, my + sign * ny * h]
+      end
+
+      # ---- Ausgabe ------------------------------------------------------------
+
+      # Arbeitsgang als [TpaCAD-Fläche, Zeile]
+      def w(line, face = 1)
+        [face, line]
+      end
+
+      def render(teil, ctx, workings, name)
+        by_face = Hash.new { |h, k| h[k] = [] }
+        workings.each { |face, line| by_face[face] << line }
+        lines = [@tcn['kopfzeile'], "$=#{teil['bezeichnung'] || teil['uid']}",
+                 "::UNm DL=#{fmt(ctx[:dl])} DH=#{fmt(ctx[:dh])} DS=#{fmt(ctx[:ds])}"]
+        by_face.keys.sort.each do |f|
+          lines << "SIDE##{f}{"
+          lines.concat(by_face[f])
+          lines << '}SIDE'
+        end
+        eol = @tcn['zeilenende'] == 'lf' ? "\n" : "\r\n"
+        File.new(name: "#{name}.tcn", content: lines.join(eol) + eol)
+      end
+
+      def safe_name(uid)
+        uid.gsub(%r{[^A-Za-z0-9_.-]}, '_')
+      end
+
+      def fmt(v)
+        s = format('%.3f', v.to_f).sub(/0+\z/, '').sub(/\.\z/, '')
+        s == '-0' ? '0' : s
+      end
+    end
+  end
+end

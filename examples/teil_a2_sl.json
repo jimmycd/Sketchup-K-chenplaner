@@ -1,0 +1,20 @@
+{
+  "uid": "kueche_mueller_2026/A2/sl",
+  "pos": "A2",
+  "teil_id": "sl",
+  "rolle": "seite_l",
+  "bezeichnung": "A2 Seite links",
+  "material": "spano_weiss_19",
+  "fertigmass": { "l": 720, "w": 560, "d": 19 },
+  "maserung": "laenge",
+  "kanten": { "vorne": "abs_weiss_1", "hinten": null, "links": null, "rechts": null },
+  "sichtseite": "F2",
+  "wenden": true,
+  "bearbeitungen": [
+    { "id": "b1", "typ": "bohrung", "flaeche": "F1", "x": 9.5, "y": 34, "d": 8, "tiefe": 12 },
+    { "id": "lr1", "typ": "bohrreihe", "flaeche": "F1", "start": [83, 37], "richtung": "+x", "raster": 32, "anzahl": 18, "d": 5, "tiefe": 12 },
+    { "id": "n1", "typ": "nut", "flaeche": "F1", "von": [0, 520], "bis": [720, 520], "breite": 8, "tiefe": 10, "bezug": "links" },
+    { "id": "k1", "typ": "bohrung", "flaeche": "F5", "y": 34, "z": 9.5, "d": 8, "tiefe": 22 },
+    { "id": "w1", "typ": "bohrung", "flaeche": "F2", "x": 100, "y": 100, "d": 35, "tiefe": 12.5 }
+  ]
+}
