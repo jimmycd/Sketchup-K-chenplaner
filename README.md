@@ -18,10 +18,13 @@ Siehe `docs/schritt1.md` für den Plan, was vorbereitet ist und was noch blockie
 | `catalog/rules/` | Konstruktionsregeln |
 | `catalog/hardware/`, `catalog/hardware_sets/` | Beschläge und Sets (Bohrbilder noch Platzhalter) |
 | `examples/` | Beispielprojekt |
+| `lib/kp/` | Formel-Auswerter, Katalog-Lader (Vererbung), Generator (Projekt → Teile) |
 | `lib/kp/tcn/` | TCN-Exporter (TpaCAD Format 4) |
-| `test/` | Tests des Exporters (`ruby test/test_exporter.rb`) |
+| `plugin/` | SketchUp-Erweiterung (Gerüst, noch nicht in SketchUp getestet) |
+| `test/` | Tests: `for f in test/test_*.rb; do ruby $f; done` |
 | `tools/validate.py` | Prüft alle Daten gegen die Schemata |
 | `tools/export_tcn.rb` | Teil + Profil -> TCN-Dateien |
+| `tools/generate.rb` | Projekt -> Teile (JSON) und TCN, ohne SketchUp: `ruby tools/generate.rb examples/projekt_mueller.json zeile_a out/` |
 
 ## Prüfen
 

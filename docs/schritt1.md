@@ -113,6 +113,27 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
   Operatorliste des Konzepts (`+ - * / ( ) min max round floor ceil`, Vergleiche kommen nur in den Beispielen vor). Der
   Formel-Auswerter muss sie unterstützen.
 
+## Generator, Formel-Auswerter, Plugin (neu)
+
+- `lib/kp/formel.rb`: Formeln und Bedingungen (`B H T S SR L W D`, `P.…`, `V.…`, `min max round floor ceil`, `and or not`,
+  `== != < > <= >=`). 5 Tests.
+- `lib/kp/katalog.rb`: lädt Vorlagen/Regeln/Beschläge/Sets, löst Vererbung (`basis`) auf (Objekte tief mischen, Arrays ersetzen).
+- `lib/kp/generator.rb`: Projekt + Vorlage + Instanz → Teile nach Schema 4 (Maße, Material, Kanten und Kantenstärke,
+  Lochreihen aus `r_lochreihe`, Einlegeböden). `ruby tools/generate.rb examples/projekt_mueller.json zeile_a out/` erzeugt
+  für den Beispielschrank 7 Teile und die TCN-Dateien; die Teile erfüllen `teil.schema.json`. 9 Tests.
+  Bestätigt durch die Maschinendateien: Lochreihe der Seite liegt bei `#8518=35` (= 37 − 2 mm Anleimer vorne), genau wie in `Seite.tcn`.
+- Teilachsen sind rechtshändig (`y = z × x`). Das Konzept lässt das offen. Bei der linken Seite zeigt y deshalb nach vorne; der Generator
+  spiegelt dafür die y-Werte der Regeln (Regeln denken „y = Abstand von vorne"). Beide Seiten haben F1 innen.
+- `plugin/`: SketchUp-Erweiterung mit Menü *Plugins → Küchenplaner* (Projekt wählen, Küche generieren, TCN exportieren). Erzeugt je Teil
+  eine Komponentendefinition mit `kp_part.data`. **Nicht in SketchUp getestet**, nur Syntax geprüft.
+
+### Noch nicht umgesetzt
+
+- Verbindungsregeln (`r_seite_boden`): Kontakterkennung und echte Beschlag-Bohrbilder (Minifix usw.). Der Generator meldet eine Warnung.
+- Fronten (Türen, Schubkästen, Topfband-Verteilung), Typcode-Parser, Zeilen-Kurzform, Freitext.
+- Rotation der Zeile (`richtung_grad`), Fräsungen aus `aussparen`.
+- Einlegeboden-Maße sind Annahmen (`standards.einlegeboden`: Spiel 2 mm, Tiefe −20 mm, Rücksprung vorne 10 mm).
+
 ## Noch nicht begonnen (hängt an Antworten oder folgt als Code)
 
 1. Ruby-Gerüst des Plugins (Extension-Registrierung, Menü, eigenständig, OCL als Abhängigkeit)

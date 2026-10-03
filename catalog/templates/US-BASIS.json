@@ -48,7 +48,7 @@
       },
       "position": [
         0,
-        0,
+        "=V.tk",
         0
       ],
       "ausrichtung": {
@@ -68,13 +68,13 @@
         "breite": "=V.tk"
       },
       "position": [
-        "=B-S",
+        "=B",
         0,
         0
       ],
       "ausrichtung": {
         "x": "+z",
-        "z": "+x"
+        "z": "-x"
       },
       "kanten": {
         "vorne": "P.korpus.kante_sichtbar"
@@ -152,15 +152,15 @@
       },
       "position": [
         0,
-        "=V.tk",
+        "=V.tk+P.rueckwand.staerke",
         0
       ],
       "ausrichtung": {
         "x": "+x",
-        "z": "+y"
+        "z": "-y"
       },
       "maserung": "keine"
     }
   ],
-  "beschreibung": "Unterschrank-Korpus; Rückwand 8 mm aufgesetzt, in der Gesamttiefe T enthalten (Seiten/Boden/Traversen = T - Rückwandstärke)"
+  "beschreibung": "Unterschrank-Korpus; Rückwand 8 mm aufgesetzt, in der Gesamttiefe T enthalten (Seiten/Boden/Traversen = T - Rückwandstärke). Teilachsen rechtshändig (y = z × x): Seite links hat y nach vorne (Ursprung hinten), Seite rechts y nach hinten; F1 zeigt bei beiden Seiten in den Korpus."
 }
