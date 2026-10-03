@@ -43,6 +43,7 @@ module Kp
 
         name = safe_name(teil['uid'])
         files = []
+        setups['A'] = format_ops(teil) + setups['A']
         files << render(teil, ctx, setups['A'], name) unless setups['A'].empty?
         files << render(teil, ctx, setups['B'], "#{name}_B") unless setups['B'].empty?
         Result.new(files: files, fehler: [])
@@ -150,6 +151,24 @@ module Kp
            "#8015=0 #201=1 #203=1 #1001=#{@tcn['bohrer_werkzeugtyp']} }W", face)]
       end
 
+      # ---- Formatieren (Makro squad, W#1510) ----------------------------------------
+      # Parameter wie in den Maschinendateien (examples/tcn_referenz); Werkzeug-ID aus dem Profil.
+      FORMAT_DEFAULT = { 8500 => 50, 8501 => 50, 8503 => '-s-2', 8504 => 0, 8505 => 0, 8506 => 2, 8507 => 0,
+                         8508 => 0, 8509 => 0.5, 8510 => 0, 8511 => '-s+1', 8513 => 0, 8514 => 10 }.freeze
+
+      def format_ops(teil)
+        cfg = @p['formatieren']
+        return [] unless cfg && cfg['aktiv'] != false
+        return [] if (cfg['ausser_rollen'] || []).include?(teil['rolle'])
+        raise Unsupported, 'formatieren.werkzeug fehlt im Profil' unless cfg['werkzeug']
+
+        params = FORMAT_DEFAULT.merge(8502 => cfg['werkzeug'])
+        params[8503] = "-s-#{fmt(cfg['durchschnitt_zugabe'])}" if cfg['durchschnitt_zugabe']
+        params.merge!((cfg['parameter'] || {}).transform_keys(&:to_i))
+        list = params.sort.map { |k, v| "##{k}=#{v.is_a?(Numeric) ? fmt(v) : v}" }.join(' ')
+        [w("W#1510{ ::WT2 #8098=#{@tcn['makro_pfad'] || '..\\custom\\mcr\\'}squad.tmcr #{list} }W", 1)]
+      end
+
       # ---- Bohrreihe -> Makro fittingx (W#1001) / fittingy (W#1003) --------------
       # Parameter abgeleitet aus den Beispieldateien, siehe docs/tpa_makros.md
       def drill_row(op, ctx, gewendet)
@@ -247,11 +266,11 @@ module Kp
       end
 
       def saw_width_ok?(saw, breite)
-        saw['d'] && breite >= saw['d'] - 1e-6
+        saw['d'].nil? || breite >= saw['d'] - 1e-6
       end
 
       def saw_cut(saw, horizontal, a, b, op, _ctx)
-        width = op['breite'] - saw['d'] > 1e-6 ? op['breite'] : 0
+        width = saw['d'].nil? || op['breite'] - saw['d'] > 1e-6 ? op['breite'] : 0
         common = "#8098=#{@tcn['saege_makro']} #6=1 #8503=#{fmt(width)} #8504=subang"
         tech = "#8514=1 #8515=1 #8516=#{saw['nummer']} #8525=0 #8526=0 #8527=0"
         z = fmt(-op['tiefe'])

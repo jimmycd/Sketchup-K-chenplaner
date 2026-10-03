@@ -82,8 +82,8 @@ class TestExporter < Minitest::Test
 
   def test_f2_goes_to_second_setup_mirrored
     r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F2', 'x' => 100, 'y' => 100, 'd' => 35, 'tiefe' => 12.5 }])
-    assert_equal ['p_A1_t_B.tcn'], r.files.map(&:name)
-    assert_includes lines(r.files[0]), 'W#81{ ::WTp #1002=35 #1=100 #2=460 #3=-12.5 #8015=0 #201=1 #203=1 #1001=0 }W'
+    assert_equal ['p_A1_t.tcn', 'p_A1_t_B.tcn'], r.files.map(&:name) # A nur Formatieren, B = gewendet
+    assert_includes lines(r.files.last), 'W#81{ ::WTp #1002=35 #1=100 #2=460 #3=-12.5 #8015=0 #201=1 #203=1 #1001=0 }W'
   end
 
   def test_through_hole_depth
@@ -125,7 +125,9 @@ class TestExporter < Minitest::Test
   end
 
   def test_missing_tool_reports_error_and_writes_nothing
-    r = Kp::Tcn::Exporter.new(JSON.parse(File.read(File.join(ROOT, 'examples/profile/werkstatt.tcnprofil.json'))))
+    prof = JSON.parse(File.read(File.join(ROOT, 'examples/profile/werkstatt.tcnprofil.json')))
+    prof['werkzeuge'].each { |t| t['nummer'] = nil }
+    r = Kp::Tcn::Exporter.new(prof)
                          .export(teil([{ 'id' => 'n', 'typ' => 'nut', 'flaeche' => 'F1', 'von' => [0, 1], 'bis' => [9, 1],
                                          'breite' => 8, 'tiefe' => 5 }]))
     assert_empty r.files
@@ -167,7 +169,7 @@ class TestExporter < Minitest::Test
     r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F2', 'x' => 100, 'y' => 100, 'd' => 35, 'tiefe' => 12.5 }], profil,
                'kantenstaerke' => { 'vorne' => 2, 'hinten' => 2 })
     # gespiegelt y' = 560 - 100 = 460, dann minus Anleimer hinten (jetzt vorne) = 458
-    assert_includes lines(r.files[0]), 'W#81{ ::WTp #1002=35 #1=100 #2=458 #3=-12.5 #8015=0 #201=1 #203=1 #1001=0 }W'
+    assert_includes lines(r.files.last), 'W#81{ ::WTp #1002=35 #1=100 #2=458 #3=-12.5 #8015=0 #201=1 #203=1 #1001=0 }W'
   end
 
   # Zeilen aus examples/tcn_referenz/T_rR.tcn und Boden.tcn werden über das Makro-Durchgriff exakt erzeugt
@@ -187,6 +189,22 @@ class TestExporter < Minitest::Test
     sides = ->(a) { a.grep(/\ASIDE#|\A\}SIDE/) }
     assert_equal sides.call(ref), sides.call(l)
     assert_equal ref[ref.index('EXE{')..ref.index('}LINK')], l[l.index('EXE{')..l.index('}LINK')]
+  end
+
+  def test_formatieren_first_op_matches_reference
+    prof = profil('formatieren' => { 'aktiv' => true, 'werkzeug' => 1037 })
+    r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F1', 'x' => 10, 'y' => 10, 'd' => 5, 'tiefe' => 5 }], prof)
+    l = lines(r.files[0])
+    ref = File.read(File.join(ROOT, 'examples/tcn_referenz/Seite.tcn')).split("\r\n").grep(/W#1510/)[0]
+    expected = ref.sub(/ WS=\d+ W\$=forma /, ' ').sub('#8502=1000', '#8502=1037').squeeze(' ')
+    got = l.grep(/W#1510/)[0].squeeze(' ')
+    assert_equal expected, got
+    assert l.index(l.grep(/W#1510/)[0]) < l.index(l.grep(/W#81/)[0])
+  end
+
+  def test_formatieren_creates_file_even_without_other_ops
+    r = export([], profil('formatieren' => { 'aktiv' => true, 'werkzeug' => 1037 }))
+    assert_equal 1, r.files.size
   end
 
   def test_contour_arc

@@ -176,6 +176,40 @@
           "description": "Drehachse: y = um die Längsachse wenden, y' = W - y"
         }
       }
+    },
+    "formatieren": {
+      "type": "object",
+      "description": "Formatieren (Makro squad, W#1510) als erste Bearbeitung jeder Datei",
+      "required": [
+        "werkzeug"
+      ],
+      "properties": {
+        "aktiv": {
+          "type": "boolean",
+          "default": true
+        },
+        "werkzeug": {
+          "type": "integer",
+          "description": "Werkzeug-ID (#8502)"
+        },
+        "durchschnitt_zugabe": {
+          "type": "number",
+          "description": "Tiefe unter Teildicke, Standard 2 (#8503 = -s-2)"
+        },
+        "ausser_rollen": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/rolle"
+          }
+        },
+        "parameter": {
+          "type": "object",
+          "description": "Überschreibt einzelne #-Parameter, Schlüssel z. B. '8514'",
+          "propertyNames": {
+            "pattern": "^[0-9]+$"
+          }
+        }
+      }
     }
   }
 }

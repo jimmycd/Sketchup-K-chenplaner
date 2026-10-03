@@ -60,6 +60,7 @@ Tests: `ruby test/test_exporter.rb` (12 Tests).
 | `nut` achsparallel auf F1 | Säge X `W#1050` / Säge Y `W#1051` (Breite > Blatt: `#8503`); sonst Nutfräser, 2 Bahnen bei Breite > Fräser | fertig, ungetestet an Maschine |
 | `kontur` | `W#89 ::WTs` + `W#2201` Linie, `W#2101` Bogen, Fräserkorrektur `#40` | fertig, ungetestet an Maschine |
 | `tasche`, `saegeschnitt` | – | meldet „noch nicht implementiert" |
+| Formatieren | `W#1510` Makro `squad`, erste Bearbeitung jeder Datei (Profil `formatieren`, Werkzeug 1037) | fertig; Werkzeug-ID 1037 als `#8502` angenommen |
 
 Prüfungen vor dem Schreiben: Position im Teil, Restwand (`pruefungen.min_restwand`), Werkzeug im Profil vorhanden.
 Teile mit Fehlern werden nicht geschrieben, die Fehlerliste nennt Teil und Bearbeitung.
@@ -92,9 +93,7 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
 
 ## Noch offen
 
-- **Werkzeugnummern** (TpaCAD-Nummer von Nutsäge X, Nutsäge Y, Nutfräser 8 mm, ggf. weiteren Fräsern) in
-  `examples/profile/werkstatt.tcnprofil.json` (`nummer`, bei Sägen auch Blattbreite `d`). Ohne sie bricht der
-  Export von Nuten mit Meldung ab. Alle anderen Durchmesser sind laut dir vorhanden, Bohrungen brauchen keine Nummer.
+- **Nutwerkzeuge:** Nummern sind eingetragen (Säge X 1161, Säge Y 1162, Nutfräser 8 mm 2200). Die Sägeblattbreite ist unbekannt; solange `d` fehlt, gibt der Exporter die Nutbreite an die Säge (`#8503`) und bevorzugt die Säge vor dem Fräser. Welche Nuten sollen mit Säge, welche mit Fräser laufen?
 - **Beschläge:** später, die Entwurfswerte in `catalog/hardware/` bleiben bis dahin ungeprüft.
 - **Fragen zu den Beispielen:** (2) `squad` = Formatieren (laut Handbuch): soll es in jede Datei, und mit welchen Werten? (4) Bedeutung von `#8508`/`#8509`/`#8517`/`#8520`/`#8521`, falls es eine Makrodoku gibt. (5) Nuten: Beispiel mit Säge oder Fräser?
 - Anleimerlogik ist geklärt (siehe oben). Offen: ob die Kantenseiten der Seitenteile (Seite: oben und unten je 2 mm?) so stimmen und wie der Generator die OCL-Kanten pro Teil in `kantenstaerke` übersetzt.

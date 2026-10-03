@@ -74,7 +74,7 @@
         "F1"
       ],
       "notiz": "Sägeblattbreite erfassen",
-      "nummer": null
+      "nummer": 1161
     },
     {
       "id": "nutsaege_y",
@@ -84,7 +84,7 @@
         "F1"
       ],
       "notiz": "Sägeblattbreite erfassen",
-      "nummer": null
+      "nummer": 1162
     },
     {
       "id": "nutfraeser_8",
@@ -93,8 +93,8 @@
       "flaechen": [
         "F1"
       ],
-      "nummer": null,
-      "notiz": "Nutfräser 8 mm"
+      "nummer": 2200,
+      "notiz": "Nutfräser 8 mm, Nr. 2200"
     },
     {
       "id": "gravur_v",
@@ -129,5 +129,10 @@
   },
   "wenden": {
     "spiegeln": "y"
+  },
+  "formatieren": {
+    "aktiv": true,
+    "werkzeug": 1037,
+    "ausser_rollen": []
   }
 }
