@@ -70,8 +70,8 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
 - **Bohrung `W#81`:** `#201=1 #203=1 #1001=0` (statt `#1001=1`), wie in `Seite.tcn`.
 - **Makros:** Die Werkstatt arbeitet mit Makros: `fittingx`/`fittingy` (`W#1001`/`W#1003`, Bohrreihen und verteilte
   Bohrungen, z. B. `#8512=150` mit `#8508=1` = gleichmäßig mit max. 150 mm Abstand, `#8518` = Querposition,
-  `#8522` = Durchmesser, `#8513` = Tiefe), `inge100` (`W#1506`, Topfband: Ø35, Tiefe 8, Position `#8507`/`#8508`)
-  und `squad` (`W#1510`, steht in jeder Datei außer der Tür; sieht nach Formatieren/Besäumen aus).
+  `#8522` = Durchmesser, `#8513` = Tiefe), `inge100` (`W#1506`, Topfband: Ø35, Nebenlöcher Ø8, Position `#8507`/`#8508`)
+  und `squad` (`W#1510` = Formatieren/Besäumen, steht in jeder Datei außer der Tür). Die Parameterzuordnung steht in `docs/tpa_makros.md`.
   Neu: Bearbeitungstyp **`makro`** (Schema 4 und Beschlag-Bohrbild) reicht Nummer, Makroname und Parameter 1:1
   durch; ein Test erzeugt die `T_rR`-Zeile damit exakt. So können Beschläge (Topfband, Verbinderreihe) später
   direkt auf eure Makros zeigen, ohne dass ich deren Bedeutung raten muss.
@@ -93,7 +93,7 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
   `examples/profile/werkstatt.tcnprofil.json` (`nummer`, bei Sägen auch Blattbreite `d`). Ohne sie bricht der
   Export von Nuten mit Meldung ab. Alle anderen Durchmesser sind laut dir vorhanden, Bohrungen brauchen keine Nummer.
 - **Beschläge:** später, die Entwurfswerte in `catalog/hardware/` bleiben bis dahin ungeprüft.
-- **Fragen zu den Beispielen:** (1) Sind die Maße im Kopf Fertig- oder Zuschnittmaß (Kanten)? (2) Was macht `squad` genau, und soll es in jede Datei? (3) Sollen Bohrreihen und Dübelreihen künftig über `fittingx`/`fittingy` ausgegeben werden statt als Einzelbohrungen? (4) Bedeutung von `#8508`/`#8509`/`#8517`/`#8520`/`#8521`, falls es eine Makrodoku gibt. (5) Nuten: Beispiel mit Säge oder Fräser?
+- **Fragen zu den Beispielen:** (1) Sind die Maße im Kopf Fertig- oder Zuschnittmaß (Kanten)? (2) `squad` = Formatieren (laut Handbuch): soll es in jede Datei, und mit welchen Werten? (3) Sollen Bohrreihen und Dübelreihen künftig über `fittingx`/`fittingy` ausgegeben werden statt als Einzelbohrungen? (4) Bedeutung von `#8508`/`#8509`/`#8517`/`#8520`/`#8521`, falls es eine Makrodoku gibt. (5) Nuten: Beispiel mit Säge oder Fräser?
 - Annahme `/2` beim Fräsoffset und `bearbeitung_auf` bestätigen.
 
 ## Noch nicht begonnen (hängt an Antworten oder folgt als Code)
