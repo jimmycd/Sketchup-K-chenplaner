@@ -60,7 +60,7 @@ Tests: `ruby test/test_exporter.rb` (12 Tests).
 | `nut` achsparallel auf F1 | Säge X `W#1050` / Säge Y `W#1051` (Breite > Blatt: `#8503`); sonst Nutfräser, 2 Bahnen bei Breite > Fräser | fertig, ungetestet an Maschine |
 | `kontur` | `W#89 ::WTs` + `W#2201` Linie, `W#2101` Bogen, Fräserkorrektur `#40` | fertig, ungetestet an Maschine |
 | `tasche`, `saegeschnitt` | – | meldet „noch nicht implementiert" |
-| Formatieren | `W#1510` Makro `squad`, erste Bearbeitung jeder Datei (Profil `formatieren`, Werkzeug 1037) | fertig; Werkzeug-ID 1037 als `#8502` angenommen |
+| Formatieren | `W#1510` Makro `squad`, erste Bearbeitung jeder Datei (Profil `formatieren`), Fräser 1300 (Wendeplattenfräser) als `#8502` | fertig; offen: Makro g1037 vs. `squad` |
 
 Prüfungen vor dem Schreiben: Position im Teil, Restwand (`pruefungen.min_restwand`), Werkzeug im Profil vorhanden.
 Teile mit Fehlern werden nicht geschrieben, die Fehlerliste nennt Teil und Bearbeitung.
@@ -93,10 +93,25 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
 
 ## Noch offen
 
-- **Nutwerkzeuge:** Nummern sind eingetragen (Säge X 1161, Säge Y 1162, Nutfräser 8 mm 2200). Die Sägeblattbreite ist unbekannt; solange `d` fehlt, gibt der Exporter die Nutbreite an die Säge (`#8503`) und bevorzugt die Säge vor dem Fräser. Welche Nuten sollen mit Säge, welche mit Fräser laufen?
+- **Formatiermakro:** Du nennst es g1037, die Beispieldateien verwenden `squad.tmcr` (`W#1510`). Sind das zwei verschiedene Makros? Falls ja, welche Parameter hat g1037? (Profil: `formatieren.nummer`, `formatieren.datei`.)
 - **Beschläge:** später, die Entwurfswerte in `catalog/hardware/` bleiben bis dahin ungeprüft.
 - **Fragen zu den Beispielen:** (2) `squad` = Formatieren (laut Handbuch): soll es in jede Datei, und mit welchen Werten? (4) Bedeutung von `#8508`/`#8509`/`#8517`/`#8520`/`#8521`, falls es eine Makrodoku gibt. (5) Nuten: Beispiel mit Säge oder Fräser?
 - Anleimerlogik ist geklärt (siehe oben). Offen: ob die Kantenseiten der Seitenteile (Seite: oben und unten je 2 mm?) so stimmen und wie der Generator die OCL-Kanten pro Teil in `kantenstaerke` übersetzt.
+
+## Festlegungen aus der Konstruktion (Stand jetzt)
+
+- **Rückwand beim Unterschrank: 8 mm aufgesetzt, keine Nut.** Projektstandard `rueckwand.art = aufgesetzt`.
+  `US-BASIS` enthält dafür `rw_aufgesetzt` (B × H, 8 mm HDF, hinter dem Korpus bei `y = T`) und `th_auf`
+  (hintere Traverse bündig, `y = T − 100`). Die genutete Variante (`rw_genutet`, `th`) bleibt per Bedingung im Katalog,
+  ist aber ausgeschaltet; die Regel `r_rueckwand_nut` greift dann nicht. Die hintere Lochreihe bezieht sich bei
+  aufgesetzter Rückwand auf die Hinterkante (`W − Abstand`). **Annahme:** Die Gesamttiefe ist Korpustiefe `T` plus
+  8 mm Rückwand. Falls die Rückwand in der Tiefe 560 enthalten sein soll, müssen die Seiten um 8 mm kürzer werden.
+- **Sägen:** Beide Nutsägen haben 4 mm Blattbreite. Breitere Nuten gibt der Exporter als `#8503` (Nutbreite) an die Säge;
+  die Säge hat Vorrang vor dem Fräser. Der Fräser 2200 (8 mm) bleibt für `ausfuehrung = fraeser`.
+- **Formatieren:** In jeder Datei, Fräser 1300.
+- **Hinweis Formelsprache:** Die Bedingungen in Vorlage und Regel nutzen jetzt `and`, `==` und `!=`. Diese stehen nicht in der
+  Operatorliste des Konzepts (`+ - * / ( ) min max round floor ceil`, Vergleiche kommen nur in den Beispielen vor). Der
+  Formel-Auswerter muss sie unterstützen.
 
 ## Noch nicht begonnen (hängt an Antworten oder folgt als Code)
 
