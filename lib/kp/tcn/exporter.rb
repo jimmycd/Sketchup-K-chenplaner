@@ -48,20 +48,35 @@ module Kp
         Result.new(files: files, fehler: [])
       end
 
-      # Versatz je Achse, wenn auf dem Rohteil (Zuschnittmaß) statt auf dem Fertigmaß bearbeitet wird.
-      def self.offset(fertig, zuschnitt)
-        { x: (zuschnitt['l'] - fertig['l']) / 2.0, y: (zuschnitt['w'] - fertig['w']) / 2.0 }
-      end
-
       private
 
+      EDGE_BAND = { 'F3' => :vorne, 'F4' => :hinten, 'F5' => :links, 'F6' => :rechts }.freeze
+
+      # Kopfmaße der TCN-Datei = Fräsmaß = Fertigmaß minus Anleimer (teil['kantenstaerke'] je Seite).
+      # Koordinaten der Bearbeitungen sind Fertigmaß-Koordinaten und werden um links/vorne verschoben.
       def build_context(teil)
         f = teil['fertigmass']
-        z = teil['zuschnittmass']
-        rohteil = @p['bearbeitung_auf'] == 'zuschnittmass' && z
-        off = rohteil ? self.class.offset(f, z) : { x: 0.0, y: 0.0 }
-        { l: f['l'], w: f['w'], d: f['d'], off: off,
-          dl: rohteil ? z['l'] : f['l'], dh: rohteil ? z['w'] : f['w'], ds: f['d'] }
+        kb = teil['kantenstaerke'] || {}
+        band = %i[vorne hinten links rechts].to_h { |k| [k, (kb[k.to_s] || 0).to_f] }
+        { l: f['l'], w: f['w'], d: f['d'], band: band,
+          dl: f['l'] - band[:links] - band[:rechts], dh: f['w'] - band[:vorne] - band[:hinten], ds: f['d'] }
+      end
+
+      # Koordinate entlang der Kantenfläche (Fertigmaß) -> Fräsmaß
+      def edge_along(flaeche, pos, ctx)
+        pos - (EDGE_ALONG.fetch(flaeche) == :x ? ctx[:band][:links] : ctx[:band][:vorne])
+      end
+
+      def edge_depth_axis(flaeche, ctx)
+        EDGE_ALONG.fetch(flaeche) == :x ? ctx[:dh] : ctx[:dl]
+      end
+
+      # Tiefe ab Rohkante: Anleimer der bearbeiteten Kante zählt zur Fertigtiefe
+      def edge_depth(flaeche, tiefe, ctx, id)
+        eff = tiefe - ctx[:band][EDGE_BAND.fetch(flaeche)]
+        raise ArgumentError, "Tiefe #{fmt(tiefe)} nicht größer als Anleimer #{fmt(ctx[:band][EDGE_BAND[flaeche]])}" if eff <= 0
+
+        eff
       end
 
       def emit(op, ctx, gewendet)
@@ -88,7 +103,9 @@ module Kp
       def plane_xy(x, y, ctx, gewendet)
         y = ctx[:w] - y if gewendet && @p.dig('wenden', 'spiegeln') != 'x'
         x = ctx[:l] - x if gewendet && @p.dig('wenden', 'spiegeln') == 'x'
-        [x + ctx[:off][:x], y + ctx[:off][:y]]
+        spiegel_x = gewendet && @p.dig('wenden', 'spiegeln') == 'x'
+        [x - (spiegel_x ? ctx[:band][:rechts] : ctx[:band][:links]),
+         y - (gewendet && !spiegel_x ? ctx[:band][:hinten] : ctx[:band][:vorne])]
       end
 
       def check_inside(x, y, ctx, id)
@@ -122,9 +139,10 @@ module Kp
         else
           along = EDGE_ALONG.fetch(op['flaeche'])
           pos = op[along.to_s] || raise(ArgumentError, "Koordinate #{along} fehlt")
-          x = pos + ctx[:off][along]
+          x = edge_along(op['flaeche'], pos, ctx)
           y = op['z'] || ctx[:d] / 2.0
-          depth_axis = along == :x ? ctx[:w] : ctx[:l]
+          depth_axis = edge_depth_axis(op['flaeche'], ctx)
+          tiefe = edge_depth(op['flaeche'], tiefe, ctx, id) unless durch
           check_depth(tiefe, durch, depth_axis, id)
           z = durch ? depth_axis + @tcn['durchbohr_zugabe'] : tiefe
         end
@@ -138,7 +156,9 @@ module Kp
         id = op['id'] || 'bohrreihe'
         face = tpa_face(op['flaeche'], gewendet)
         durch = op['durch'] == true
-        check_depth(op['tiefe'].to_f, durch, face == 1 ? ctx[:d] : [ctx[:w], ctx[:l]].min, id)
+        row_depth = op['tiefe'].to_f
+        row_depth = edge_depth(op['flaeche'], row_depth, ctx, id) if face != 1 && !durch
+        check_depth(row_depth, durch, face == 1 ? ctx[:d] : edge_depth_axis(op['flaeche'], ctx), id)
         richtung = op['richtung']
         along_x = %w[+x -x].include?(richtung)
         raise Unsupported, 'Bohrreihe auf Kantenfläche nur in Richtung x der Fläche' if face != 1 && !along_x
@@ -165,10 +185,10 @@ module Kp
           lo, hi = [a, b].map { |q| along_x ? q[0] : q[1] }.minmax
           cross = along_x ? a[1] : a[0]
         else
-          lo, hi = [sx + ctx[:off][:x], ex + ctx[:off][:x]].minmax
+          lo, hi = [edge_along(op['flaeche'], sx, ctx), edge_along(op['flaeche'], ex, ctx)].minmax
           cross = sy
         end
-        tiefe = durch ? (face == 1 ? ctx[:d] : [ctx[:w], ctx[:l]].min) + @tcn['durchbohr_zugabe'] : op['tiefe']
+        tiefe = durch ? (face == 1 ? ctx[:d] : edge_depth_axis(op['flaeche'], ctx)) + @tcn['durchbohr_zugabe'] : row_depth
         p = { 8510 => lo, 8511 => hi, 8512 => op['raster'], 8513 => -tiefe, 8518 => cross, 8522 => op['d'] }
         flags = "#8508=#{ausgemittelt ? 1 : 0} #8509=#{ausgemittelt && op['gerade_anzahl'] ? 1 : 0}"
         nr, datei = along_x ? [1001, 'fittingx'] : [1003, 'fittingy']

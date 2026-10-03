@@ -139,14 +139,35 @@ class TestExporter < Minitest::Test
     assert_empty r.files
   end
 
-  def test_offset_to_zuschnittmass
-    assert_equal({ x: 1.0, y: 1.0 }, Kp::Tcn::Exporter.offset({ 'l' => 720, 'w' => 560 }, { 'l' => 722, 'w' => 562 }))
-    prof = profil('bearbeitung_auf' => 'zuschnittmass')
-    r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F1', 'x' => 10, 'y' => 10, 'd' => 5, 'tiefe' => 5 }], prof,
-               'zuschnittmass' => { 'l' => 722, 'w' => 562, 'd' => 19 })
+  # Kopfmaß = Fräsmaß = Fertigmaß - Anleimer; Koordinaten verschieben sich um Anleimer links/vorne
+  def test_head_is_fraesmass_and_coordinates_shift
+    band = { 'kantenstaerke' => { 'vorne' => 2, 'links' => 2, 'rechts' => 2 } }
+    r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F1', 'x' => 10, 'y' => 10, 'd' => 5, 'tiefe' => 5 }], profil, band)
     l = lines(r.files[0])
-    assert_equal '::UNm DL=722 DH=562 DS=19', l[2]
-    assert_includes l, 'W#81{ ::WTp #1002=5 #1=11 #2=11 #3=-5 #8015=0 #201=1 #203=1 #1001=0 }W'
+    assert_equal '::UNm DL=716 DH=558 DS=19', l[2] # wie Seite.tcn bei Fertigmaß 720 x 560
+    assert_includes l, 'W#81{ ::WTp #1002=5 #1=8 #2=8 #3=-5 #8015=0 #201=1 #203=1 #1001=0 }W'
+  end
+
+  def test_back_edge_reduces_size_without_shift
+    r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F1', 'x' => 10, 'y' => 10, 'd' => 5, 'tiefe' => 5 }], profil,
+               'kantenstaerke' => { 'hinten' => 2 })
+    l = lines(r.files[0])
+    assert_equal '::UNm DL=720 DH=558 DS=19', l[2]
+    assert_includes l, 'W#81{ ::WTp #1002=5 #1=10 #2=10 #3=-5 #8015=0 #201=1 #203=1 #1001=0 }W'
+  end
+
+  def test_edge_hole_subtracts_band_of_that_edge
+    # F5 = linke Kante (Anleimer links 2): Tiefe 22 -> 20; Position entlang y verschiebt um Anleimer vorne
+    r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F5', 'y' => 34, 'z' => 9.5, 'd' => 8, 'tiefe' => 22 }], profil,
+               'kantenstaerke' => { 'links' => 2, 'vorne' => 2 })
+    assert_includes lines(r.files[0]), 'W#81{ ::WTp #1002=8 #1=32 #2=9.5 #3=-20 #8015=0 #201=1 #203=1 #1001=0 }W'
+  end
+
+  def test_wenden_uses_back_band_for_shift
+    r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F2', 'x' => 100, 'y' => 100, 'd' => 35, 'tiefe' => 12.5 }], profil,
+               'kantenstaerke' => { 'vorne' => 2, 'hinten' => 2 })
+    # gespiegelt y' = 560 - 100 = 460, dann minus Anleimer hinten (jetzt vorne) = 458
+    assert_includes lines(r.files[0]), 'W#81{ ::WTp #1002=35 #1=100 #2=458 #3=-12.5 #8015=0 #201=1 #203=1 #1001=0 }W'
   end
 
   # Zeilen aus examples/tcn_referenz/T_rR.tcn und Boden.tcn werden über das Makro-Durchgriff exakt erzeugt

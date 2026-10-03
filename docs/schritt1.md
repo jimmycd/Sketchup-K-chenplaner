@@ -21,7 +21,7 @@ Maschine läuft. Quelle: `docs/konzept.pdf` (Roadmap Punkt 1).
 | 3b | Beschläge: später | Entwürfe bleiben ungeprüft |
 | 4 | Unterschrank: Seiten durchgehend. Oberschrank: mit Deckel (aufgesetzt) | `bauweise` je Kategorie nötig, siehe unten |
 | 5 | Eigenständiges Plugin, nutzt OCL; TCN-Export direkt, ohne DXF- oder OCL-Export | Exporter liest `kp_part` direkt |
-| 6 | OCL zieht Kanten nicht ab; Fräsoffset aus Zuschnittmaß minus Fertigmaß | siehe „Fräsoffset" |
+| 6 | OCL zieht Kanten nicht ab; Fräsmaß = Fertigmaß − Anleimer (2 mm sichtbare Kanten) | siehe „Fertigmaß, Fräsmaß und Anleimer" |
 | 7 | Katalog zunächst im Plugin, später Netzlaufwerk | Katalogpfade bleiben konfigurierbar (`kataloge` im Projekt) |
 
 ### Folgen für das Datenmodell
@@ -36,11 +36,16 @@ Maschine läuft. Quelle: `docs/konzept.pdf` (Roadmap Punkt 1).
   Dicke `z` (gemessen von F2, Default Mitte). Das war im Konzept nicht eindeutig festgelegt.
 - **Bauweise je Kategorie.** Unterschrank `seiten_durchgehend`, Oberschrank mit aufgesetztem Deckel
   (`seiten_durchgehend_deckel_aufgesetzt`). `HS-BASIS` folgt in Roadmap-Punkt 4.
-- **Fräsoffset.** OCL liefert das Zuschnittmaß ohne Kantenabzug. Profilschalter `bearbeitung_auf`:
-  `fertigmass` (Standard, Bearbeitung nach dem Kantenanleimen) oder `zuschnittmass` (Rohteil, Koordinaten werden um
-  `(Zuschnitt − Fertig)/2` je Achse verschoben, Kopfmaße = Zuschnittmaß). Gerechnet wird symmetrisch, wie von dir
-  beschrieben; bei Kante nur auf einer Seite ist das eine Näherung. **Bitte bestätigen:** „/7" in der Nachricht
-  habe ich als „/2" gelesen.
+- **Fertigmaß, Fräsmaß und Anleimer (bestätigt).** SketchUp arbeitet mit dem Fertigmaß (inkl. Anleimer, sichtbare
+  Kanten 2 mm). Die Kopfmaße `DL/DH/DS` der TCN-Datei sind das **Fräsmaß = Fertigmaß − Anleimer**; OpenCutList zieht
+  die Kanten nicht ab. Im Teil (Schema 4) steht dafür `kantenstaerke` je Seite (`vorne`, `hinten`, `links`, `rechts`
+  in mm, vom Generator aus den OCL-Kanten aufgelöst). Der Exporter rechnet:
+  `DL = L − links − rechts`, `DH = W − vorne − hinten`; alle Koordinaten verschieben sich um Anleimer links (x) und
+  vorne (y), bei gewendeten Teilen um die Gegenseite. Auf einer beklebten Kantenfläche (F3–F6) wird die Tiefe um deren
+  Anleimer verringert. Die Rechnung ist je Kante exakt, nicht symmetrisch „/2" (bei Kante nur vorne ist die Verschiebung
+  2 mm, nicht 1 mm). Das Beispiel stimmt mit den Maschinendateien: `Boden` Fertig 862 × 560, Kante vorne 2 → 862 × 558;
+  `Seite` Fertig 720 × 560, Kanten vorne und je an beiden Enden 2 → 716 × 558.
+  Die frühere Profiloption `bearbeitung_auf` ist entfernt.
 
 ## TCN-Export (implementiert)
 
@@ -75,9 +80,7 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
   Neu: Bearbeitungstyp **`makro`** (Schema 4 und Beschlag-Bohrbild) reicht Nummer, Makroname und Parameter 1:1
   durch; ein Test erzeugt die `T_rR`-Zeile damit exakt. So können Beschläge (Topfband, Verbinderreihe) später
   direkt auf eure Makros zeigen, ohne dass ich deren Bedeutung raten muss.
-- **Maße im Kopf:** `Boden` 862 × 558, `Seite` 716 × 558, `Strebe` 562 × 100. 862 und 562 entsprechen Innenbreite
-  (B − 2·19); 558 ist 2 mm weniger als die Tiefe 560. Ob das Fertig- oder Zuschnittmaß ist, kann ich daraus nicht sicher
-  ablesen (siehe Fragen).
+- **Maße im Kopf:** `Boden` 862 × 558, `Seite` 716 × 558, `Strebe` 562 × 100 sind Fräsmaße (Fertigmaß minus 2 mm Anleimer).
 
 ### Weitere Auffälligkeiten der Spezifikation
 
@@ -93,8 +96,8 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
   `examples/profile/werkstatt.tcnprofil.json` (`nummer`, bei Sägen auch Blattbreite `d`). Ohne sie bricht der
   Export von Nuten mit Meldung ab. Alle anderen Durchmesser sind laut dir vorhanden, Bohrungen brauchen keine Nummer.
 - **Beschläge:** später, die Entwurfswerte in `catalog/hardware/` bleiben bis dahin ungeprüft.
-- **Fragen zu den Beispielen:** (1) Kopfmaße sind Fertigmaße (beantwortet). (2) `squad` = Formatieren (laut Handbuch): soll es in jede Datei, und mit welchen Werten? (4) Bedeutung von `#8508`/`#8509`/`#8517`/`#8520`/`#8521`, falls es eine Makrodoku gibt. (5) Nuten: Beispiel mit Säge oder Fräser?
-- Fräsoffset `/2` ist bestätigt. `DL/DH/DS` im Kopf sind Fertigmaße (bestätigt), das Profil bleibt bei `bearbeitung_auf: fertigmass`. Offen: wo der Offset `(Zuschnitt − Fräsmaß)/2` dann gebraucht wird (vermutlich beim Formatieren/`squad` oder bei Fräsungen am Rand) und woher die 558 mm Tiefe kommen.
+- **Fragen zu den Beispielen:** (2) `squad` = Formatieren (laut Handbuch): soll es in jede Datei, und mit welchen Werten? (4) Bedeutung von `#8508`/`#8509`/`#8517`/`#8520`/`#8521`, falls es eine Makrodoku gibt. (5) Nuten: Beispiel mit Säge oder Fräser?
+- Anleimerlogik ist geklärt (siehe oben). Offen: ob die Kantenseiten der Seitenteile (Seite: oben und unten je 2 mm?) so stimmen und wie der Generator die OCL-Kanten pro Teil in `kantenstaerke` übersetzt.
 
 ## Noch nicht begonnen (hängt an Antworten oder folgt als Code)
 

@@ -56,7 +56,7 @@ Handbuch-Felder: A Eingangsbogen, OA Ausgangsbogen, T Werkzeug, Z Startpunkt, D 
 ED Versatz Eingangsbewegung, SS Ausführung in zwei Fräsungen, FSS, MSS. Abgeleitet aus den Beispielen
 (`#8500=50 #8501=50 #8502=1000 #8503=-s-2 … #8509=0.5 #8511=-s+1 #8514=10`): 8500/8501 = Ein-/Ausgangsbogen 50,
 8503 = Z bis 2 mm durch das Teil. Die Zuordnung der übrigen Nummern ist unklar. Die Formatierung deutet darauf hin, dass
-die Maschine das Teil aus einem größeren Rohling besäumt; ob die Kopfmaße Fertig- oder Zuschnittmaß sind, ist offen.
+die Maschine das Teil aus einem größeren Rohling besäumt. Die Kopfmaße der Datei sind das Fräsmaß (Fertigmaß minus Anleimer).
 
 ## Weitere Funktionen im Handbuch (noch keine `#`-Zuordnung, keine Beispieldatei)
 

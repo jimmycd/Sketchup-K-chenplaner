@@ -35,7 +35,7 @@
     },
     "fertigmass": {
       "$ref": "#/$defs/mass3",
-      "description": "L x W x D inkl. Kanten"
+      "description": "L x W x D inkl. Anleimer (Konstruktionsmaß in SketchUp)"
     },
     "zuschnittmass": {
       "$ref": "#/$defs/mass3",
@@ -90,6 +90,17 @@
           "type": "string",
           "description": "Prüfsumme der Eingaben, erkennt manuelle Änderungen"
         }
+      }
+    },
+    "kantenstaerke": {
+      "type": "object",
+      "description": "Aufgelöste Anleimerstärke je Seite in mm (0 oder fehlend = keine Kante). Der TCN-Export zieht sie vom Fertigmaß ab: Fräsmaß = Fertigmaß − Anleimer",
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/kantenseite"
+      },
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0
       }
     }
   },

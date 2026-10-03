@@ -176,14 +176,6 @@
           "description": "Drehachse: y = um die Längsachse wenden, y' = W - y"
         }
       }
-    },
-    "bearbeitung_auf": {
-      "enum": [
-        "fertigmass",
-        "zuschnittmass"
-      ],
-      "default": "fertigmass",
-      "description": "zuschnittmass: Rohteil wird vor dem Kantenanleimen bearbeitet; Koordinaten werden um (Zuschnitt - Fertig)/2 verschoben"
     }
   }
 }
