@@ -222,7 +222,7 @@ class TestSchubkasten < Minitest::Test
       ops = teil(id)['bearbeitungen']
       refute(ops.any? { |o| o['typ'] == 'bohrreihe' }, 'Lochreihe entfällt bei Schubladenschrank (wie Seiten_SK)')
       schienen = ops.select { |o| o['id'].to_s.start_with?('schiene1') }
-      assert_equal 5, schienen.size
+      assert_equal 4, schienen.size # NL 500, 40 kg: 0, 32, 224, 256
       assert_equal [57.0], schienen.map { |o| o['x'] }.uniq # Frontunterkante 1,5 + 55,5
     end
   end
@@ -241,5 +241,55 @@ class TestSchubkasten < Minitest::Test
     ref_y = ref.map { |l| numeric(l[/#2=(\S+)/, 1], 551) }.sort
     assert_equal ref_y.first(4), ys.first(4) # 35, 67, 259, 291
     assert_equal 355.0, ys.last # Beispieldatei: 35-32+192+32+64 = 291 (vermutlich Tippfehler statt 355 = 37 + 320 - 2)
+  end
+
+  def test_three_drawers_reproduce_reference_rail_heights
+    # Fronten 292 / 179 / 292 (zusammen mit 2 x 3 mm Fuge = H - 3): Schienen bei x = 55, 350, 532 wie in Seiten_SK_L.tcn
+    res = @gen.schrank('pos' => 'A3', 'vorlage' => 'US-S3', 'breite' => 600, 'hoehe' => 772, 'tiefe' => 561,
+                       'overrides' => { 'front.felder.0.anteil' => 292, 'front.felder.1.anteil' => 179, 'front.felder.2.anteil' => 292 })
+    fronten = res.teile.select { |t| t['rolle'] == 'front_schublade' }.map { |t| t['fertigmass']['w'] }
+    assert_equal [292.0, 179.0, 292.0], fronten
+    sr = res.teile.find { |t| t['teil_id'] == 'sr' }
+    out = Kp::Tcn::Exporter.new(@profil).export(sr).files.first.content.split("\r\n").grep(/#1002=5 #1=\S+ #2=\S+ #3=-14 /)
+    assert_equal [55.0, 350.0, 532.0], out.map { |l| l[/#1=(\S+)/, 1].to_f }.uniq.sort
+    assert_equal 15, out.size # NL 550: 5 Löcher je Schiene
+  end
+
+  def test_front_fastening_matches_reference
+    # Front 600 x 232 -> Fräsmaß 596 x 228 wie SK_Vorderstueck_Frontbef.tcn
+    res = @gen.schrank('pos' => 'A4', 'vorlage' => 'US-S2', 'breite' => 603, 'hoehe' => 235,
+                       'overrides' => { 'front.felder' => [{ 'art' => 'schublade', 'anteil' => 1 }] })
+    f = res.teile.find { |t| t['rolle'] == 'front_schublade' }
+    assert_equal({ 'l' => 600.0, 'w' => 232.0, 'd' => 19.0 }, f['fertigmass'])
+    out = Kp::Tcn::Exporter.new(@profil).export(f).files.first.content.split("\r\n")
+    assert_includes out, '::UNm DL=596 DH=228 DS=19'
+    holes = out.grep(/#1002=3 /).map { |l| [l[/#1=(\S+)/, 1].to_f, l[/#2=(\S+)/, 1].to_f, l[/#3=(\S+)/, 1].to_f, l[/#205=(\S+)/, 1].to_f] }
+    ref = File.read(File.join(ROOT, 'examples/tcn_referenz/SK_Vorderstueck_Frontbef.tcn')).split("\r\n").grep(/W#81/).map do |l|
+      v = ->(k) { numeric_ref(l[/##{k}=(\S+)/, 1], 596) }
+      [v.call(1), v.call(2), -5.0, v.call(205)] # erste Beispielzeile hat -2 (vermutlich Tippfehler)
+    end
+    assert_equal ref.sort, holes.sort
+  end
+
+  def numeric_ref(ausdruck, x)
+    Kp::Formel.auswerten("=#{ausdruck.tr(',', '.').gsub('x', x.to_s)}", { vars: {} })
+  end
+
+  def test_70kg_table_and_class
+    @projekt['standards']['schubkasten']['last'] = 70
+    gen = Kp::Generator.new(@projekt, Kp::Katalog.new(File.join(ROOT, 'catalog')))
+    res = gen.schrank('pos' => 'A5', 'vorlage' => 'US-S2', 'breite' => 600, 'tiefe' => 700)
+    sr = res.teile.find { |t| t['teil_id'] == 'sr' }
+    # NL = floor((700 - 8 - 3) / 50) * 50 = 650: 6 Löcher je Schiene
+    assert_equal 6, sr['bearbeitungen'].count { |o| o['id'].to_s.start_with?('schiene1') }
+  end
+
+  def test_griff_marks_on_drawer_front_near_top
+    @projekt['standards']['front']['griff'] = 'griff'
+    gen = Kp::Generator.new(@projekt, Kp::Katalog.new(File.join(ROOT, 'catalog')))
+    f = gen.schrank('pos' => 'A6', 'vorlage' => 'US-S2', 'breite' => 600).teile.find { |t| t['teil_id'] == 'sk2f' }
+    marks = f['bearbeitungen'].select { |o| o['tiefe'] == 3 }
+    assert_equal 2, marks.size
+    assert_equal f['fertigmass']['w'] - 37, marks[0]['y'] # 37 mm unter der Oberkante
   end
 end

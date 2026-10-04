@@ -210,18 +210,26 @@ module Kp
         'kantenstaerke' => KANTEN.to_h { |k| [k, staerke] },
         'sichtseite' => 'F2', 'wenden' => false, 'bearbeitungen' => [],
         'herkunft' => { 'vorlage' => tmpl['code'], 'generator_version' => VERSION },
-        'lage' => { 'position' => [x0, -dicke, z0 + hoehe], 'ausrichtung' => { 'x' => '+x', 'z' => '+y' } }
+        # y nach oben (Ursprung unten), x von rechts nach links
+        'lage' => { 'position' => [x0 + breite, -dicke, z0], 'ausrichtung' => { 'x' => '-x', 'z' => '+y' } }
       }
-      warn << "Schubladenfront #{nr}: Frontbefestigung (Blum-Bohrbild) und Griff noch nicht umgesetzt"
+      fctx = teil_ctx(ctx, breite, hoehe, dicke)
+      fctx = fctx.merge(vars: fctx[:vars].merge(kantenvariablen(front)))
+      set = @katalog.beschlagset(@std['beschlag_set'])['zuordnung']
+      griff_ops(front, fctx, set, @std['front']['griff'], warn, von_oben: true)
       return [front] unless cfg['material']
 
       hw = @katalog.beschlag('blum_legrabox_free') or (warn << 'Beschlag blum_legrabox_free fehlt' and return [front])
       params = hw['parameter'].to_h { |k, p| [k, p['default']] }
+      beschlag_bohrbild(hw, 'sk_front', front, fctx, params, "sk#{nr}f")
       s = ctx[:vars]['S']
       tk = ctx['V']['tk'] || ctx[:vars]['T']
       lw = ctx['V']['innen_b'] || (ctx[:vars]['B'] - 2 * s)
       nl = cfg['nl'] || (((tk - 3) / 50).floor * 50)
-      warn << "Schubkasten NL #{nl}: Bohrbild der Seite nur für NL 400-500 (40 kg) belegt" unless (400..500).cover?(nl)
+      last = (cfg['last'] || 40).to_s
+      klasse = nl_klasse(hw['schienenbilder'][last], nl)
+      versaetze = hw['schienenbilder'][last][klasse || hw['schienenbilder'][last].keys.first]
+      warn << "Schubkasten NL #{nl} bei #{last} kg nicht in der Blum-Tabelle, Bohrbild der Seite nur genähert" unless klasse
       bmat = material("P.schubkasten.material")
       boden = {
         'uid' => "#{@projekt['id']}/#{pos}/sk#{nr}b", 'pos' => pos, 'teil_id' => "sk#{nr}b", 'rolle' => 'sk_boden',
@@ -239,9 +247,19 @@ module Kp
       teile.select { |t| %w[seite_l seite_r].include?(t['rolle']) }.each do |seite|
         sctx = teil_ctx(ctx, seite['fertigmass']['l'], seite['fertigmass']['w'], seite['fertigmass']['d'])
         sctx = sctx.merge(vars: sctx[:vars].merge(kantenvariablen(seite)))
-        beschlag_bohrbild(hw, 'seite', seite, sctx, params.merge('x' => x_schiene), "schiene#{nr}")
+        versaetze.each_with_index do |v, i|
+          beschlag_bohrbild(hw, 'seite', seite, sctx, params.merge('x' => x_schiene, 'versatz' => v), "schiene#{nr}.#{i + 1}")
+        end
       end
       [front, boden]
+    end
+
+    # Klasse "350", "400-500" usw. aus den Schlüsseln der Tabelle, in die die Nennlänge fällt
+    def nl_klasse(tabelle, nl)
+      tabelle.keys.find do |k|
+        von, bis = k.split('-').map(&:to_i)
+        nl.between?(von, bis || von)
+      end
     end
 
     def beschlag_id(set, funktion, ctx)
@@ -272,13 +290,15 @@ module Kp
       end
     end
 
-    def griff_ops(teil, pctx, set, griff, warn)
+    def griff_ops(teil, pctx, set, griff, warn, von_oben: false)
       return if griff.nil? || griff == 'grifflos'
 
       id = set[griff] || griff
       hw = @katalog.beschlag(id) or return warn << "Griff #{id} nicht im Katalog"
       params = (hw['parameter'] || {}).to_h { |k, p| [k, p['default']] }
       pctx = pctx.merge('V' => params.transform_values { |x| Formel.auswerten(x, pctx) })
+      # Schubladenfront: Griff nahe der Oberkante (y von unten = Höhe - Kante)
+      pctx['V']['kante'] = teil['fertigmass']['w'] - pctx['V']['kante'] if von_oben
       beschlag_bohrbild(hw, 'front_tuer', teil, pctx, pctx['V'], 'griff')
     end
 

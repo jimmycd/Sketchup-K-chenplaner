@@ -401,6 +401,14 @@
               "type": "number",
               "default": 35,
               "description": "Boden Breite = lichte Weite - Abzug (Blum: LW - 35)"
+            },
+            "last": {
+              "enum": [
+                40,
+                70
+              ],
+              "default": 40,
+              "description": "Tragfähigkeit in kg (bestimmt das Bohrbild der Seite)"
             }
           }
         }
