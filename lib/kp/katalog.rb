@@ -40,6 +40,11 @@ module Kp
       @beschlaege[id]
     end
 
+    # Rohe (nicht aufgelöste) Vorlagen, z. B. für Auswahllisten im Editor
+    def vorlagen
+      @vorlagen.values
+    end
+
     def beschlagset(id)
       set = @sets[id] or raise Fehler, "Beschlag-Set #{id} nicht gefunden"
       return set unless set['basis']

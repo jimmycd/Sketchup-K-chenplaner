@@ -20,6 +20,7 @@ Siehe `docs/schritt1.md` für den Plan, was vorbereitet ist und was noch blockie
 | `examples/` | Beispielprojekt |
 | `lib/kp/` | Formel-Auswerter, Katalog-Lader (Vererbung), Generator (Projekt → Teile) |
 | `lib/kp/tcn/` | TCN-Exporter (TpaCAD Format 4) |
+| `lib/kp/editor/`, `plugin/kp_kuechenplaner/editor/` | Editor-Dialog für Projekt und Katalog (Logik, Schema-Prüfer, Oberfläche) |
 | `plugin/`, `dev/` | SketchUp-Erweiterung, Dev-Lader (siehe `docs/plugin.md`) |
 | `dist/` | installierbares Paket `.rbz` |
 | `test/` | Tests: `for f in test/test_*.rb; do ruby $f; done` |
