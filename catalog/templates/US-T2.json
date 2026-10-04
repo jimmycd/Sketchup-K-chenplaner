@@ -1,0 +1,31 @@
+{
+  "code": "US-T2",
+  "basis": "US-BASIS",
+  "name": "Unterschrank, Doppeltür, 1 Einlegeboden",
+  "kategorie": "unterschrank",
+  "suchbegriffe": [
+    "doppeltür",
+    "2 türen",
+    "zwei türen",
+    "einlegeboden"
+  ],
+  "einbauten": [
+    {
+      "art": "einlegeboden",
+      "anzahl": 1,
+      "verteilung": "gleichmaessig",
+      "beschlag": "set:bodentraeger"
+    }
+  ],
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "tuer_doppelt",
+        "anteil": 1,
+        "beschlag": "topfband"
+      }
+    ]
+  }
+}

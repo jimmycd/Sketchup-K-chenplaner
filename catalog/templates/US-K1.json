@@ -1,0 +1,24 @@
+{
+  "code": "US-K1",
+  "basis": "US-BASIS",
+  "name": "Unterschrank, Klappe oben (Aventos)",
+  "kategorie": "unterschrank",
+  "suchbegriffe": [
+    "klappe",
+    "aventos",
+    "lift",
+    "klappenschrank"
+  ],
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "klappe_oben",
+        "anteil": 1,
+        "anschlag": "oben",
+        "beschlag": "klappenbeschlag"
+      }
+    ]
+  }
+}
