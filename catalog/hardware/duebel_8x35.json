@@ -1,0 +1,18 @@
+{
+  "id": "duebel_8x35",
+  "hersteller": "Häfele",
+  "bezeichnung": "Holzdübel 8 x 35 (Bohrbild in Regeln und Projektstandards: verbindung.duebel)",
+  "kategorie": "duebel",
+  "artikelnummern": [
+    {
+      "artnr": "<artnr>",
+      "menge": 1
+    }
+  ],
+  "bohrbilder": [],
+  "geprueft": {
+    "von": null,
+    "am": null,
+    "quelle": "Bohrbild liegt in den Regeln r_seite_duebel_schraube u. a.; Maße aus Seiten_.tcn"
+  }
+}

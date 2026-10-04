@@ -3,65 +3,222 @@
   "$id": "kp/tcnprofil.schema.json",
   "title": "TCN-Exporter-Profil",
   "type": "object",
-  "required": ["id", "flaechen", "abbildung"],
+  "required": [
+    "id",
+    "flaechen"
+  ],
   "properties": {
-    "id": { "type": "string" },
-    "maschine": { "type": "string" },
-    "vorlage_kopf": { "type": "string", "description": "Pfad zur TCN-Kopfvorlage mit Platzhaltern {L} {W} {D} {NAME}" },
+    "id": {
+      "type": "string"
+    },
+    "maschine": {
+      "type": "string"
+    },
     "flaechen": {
-      "description": "F1..F6 -> Flächennummer der Maschine",
+      "description": "Konzept-Fläche F1..F6 -> TpaCAD-Flächennummer (1 oben, 2 unten, 3 vorne, 4 rechts, 5 hinten, 6 links). Fehlende Fläche = nicht bearbeitbar",
       "type": "object",
-      "propertyNames": { "$ref": "common.schema.json#/$defs/flaeche" },
-      "additionalProperties": { "type": "integer" }
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/flaeche"
+      },
+      "additionalProperties": {
+        "type": "integer"
+      }
     },
     "ursprung": {
       "type": "object",
       "properties": {
-        "ecke": { "enum": ["links_vorne", "links_hinten", "rechts_vorne", "rechts_hinten"] },
-        "x_spiegeln": { "type": "boolean" },
-        "y_spiegeln": { "type": "boolean" }
+        "ecke": {
+          "enum": [
+            "links_vorne",
+            "links_hinten",
+            "rechts_vorne",
+            "rechts_hinten"
+          ]
+        },
+        "x_spiegeln": {
+          "type": "boolean"
+        },
+        "y_spiegeln": {
+          "type": "boolean"
+        }
       }
     },
     "werkzeuge": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "art", "d"],
+        "required": [
+          "id",
+          "art"
+        ],
         "properties": {
-          "id": { "type": "string" },
-          "art": { "enum": ["bohrer_durch", "bohrer_flach", "topfbohrer", "fraeser", "saege"] },
-          "d": { "type": "number" },
-          "max_tiefe": { "type": "number" },
-          "flaechen": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/flaeche" } }
+          "id": {
+            "type": "string"
+          },
+          "art": {
+            "enum": [
+              "bohrer_durch",
+              "bohrer_flach",
+              "topfbohrer",
+              "lochreihenbohrer",
+              "horizontalbohrer",
+              "fraeser",
+              "nutfraeser",
+              "graviermesser_v",
+              "graviermesser_rund",
+              "saege",
+              "nutsaege_x",
+              "nutsaege_y",
+              "schlosskastenaggregat"
+            ]
+          },
+          "d": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Durchmesser bzw. Sägeblattbreite; null = unbekannt"
+          },
+          "max_tiefe": {
+            "type": "number"
+          },
+          "flaechen": {
+            "type": "array",
+            "items": {
+              "$ref": "common.schema.json#/$defs/flaeche"
+            }
+          },
+          "notiz": {
+            "type": "string"
+          },
+          "nummer": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Werkzeugnummer in TpaCAD (#205 bzw. #8516); null = noch zu erfassen"
+          }
         }
-      }
-    },
-    "abbildung": {
-      "description": "Bearbeitungstyp -> TCN-Baustein (Vorlagenzeilen mit Platzhaltern aus csv2tcn)",
-      "type": "object",
-      "propertyNames": { "enum": ["bohrung", "bohrung_kante", "bohrreihe", "nut", "tasche", "kontur", "saegeschnitt"] },
-      "additionalProperties": {
-        "type": "object",
-        "required": ["baustein"],
-        "properties": {
-          "baustein": { "type": "string" },
-          "aufloesen": { "type": "boolean", "description": "z. B. Bohrreihe in Einzelbohrungen zerlegen, wenn die Maschine keine Reihe kennt" }
-        }
-      }
-    },
-    "sammelliste": {
-      "type": "object",
-      "properties": {
-        "format": { "type": "string", "description": "z. B. XMLST wie in csv2tcn" },
-        "dateiname": { "type": "string" }
       }
     },
     "pruefungen": {
       "type": "object",
       "properties": {
-        "min_randabstand": { "type": "number" },
-        "min_restwand": { "type": "number", "description": "Mindestmaterial unter Sackbohrung" },
-        "kollision_toleranz": { "type": "number" }
+        "min_randabstand": {
+          "type": "number"
+        },
+        "min_restwand": {
+          "type": "number",
+          "description": "Mindestmaterial unter Sackbohrung"
+        },
+        "kollision_toleranz": {
+          "type": "number"
+        }
+      }
+    },
+    "steuerung": {
+      "type": "string",
+      "description": "Steuerungssoftware, z. B. TpaCAD"
+    },
+    "achsen": {
+      "type": "integer"
+    },
+    "tcn": {
+      "type": "object",
+      "description": "Dateiformat TpaCAD TCN",
+      "properties": {
+        "kopfzeile": {
+          "type": "string",
+          "default": "TPA\\ALBATROS\\EDICAD\\02.00:1224:r0w0h0s1"
+        },
+        "zeilenende": {
+          "enum": [
+            "crlf",
+            "lf"
+          ],
+          "default": "crlf"
+        },
+        "bohrer_werkzeugtyp": {
+          "type": "integer",
+          "default": 0,
+          "description": "#1001 bei Bohrung nach Durchmesser"
+        },
+        "saege_makro": {
+          "type": "string",
+          "default": "..\\custom\\mcr\\lame.tmcr",
+          "description": "#8098 bei Säge X/Y"
+        },
+        "durchbohr_zugabe": {
+          "type": "number",
+          "default": 2,
+          "description": "Zusätzliche Tiefe bei Durchgangsbohrung"
+        },
+        "tcn_version": {
+          "type": "string",
+          "default": "2.6.14"
+        },
+        "makro_pfad": {
+          "type": "string",
+          "default": "..\\custom\\mcr\\"
+        }
+      }
+    },
+    "wenden": {
+      "type": "object",
+      "description": "Zweite Aufspannung für Bearbeitungen auf F2 (nicht bearbeitbar)",
+      "properties": {
+        "spiegeln": {
+          "enum": [
+            "x",
+            "y"
+          ],
+          "default": "y",
+          "description": "Drehachse: y = um die Längsachse wenden, y' = W - y"
+        }
+      }
+    },
+    "formatieren": {
+      "type": "object",
+      "description": "Formatieren (Makro squad, W#1510) als erste Bearbeitung jeder Datei",
+      "required": [
+        "werkzeug"
+      ],
+      "properties": {
+        "aktiv": {
+          "type": "boolean",
+          "default": true
+        },
+        "werkzeug": {
+          "type": "integer",
+          "description": "Werkzeug-ID des Formatierfräsers (#8502), z. B. 1300"
+        },
+        "durchschnitt_zugabe": {
+          "type": "number",
+          "description": "Tiefe unter Teildicke, Standard 2 (#8503 = -s-2)"
+        },
+        "ausser_rollen": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/rolle"
+          }
+        },
+        "parameter": {
+          "type": "object",
+          "description": "Überschreibt einzelne #-Parameter, Schlüssel z. B. '8514'",
+          "propertyNames": {
+            "pattern": "^[0-9]+$"
+          }
+        },
+        "nummer": {
+          "type": "integer",
+          "default": 1510,
+          "description": "W#-Nummer des Formatiermakros"
+        },
+        "datei": {
+          "type": "string",
+          "default": "squad",
+          "description": "Makroname ohne .tmcr"
+        }
       }
     }
   }

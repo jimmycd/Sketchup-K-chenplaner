@@ -1,0 +1,150 @@
+{
+  "id": "werkstatt",
+  "maschine": "Profit H200",
+  "steuerung": "TpaCAD (Format 4, TPACAD 4.0)",
+  "achsen": 4,
+  "flaechen": {
+    "F1": 1,
+    "F3": 3,
+    "F4": 5,
+    "F5": 6,
+    "F6": 4
+  },
+  "werkzeuge": [
+    {
+      "id": "bohrer_f1",
+      "art": "bohrer_durch",
+      "d": null,
+      "flaechen": [
+        "F1"
+      ],
+      "notiz": "Alle benötigten Durchmesser vorhanden; Liste erfassen",
+      "nummer": null
+    },
+    {
+      "id": "lochreihe_f1",
+      "art": "lochreihenbohrer",
+      "d": 5,
+      "flaechen": [
+        "F1"
+      ],
+      "notiz": "Durchmesser des Reihenbohrkopfs bestätigen",
+      "nummer": null
+    },
+    {
+      "id": "forstner_topf",
+      "art": "topfbohrer",
+      "d": 35,
+      "flaechen": [
+        "F1"
+      ],
+      "notiz": "Forstnerbohrer für Topfband; 35 mm angenommen",
+      "nummer": null
+    },
+    {
+      "id": "horizontal",
+      "art": "horizontalbohrer",
+      "d": null,
+      "flaechen": [
+        "F3",
+        "F4",
+        "F5",
+        "F6"
+      ],
+      "notiz": "Durchmesser erfassen",
+      "nummer": null
+    },
+    {
+      "id": "schlosskasten",
+      "art": "schlosskastenaggregat",
+      "d": null,
+      "flaechen": [
+        "F3",
+        "F4",
+        "F5",
+        "F6"
+      ],
+      "nummer": null
+    },
+    {
+      "id": "nutsaege_x",
+      "art": "nutsaege_x",
+      "d": 4,
+      "flaechen": [
+        "F1"
+      ],
+      "notiz": "Sägeblattbreite 4 mm",
+      "nummer": 1161
+    },
+    {
+      "id": "nutsaege_y",
+      "art": "nutsaege_y",
+      "d": 4,
+      "flaechen": [
+        "F1"
+      ],
+      "notiz": "Sägeblattbreite 4 mm",
+      "nummer": 1162
+    },
+    {
+      "id": "nutfraeser_8",
+      "art": "nutfraeser",
+      "d": 8,
+      "flaechen": [
+        "F1"
+      ],
+      "nummer": 2200,
+      "notiz": "Nutfräser 8 mm, Nr. 2200"
+    },
+    {
+      "id": "gravur_v",
+      "art": "graviermesser_v",
+      "d": null,
+      "flaechen": [
+        "F1"
+      ],
+      "nummer": null
+    },
+    {
+      "id": "gravur_rund",
+      "art": "graviermesser_rund",
+      "d": null,
+      "flaechen": [
+        "F1"
+      ],
+      "nummer": null
+    },
+    {
+      "id": "formatierfraeser",
+      "art": "fraeser",
+      "d": null,
+      "nummer": 1300,
+      "flaechen": [
+        "F1"
+      ],
+      "notiz": "Wendeplattenfräser zum Formatieren"
+    }
+  ],
+  "pruefungen": {
+    "min_randabstand": 8,
+    "min_restwand": 3,
+    "kollision_toleranz": 0.1
+  },
+  "tcn": {
+    "kopfzeile": "TPA\\ALBATROS\\EDICAD\\02.00:1224:r0w0h0s1",
+    "tcn_version": "2.6.14",
+    "zeilenende": "crlf",
+    "bohrer_werkzeugtyp": 0,
+    "durchbohr_zugabe": 2
+  },
+  "wenden": {
+    "spiegeln": "y"
+  },
+  "formatieren": {
+    "aktiv": true,
+    "nummer": 1510,
+    "datei": "squad",
+    "werkzeug": 1300,
+    "ausser_rollen": []
+  }
+}

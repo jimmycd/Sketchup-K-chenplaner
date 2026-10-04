@@ -5,6 +5,7 @@ Aufruf: python3 tools/validate.py            (alles prüfen)
         pip install jsonschema referencing    (Voraussetzung)
 """
 import json
+import pathlib
 import sys
 from pathlib import Path
 
@@ -38,6 +39,32 @@ def build_registry():
     return registry
 
 
+def pruefe_generierte_teile(registry):
+    """Erzeugt mit dem Generator (Ruby) die Teile des Beispielprojekts und prüft sie gegen teil.schema.json."""
+    import shutil
+    import subprocess
+    import tempfile
+
+    if shutil.which("ruby") is None:
+        print("Hinweis: ruby nicht gefunden, generierte Teile werden nicht geprüft")
+        return 0
+    fehler = 0
+    validator = Draft202012Validator(load(SCHEMAS / "teil.schema.json"), registry=registry)
+    with tempfile.TemporaryDirectory() as tmp:
+        r = subprocess.run(["ruby", str(ROOT / "tools" / "generate.rb"), str(ROOT / "examples" / "projekt_mueller.json"), "-", tmp],
+                           capture_output=True, text=True)
+        if r.returncode != 0:
+            print("FEHLER Generator:", r.stderr[-300:])
+            return 1
+        for datei in sorted(pathlib.Path(tmp).glob("*.json")):
+            for err in validator.iter_errors(load(datei)):
+                fehler += 1
+                loc = "/".join(map(str, err.absolute_path)) or "(Wurzel)"
+                print(f"FEHLER generiertes Teil {datei.name} [{loc}]: {err.message[:150]}")
+        print(f"{len(list(pathlib.Path(tmp).glob('*.json')))} generierte Teile gegen teil.schema.json geprüft")
+    return fehler
+
+
 def main():
     registry = build_registry()
     errors = placeholders = checked = 0
@@ -53,6 +80,7 @@ def main():
                     loc = "/".join(map(str, err.absolute_path)) or "(Wurzel)"
                     print(f"FEHLER {path.relative_to(ROOT)} [{loc}]: {err.message[:200]}")
             placeholders += path.read_text(encoding="utf-8").count('"<')
+    errors += pruefe_generierte_teile(registry)
     print(f"{checked} Dateien geprüft, {errors} Fehler, {placeholders} offene Platzhalter (<...>)")
     return 1 if errors else 0
 

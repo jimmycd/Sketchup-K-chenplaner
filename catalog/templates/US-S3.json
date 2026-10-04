@@ -1,0 +1,32 @@
+{
+  "code": "US-S3",
+  "basis": "US-BASIS",
+  "name": "Standard-Unterschrank mit 3 Schubladen",
+  "kategorie": "unterschrank",
+  "suchbegriffe": [
+    "schubladenschrank",
+    "3 schubladen",
+    "drei schubkästen"
+  ],
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "schublade",
+        "anteil": 2,
+        "beschlag": "schubkastensystem"
+      },
+      {
+        "art": "schublade",
+        "anteil": 1,
+        "beschlag": "schubkastensystem"
+      },
+      {
+        "art": "schublade",
+        "anteil": 1,
+        "beschlag": "schubkastensystem"
+      }
+    ]
+  }
+}

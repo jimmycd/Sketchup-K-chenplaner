@@ -1,0 +1,60 @@
+{
+  "id": "griff_bohrabstand_160",
+  "hersteller": "<Hersteller>",
+  "bezeichnung": "Griff, Bohrabstand 160 mm (Markierungsbohrungen)",
+  "kategorie": "griff",
+  "parameter": {
+    "abstand": {
+      "default": 160,
+      "werte": [
+        96,
+        128,
+        160,
+        192,
+        224,
+        256
+      ],
+      "beschreibung": "Bohrabstand des Griffs"
+    },
+    "mitte": {
+      "default": "=L/2",
+      "beschreibung": "Position der Griffmitte entlang der Türhöhe (x), je Griffmodell"
+    },
+    "kante": {
+      "default": 37,
+      "beschreibung": "Abstand der Bohrungen von der Kante ohne Bänder (y, Fertigmaß), je Griffmodell"
+    }
+  },
+  "bohrbilder": [
+    {
+      "teil": "front_tuer",
+      "bezug": {
+        "flaeche": "F1",
+        "punkt": "ecke_vorne_unten"
+      },
+      "bearbeitungen": [
+        {
+          "typ": "bohrung",
+          "flaeche": "F1",
+          "x": "=V.mitte-V.abstand/2",
+          "y": "=V.kante",
+          "d": 3,
+          "tiefe": 3
+        },
+        {
+          "typ": "bohrung",
+          "flaeche": "F1",
+          "x": "=V.mitte+V.abstand/2",
+          "y": "=V.kante",
+          "d": 3,
+          "tiefe": 3
+        }
+      ]
+    }
+  ],
+  "geprueft": {
+    "von": null,
+    "am": null,
+    "quelle": "Markierungsbohrungen Ø3 x 3 mm wie in T_re_L_Topfband.tcn; Position und Abstand je Griffmodell als Parameter"
+  }
+}
