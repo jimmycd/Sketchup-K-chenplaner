@@ -7,8 +7,8 @@ Maschine läuft. Quelle: `docs/konzept.pdf` (Roadmap Punkt 1).
 
 - [x] Alle 9 JSON-Schemata aus dem Konzept (`schemas/`), validierbar mit `tools/validate.py`
 - [x] Vorlagen `US-BASIS` (abstrakt, Korpus) und `US-T1` (1 Tür, 1 Einlegeboden)
-- [x] Die drei MVP-Regeln `r_seite_boden`, `r_lochreihe`, `r_rueckwand_nut`
-- [x] Beschlag-Entwürfe (Minifix, Topfband) und Set `haefele_standard` – **mit Platzhaltern `<...>`**
+- [x] MVP-Regeln: Dübel und Schrauben (`r_seite_duebel_schraube` u. a.), `r_lochreihe`, `r_rueckwand_nut` (nur bei genuteter Rückwand)
+- [x] Beschlag-Entwürfe (Topfband, Griff) und Set `haefele_standard` – **mit Platzhaltern `<...>`**
 - [x] Beispielprojekt `examples/projekt_mueller.json` mit einem `US-T1` (A1, 450 mm)
 
 ## Antworten auf die offenen Fragen (Stand 2026-10-03)
