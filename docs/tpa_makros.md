@@ -48,7 +48,20 @@ Wie oben, aber entlang Y: `#8510` Y-Anfang, `#8511` YF, `#8518` X-Position. Bele
 | R7 Einfügemaß X | 8507 | `55+2+16` (= 73) und `55+2+16+576` |
 | R8 Einfügemaß Y | 8508 | `y-21,5` (Topfmitte 21,5 vom Rand, d. h. 17,5 + 4 mm) |
 
-Die Türen werden mit der Innenseite oben (F1) bearbeitet; `T_rR` hat nur SIDE 1.
+Die Türen werden mit der Innenseite oben (F1) bearbeitet; `T_rR` und `T_re_L_Topfband` haben nur SIDE 1.
+
+Zwei Türbeispiele (alle Makroparameter 8500–8506 gleich, nur Position unterschiedlich):
+
+| Datei | Kopf (Fräsmaß) | `#8507` Topfmitte x (Türhöhe) | `#8508` y |
+|---|---|---|---|
+| `T_rR.tcn` | 715 × 444 | 73 und 73 + 576 | `y-21,5` |
+| `T_re_L_Topfband.tcn` ("re (L)") | 696 × 661 | 90 und 90 + 512 | `y-21,5` |
+
+- Der Abstand der beiden Bänder ist ein Vielfaches von 32 (576 = 18 × 32, 512 = 16 × 32). Sie rasten damit auf die Lochreihe der Seite ein
+  (`raster_fangen` im Beschlag-Konzept). Der Abstand vom Türende ist in den Beispielen nicht symmetrisch (90 / 94, 73 / 66).
+- **Markierungsbohrungen:** Ø3 mm, nur 3 mm tief (`W#81 … #1002=3 … #3=-3`) kennzeichnen Stellen für Montage von Hand: hier die Griffbohrung
+  (x = 212 und 212 + 160, y = 35), am `Boden` die Sockelfüße (Raster 64 mm). In der ersten Zeile des Türbeispiels fehlt `#3`; die Maschine
+  übernimmt dann die Tiefe der vorherigen Bearbeitung. Der Exporter schreibt die Tiefe immer ausdrücklich.
 
 ## Formatieren – `squad`, `W#1510` (Handbuch S. 15)
 Besäumt/formatiert rechteckige Teile mit Fräser. In allen Beispielen außer der Tür steht es als erste Bearbeitung.
