@@ -135,6 +135,14 @@
         {
           "pos": "B11",
           "vorlage": "ES-L-LEMANS"
+        },
+        {
+          "pos": "B12",
+          "vorlage": "ES-LR-KARUSSELL"
+        },
+        {
+          "pos": "B13",
+          "vorlage": "ES-LR-LEMANS"
         }
       ]
     }

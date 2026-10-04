@@ -21,7 +21,8 @@ Konventionen wie im ganzen Projekt: Rohmaß = Fräsmaß + 10 mm, Topfbänder an 
 | `HS-BASIS` | Hochschrank-Korpus (abstrakt): Boden, Deckel, Seiten 2100 hoch | |
 | `HS-OFEN` | Hochschrank mit Backofen, zwei großen Schubladen (70 kg) darunter und einem Fach mit Tür und Einlegeboden darüber | `schub_zone` (700), `ofen_nische_h` (600), `lueftung_b` |
 | `ES-BLIND-L/-R` | Blind-Eckschrank 900 bis 1200: Tür über der Öffnung, daneben eine feste Blindfront; Blindteil links bzw. rechts | `tuer_b` (600) |
-| `ES-L-KARUSSELL`, `ES-L-LEMANS` | L-Eckschrank mit Falttür (zwei Flügel); Karussell bzw. LeMans nur als Zubehör-Vermerk | `breite`, `tiefe` (je 900 bis 1200), `schenkel_t` (560) |
+| `ES-L-KARUSSELL`, `ES-L-LEMANS` | L-Eckschrank, Ecke hinten links, mit Falttür (zwei Flügel); Karussell bzw. LeMans nur als Zubehör-Vermerk |
+| `ES-LR-KARUSSELL`, `ES-LR-LEMANS` | dasselbe als Spiegelbild, Ecke hinten rechts (Topfbänder am linken Schenkelende, gleiche Teil-IDs) | `breite`, `tiefe` (je 900 bis 1200), `schenkel_t` (560) |
 
 ## Neue Funktionen im Generator
 
@@ -39,8 +40,8 @@ Konventionen wie im ganzen Projekt: Rohmaß = Fräsmaß + 10 mm, Topfbänder an 
 ## Annahmen und offene Punkte
 
 1. **Geschirrspüler ohne eigene Seiten.** Die Nische liegt zwischen den Nachbarschränken (lichte Breite 600); die Streben werden mit Schraubwinkeln befestigt, deshalb ohne Dübelbohrungen. Gerätefront-Bohrbild des Herstellers fehlt (`geraetefront_befestigung`, Warnung).
-2. **L-Eckschrank, Ecke hinten links.** Grundriss und Maße sind eine Annahme (Schenkeltiefe 560, die Flügel der Falttür liegen an den Fronten der beiden Schenkel). Die Eckvariante mit Ecke hinten rechts fehlt noch. Dübel- und Schraubenbohrungen der L-Teile werden nicht erzeugt (Warnung), ebenso die Faltscharniere (`eck_faltscharnier`) und die Karussell-/LeMans-Beschläge (`eck_karussell`, `eck_lemans`). Vor dem Bau am Probeschrank prüfen.
+2. **L-Eckschrank (links und rechts).** Grundriss und Maße sind eine Annahme (Schenkeltiefe 560, die Flügel der Falttür liegen an den Fronten der beiden Schenkel). Dübel- und Schraubenbohrungen der L-Teile werden nicht erzeugt (Warnung), ebenso die Faltscharniere (`eck_faltscharnier`) und die Karussell-/LeMans-Beschläge (`eck_karussell`, `eck_lemans`). Vor dem Bau am Probeschrank prüfen.
 3. **Fräserkorrektur der Ausschnitte.** Die Kontur läuft gegen den Uhrzeigersinn mit Korrektur links, der Fräser liegt damit im Abfall. Ob das mit dem Maschinenprofil stimmt, ist an der Maschine zu prüfen.
 4. **`HS-OFEN`**: Die Lochreihe läuft über die ganze Seite, auch hinter den Schubladen (Warnung `Aussparung nur hinter einem Teil der Fronten`). Das Ausparen einzelner Bereiche ist noch nicht umgesetzt.
-5. **Backofenschrank**: Ohne Traversen. Die Arbeitsplatte wird über Winkel an den Seiten befestigt; ein Hitzeschutzboden unter dem Kochfeld (bei `US-HERD-KF`) ist noch nicht modelliert.
+5. **Backofenschrank**: Ohne Traversen. Die Arbeitsplatte wird über Winkel an den Seiten befestigt; bei `US-HERD-KF` gibt es bewusst keinen Hitzeschutzboden.
 6. **Mülltrennung** ist als Frontauszug mit dem Blum-Abfalltrennsystem vorgesehen. Das System selbst ist kein CNC-Teil (Platzhalter `blum_muellsystem`); der Boden des Schubkastens trägt nur den Siphonausschnitt.

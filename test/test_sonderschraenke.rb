@@ -9,7 +9,7 @@ require_relative '../lib/kp/tcn/exporter'
 class TestSonderschraenke < Minitest::Test
   ROOT = File.expand_path('..', __dir__)
   AXES = { '+x' => [1, 0, 0], '-x' => [-1, 0, 0], '+y' => [0, 1, 0], '-y' => [0, -1, 0], '+z' => [0, 0, 1], '-z' => [0, 0, -1] }.freeze
-  ALLE = %w[US-GS-VOLL US-GS-TEIL US-GS-FREI US-SPUE US-HERD-OFEN US-HERD-KF HS-OFEN ES-BLIND-L ES-BLIND-R ES-L-KARUSSELL ES-L-LEMANS].freeze
+  ALLE = %w[US-GS-VOLL US-GS-TEIL US-GS-FREI US-SPUE US-HERD-OFEN US-HERD-KF HS-OFEN ES-BLIND-L ES-BLIND-R ES-L-KARUSSELL ES-L-LEMANS ES-LR-KARUSSELL ES-LR-LEMANS].freeze
 
   def setup
     @projekt = JSON.parse(File.read(File.join(ROOT, 'examples/projekt_mueller.json')))
@@ -262,6 +262,34 @@ class TestSonderschraenke < Minitest::Test
     assert b2[1] < a1[1], 'Flügel 2 endet vor Flügel 1'
     assert_equal 2, f1['bearbeitungen'].size # Topfbänder nur am äußeren Flügel
     assert_empty f2['bearbeitungen']
+  end
+
+  # Ecke rechts ist das Spiegelbild der Ecke links (x -> B − x), Teile mit denselben IDs
+  def test_right_l_corner_mirrors_left
+    [%w[ES-L-KARUSSELL ES-LR-KARUSSELL], %w[ES-L-LEMANS ES-LR-LEMANS]].each do |links, rechts|
+      [{}, { 'breite' => 1000, 'tiefe' => 1100 }].each do |inst|
+        l = schrank(links, inst)
+        r = schrank(rechts, inst)
+        assert_equal ids(l), ids(r)
+        b = inst['breite'] || 900
+        l.teile.each do |tl|
+          tr = teil(r, tl['teil_id'])
+          assert_equal tl['fertigmass'].values_at('l', 'w', 'd').sort, tr['fertigmass'].values_at('l', 'w', 'd').sort, tl['teil_id']
+          lo, hi = huelle(tl)
+          rlo, rhi = huelle(tr)
+          assert_in_delta b - hi[0], rlo[0], 1e-6, "#{tl['teil_id']} x min"
+          assert_in_delta b - lo[0], rhi[0], 1e-6, "#{tl['teil_id']} x max"
+          assert_equal [lo[1], lo[2], hi[1], hi[2]], [rlo[1], rlo[2], rhi[1], rhi[2]], "#{tl['teil_id']} y/z"
+        end
+      end
+    end
+  end
+
+  def test_right_l_corner_hinges_on_left_end
+    res = schrank('ES-LR-KARUSSELL')
+    assert_equal({ 'x' => '-z', 'z' => '+y' }, teil(res, 'ef1a')['lage']['ausrichtung']) # Anschlag links
+    assert_equal 2, teil(res, 'ef1a')['bearbeitungen'].size
+    assert_empty teil(res, 'ef1b')['bearbeitungen']
   end
 
   def test_l_corner_depth_and_leg_parameters

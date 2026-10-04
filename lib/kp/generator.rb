@@ -344,19 +344,27 @@ module Kp
       }]
     end
 
-    # L-Eckschrank, Falttür (Winkeltür): Flügel 1 an der Front des einen Schenkels (Topfbänder am Schenkelende, x = B),
-    # Flügel 2 an der Front des anderen Schenkels (x = Schenkeltiefe). Beide Flügel sind am inneren Eck mit Faltscharnieren verbunden
-    # (noch kein Bohrbild). Vorlagenvariable V.schenkel_t = Tiefe der Schenkel; T = Gesamttiefe der Ecke.
+    # L-Eckschrank, Falttür (Winkeltür): Flügel 1 an der Front des hinteren Schenkels (Topfbänder am Schenkelende), Flügel 2 an der
+    # Front des vorderen Schenkels. Beide Flügel sind am inneren Eck mit Faltscharnieren verbunden (noch kein Bohrbild).
+    # Vorlagenvariablen: schenkel_t = Tiefe der Schenkel, ecke_rechts = 1 für Ecke hinten rechts (gespiegelt), T = Gesamttiefe der Ecke.
     def eckfront(tmpl, ctx, pos, feld, nr, hoehe, z0, dicke, fuge, warn, seite_z0)
       a = ctx[:vars]['B']
       t = ctx['V']['schenkel_t'] or raise Katalog::Fehler, 'eckfront braucht die Vorlagenvariable schenkel_t'
+      rechts = ctx['V']['ecke_rechts'].to_f.positive?
       jy = ctx[:vars]['T'] - t # Front des hinteren Schenkels und Ende des vorderen
-      f1 = tuer(tmpl, ctx, pos, feld.merge('anschlag' => 'rechts'), nr, a - t - fuge, hoehe, t + fuge / 2, z0, dicke, warn, seite_z0, "ef#{nr}a")
-      f1[0]['lage']['position'] = [t + fuge / 2, jy - dicke, z0]
-      f1[0]['bezeichnung'] = "#{pos} Eckfront Flügel 1 (Topfbänder)"
+      b1 = a - t - fuge
       b2 = jy - dicke - fuge
-      f2 = tuer(tmpl, ctx, pos, feld.merge('beschlag' => 'keiner'), nr, b2, hoehe, t, z0, dicke, [], seite_z0, "ef#{nr}b")
-      f2[0]['lage'] = { 'position' => [t + dicke, fuge / 2, z0], 'ausrichtung' => { 'x' => '+z', 'z' => '-x' } }
+      if rechts
+        f1 = tuer(tmpl, ctx, pos, feld.merge('anschlag' => 'links'), nr, b1, hoehe, fuge / 2, z0, dicke, warn, seite_z0, "ef#{nr}a")
+        f2 = tuer(tmpl, ctx, pos, feld.merge('beschlag' => 'keiner'), nr, b2, hoehe, t, z0, dicke, [], seite_z0, "ef#{nr}b")
+        f2[0]['lage'] = { 'position' => [a - t - dicke, fuge / 2 + b2, z0], 'ausrichtung' => { 'x' => '+z', 'z' => '+x' } }
+      else
+        f1 = tuer(tmpl, ctx, pos, feld.merge('anschlag' => 'rechts'), nr, b1, hoehe, t + fuge / 2, z0, dicke, warn, seite_z0, "ef#{nr}a")
+        f2 = tuer(tmpl, ctx, pos, feld.merge('beschlag' => 'keiner'), nr, b2, hoehe, t, z0, dicke, [], seite_z0, "ef#{nr}b")
+        f2[0]['lage'] = { 'position' => [t + dicke, fuge / 2, z0], 'ausrichtung' => { 'x' => '+z', 'z' => '-x' } }
+      end
+      f1[0]['lage']['position'][1] = jy - dicke
+      f1[0]['bezeichnung'] = "#{pos} Eckfront Flügel 1 (Topfbänder)"
       f2[0]['bezeichnung'] = "#{pos} Eckfront Flügel 2 (Faltscharnier)"
       warn << "#{pos}: Faltscharniere zwischen den Eckfront-Flügeln ohne Bohrbild (Hersteller-Referenz nötig)"
       f1 + f2

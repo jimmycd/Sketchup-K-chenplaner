@@ -1,10 +1,10 @@
 {
-  "code": "ES-L",
+  "code": "ES-LR",
   "basis": "US-BASIS",
-  "name": "L-Eckunterschrank, Ecke hinten links (Basis)",
+  "name": "L-Eckunterschrank, Ecke hinten rechts (Basis)",
   "kategorie": "eckschrank",
   "abstrakt": true,
-  "beschreibung": "L-Grundriss, Ecke hinten links: Wand A hinten (y = T), Wand B links (x = 0). Schenkel 1 läuft hinten entlang (x = Schenkeltiefe .. B), Schenkel 2 links nach vorn (y = 0 .. T - Schenkeltiefe). Zwei Eckfront-Flügel (Falttür) im inneren Eck bei (Schenkeltiefe, T - Schenkeltiefe). B = Ausdehnung entlang der Wand A, T = entlang der Wand B. Annahme zu prüfen, siehe Hinweis in docs/sonderschraenke.md.",
+  "beschreibung": "Spiegelbild von ES-L: Ecke hinten rechts (Wand B rechts bei x = B). Schenkel 1 läuft hinten entlang (x = 0 .. B - Schenkeltiefe), Schenkel 2 rechts nach vorn. Eckfront-Flügel im inneren Eck bei (B - Schenkeltiefe, T - Schenkeltiefe), Topfbänder am linken Schenkelende. Teile gleiche IDs wie ES-L.",
   "merkmale": [
     "ohne_verbindung",
     "verbindung_offen",
@@ -40,7 +40,8 @@
   },
   "variablen": {
     "dd": "=T-SR",
-    "jy": "=T-V.schenkel_t"
+    "jy": "=T-V.schenkel_t",
+    "ecke_rechts": 1
   },
   "teile_ohne": [
     "sl",
@@ -53,24 +54,24 @@
   "teile_zusatz": [
     {
       "id": "sl",
-      "rolle": "seite_l",
-      "name": "Seite links (Wand B)",
+      "rolle": "seite_r",
+      "name": "Seite rechts (Wand B)",
       "material": "P.korpus.material",
       "abmessungen": {
         "laenge": "=H",
         "breite": "=V.dd"
       },
       "position": [
+        "=B",
         0,
-        "=V.dd",
         0
       ],
       "ausrichtung": {
         "x": "+z",
-        "z": "+x"
+        "z": "-x"
       },
       "kanten": {
-        "hinten": "P.korpus.kante_sichtbar",
+        "vorne": "P.korpus.kante_sichtbar",
         "links": "P.korpus.kante_sichtbar",
         "rechts": "P.korpus.kante_sichtbar"
       }
@@ -85,7 +86,7 @@
         "breite": "=H"
       },
       "position": [
-        "=S",
+        "=B-V.schenkel_t",
         "=S",
         0
       ],
@@ -96,7 +97,7 @@
     },
     {
       "id": "sa",
-      "rolle": "seite_r",
+      "rolle": "seite_l",
       "name": "Seite Schenkelende",
       "material": "P.korpus.material",
       "abmessungen": {
@@ -104,16 +105,16 @@
         "breite": "=V.dd-V.jy"
       },
       "position": [
-        "=B",
-        "=V.jy",
+        0,
+        "=V.dd",
         0
       ],
       "ausrichtung": {
         "x": "+z",
-        "z": "-x"
+        "z": "+x"
       },
       "kanten": {
-        "vorne": "P.korpus.kante_sichtbar",
+        "hinten": "P.korpus.kante_sichtbar",
         "links": "P.korpus.kante_sichtbar",
         "rechts": "P.korpus.kante_sichtbar"
       }
@@ -150,7 +151,7 @@
         "breite": "=V.jy-S"
       },
       "position": [
-        "=S",
+        "=B-V.schenkel_t",
         "=S",
         0
       ],
@@ -159,7 +160,7 @@
         "z": "+z"
       },
       "kanten": {
-        "rechts": "P.korpus.kante_sichtbar"
+        "links": "P.korpus.kante_sichtbar"
       }
     },
     {
@@ -172,7 +173,7 @@
         "breite": 100
       },
       "position": [
-        "=V.schenkel_t",
+        "=S",
         "=V.jy",
         "=H-S"
       ],
@@ -194,12 +195,12 @@
         "breite": 100
       },
       "position": [
-        "=V.schenkel_t",
-        "=S",
+        "=B-V.schenkel_t",
+        "=V.jy",
         "=H-S"
       ],
       "ausrichtung": {
-        "x": "+y",
+        "x": "-y",
         "z": "+z"
       },
       "kanten": {
@@ -228,19 +229,19 @@
     {
       "id": "tl",
       "rolle": "sonstiges",
-      "name": "Traverse links",
+      "name": "Traverse rechts",
       "material": "P.korpus.material",
       "abmessungen": {
         "laenge": "=V.dd-100-S",
         "breite": 100
       },
       "position": [
-        "=S+100",
-        "=S",
+        "=B-S-100",
+        "=V.dd-100",
         "=H-S"
       ],
       "ausrichtung": {
-        "x": "+y",
+        "x": "-y",
         "z": "+z"
       }
     },
