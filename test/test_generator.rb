@@ -99,7 +99,29 @@ class TestGenerator < Minitest::Test
     assert_equal 576.0, xs[1] - xs[0] # Vielfaches von 32 (18 x 32)
     assert_equal 'y-21,5', ops[0]['parameter']['8508'] # Topfmitte 17,5 + tb 4
     assert_equal 35, ops[0]['parameter']['8500']
-    assert_in_delta 94.5, xs[0], 1e-6 # (769 - 576) / 2 = 96,5 minus Anleimer 2
+    assert_in_delta 101.5, xs[0], 1e-6 # (769 - 576) / 2 = 96,5, auf Lochreihe geschoben (+7), minus Anleimer 2
+  end
+
+  # Bandmitte (Schrankhöhe) liegt auf der Systemlochreihe der Seite, Beschlagmitte 16 mm neben einem Loch (Kreuzmontageplatte)
+  def test_hinges_align_with_system_row
+    %w[rechts links].each do |anschlag|
+      res = schrank('overrides' => { 'front.felder.0.anschlag' => anschlag })
+      t = tuer(res)
+      seite = teil(res, 'sr')
+      reihe0 = seite['lage']['position'][2] + seite['kantenstaerke']['links'] + 55
+      t['bearbeitungen'].each do |o|
+        x = o['parameter']['8507'] + t['kantenstaerke']['links']
+        z = anschlag == 'links' ? t['lage']['position'][2] - x : t['lage']['position'][2] + x
+        assert_in_delta 16.0, (z - reihe0) % 32, 1e-6, "DIN #{anschlag}: Band bei z=#{z}"
+      end
+      assert_equal 2, t['bearbeitungen'].size
+    end
+  end
+
+  def test_no_extra_holes_on_side
+    res = schrank
+    assert_empty(teil(res, 'sr')['bearbeitungen'].select { |o| o['id'].to_s.start_with?('topfband') })
+    assert_empty(teil(res, 'sl')['bearbeitungen'].select { |o| o['id'].to_s.start_with?('topfband') })
   end
 
   def test_handle_marks_from_griff_parameters

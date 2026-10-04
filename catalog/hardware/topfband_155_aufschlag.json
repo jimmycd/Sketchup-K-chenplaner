@@ -34,7 +34,8 @@
         "anzahl": 5
       }
     ],
-    "raster_fangen": true
+    "raster_fangen": true,
+    "lochreihe_versatz": 16
   },
   "bohrbilder": [
     {

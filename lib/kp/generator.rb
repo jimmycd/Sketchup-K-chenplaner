@@ -161,12 +161,15 @@ module Kp
       summe = felder.sum { |f| (f['anteil'] || 1).to_f }
       z = fuge / 2 - (cfg['ueberstand_unten'] || 0).to_f
       d = (cfg['staerke'] || 19).to_f
+      # Unterkante der Seite in Schrankhöhe (Fräskante): Bezug der Systemlochreihe
+      seite = teile.find { |t| t['rolle'] == 'seite_r' }
+      seite_z0 = seite ? seite['lage']['position'][2].to_f + seite['kantenstaerke']['links'] : 0.0
       felder.each_with_index.flat_map do |f, i|
         hoehe = (h_ges - fuge * (felder.size - 1)) * (f['anteil'] || 1).to_f / summe
         z0 = z
         z += hoehe + fuge
         case f['art']
-        when 'tuer' then tuer(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn)
+        when 'tuer' then tuer(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn, seite_z0)
         when 'schublade', 'auszug' then schublade(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn, teile)
         else
           warn << "Frontfeld #{f['art']} noch nicht umgesetzt"
@@ -175,7 +178,7 @@ module Kp
       end
     end
 
-    def tuer(tmpl, ctx, pos, feld, nr, breite, hoehe, x0, z0, dicke, warn)
+    def tuer(tmpl, ctx, pos, feld, nr, breite, hoehe, x0, z0, dicke, warn, seite_z0)
       cfg = @std['front']
       mat = material('P.front.material')
       kante = kante('P.front.kante')
@@ -195,7 +198,7 @@ module Kp
       }
       pctx = teil_ctx(ctx, hoehe, breite, dicke)
       set = @katalog.beschlagset(@std['beschlag_set'])['zuordnung']
-      topfband_ops(teil, pctx, set, feld['beschlag'] || 'topfband', staerke, warn)
+      topfband_ops(teil, pctx, set, feld['beschlag'] || 'topfband', warn, z0, links, seite_z0)
       griff_ops(teil, pctx, set, cfg['griff'], warn)
       [teil]
     end
@@ -275,8 +278,10 @@ module Kp
       z.find { |e| e['bedingung'].nil? || Formel.auswerten(e['bedingung'], vctx) }&.fetch('beschlag')
     end
 
-    # Topfbänder: Anzahl nach Türhöhe (anzahl_tabelle), Randabstand, auf 32er-Raster einrasten, mittig verteilt.
-    def topfband_ops(teil, pctx, set, funktion, band, warn)
+    # Topfbänder: Anzahl nach Türhöhe (anzahl_tabelle), Randabstand, Abstand auf das 32er-Raster gerundet, mittig verteilt.
+    # Die Montageplatten sitzen in der Systemlochreihe der Seite: die Bandmitten werden in Schrankhöhe auf die Lochreihe gerastet
+    # (Start ab Fräskante der Seite, Raster; lochreihe_versatz = Beschlagmitte zwischen zwei Löchern).
+    def topfband_ops(teil, pctx, set, funktion, warn, z0, links, seite_z0)
       id = beschlag_id(set, funktion.sub('set:', ''), pctx) || funktion
       hw = @katalog.beschlag(id) or return warn << "Beschlag #{id} nicht im Katalog"
       l = teil['fertigmass']['l']
@@ -287,6 +292,15 @@ module Kp
       abstand = (l - 2 * rand) / (n - 1)
       abstand = (abstand / raster).round * raster if raster
       erste = (l - abstand * (n - 1)) / 2.0
+      # Türkoordinate x (ab Türanfang) -> Schrankhöhe z: DIN rechts z0 + x, DIN links z0 + l - x
+      z_von = ->(x) { links ? z0 + l - x : z0 + x }
+      if raster
+        bezug = seite_z0 + @std['lochreihe']['start'].to_f + (v['lochreihe_versatz'] || 0).to_f
+        z_tief = (0...n).map { |i| z_von.call(erste + abstand * i) }.min
+        # Bandkette als Ganzes auf die nächste Lochreihenposition schieben (Abstand ist Vielfaches des Rasters)
+        schub = bezug + ((z_tief - bezug) / raster).round * raster - z_tief
+        erste += links ? -schub : schub
+      end
       params = (hw['parameter'] || {}).transform_values { |p| Formel.auswerten(p['default'], pctx) }
       (0...n).each do |i|
         # Makroparameter sind Fräsmaß-Koordinaten (TpaCAD): Anleimer am Teilanfang abziehen
