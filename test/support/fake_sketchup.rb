@@ -206,6 +206,36 @@ module Sketchup
 end
 
 module UI
+  # Attrappe für UI::HtmlDialog: merkt sich Callbacks und ausgeführte Skripte
+  class HtmlDialog
+    STYLE_DIALOG = 1
+    attr_reader :callbacks, :scripts, :file, :optionen
+
+    def initialize(optionen = {})
+      @optionen = optionen
+      @callbacks = {}
+      @scripts = []
+      @sichtbar = false
+    end
+
+    def add_action_callback(name, &blk) = @callbacks[name] = blk
+    def set_file(f) = @file = f
+    def show = @sichtbar = true
+    def visible? = @sichtbar
+    def bring_to_front = @front = true
+    def execute_script(js) = @scripts << js
+    def close = @sichtbar = false
+
+    def self.letzter = @letzter
+    def self.letzter=(d)
+      @letzter = d
+    end
+
+    def self.new(*a)
+      super.tap { |d| self.letzter = d }
+    end
+  end
+
   class FakeMenu
     attr_reader :items
 

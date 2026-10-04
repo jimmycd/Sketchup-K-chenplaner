@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Baut dist/kp_kuechenplaner_<version>.rbz (SketchUp-Erweiterungspaket).
 
-Aufbau im Paket: kp_kuechenplaner.rb (Lader) und kp_kuechenplaner/ mit main.rb, lib/, schemas/, catalog/, examples/.
+Aufbau im Paket: kp_kuechenplaner.rb (Lader) und kp_kuechenplaner/ mit main.rb, editor_dialog.rb, editor/ (Oberfläche), lib/, schemas/, catalog/, examples/.
 Aufruf: python3 tools/build_rbz.py
 """
 import pathlib
@@ -15,8 +15,10 @@ VERSION = re.search(r"VERSION = '([^']+)'", (PLUGIN / "kp_kuechenplaner.rb").rea
 EINTRAEGE = [
     (PLUGIN / "kp_kuechenplaner.rb", "kp_kuechenplaner.rb"),
     (PLUGIN / "kp_kuechenplaner" / "main.rb", "kp_kuechenplaner/main.rb"),
+    (PLUGIN / "kp_kuechenplaner" / "editor_dialog.rb", "kp_kuechenplaner/editor_dialog.rb"),
 ]
 for ordner, ziel, muster in [
+    (PLUGIN / "kp_kuechenplaner" / "editor", "kp_kuechenplaner/editor", "*.*"),
     (ROOT / "lib", "kp_kuechenplaner/lib", "**/*.rb"),
     (ROOT / "schemas", "kp_kuechenplaner/schemas", "*.json"),
     (ROOT / "catalog", "kp_kuechenplaner/catalog", "**/*.json"),

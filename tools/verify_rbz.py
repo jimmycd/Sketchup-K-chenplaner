@@ -15,6 +15,7 @@ with tempfile.TemporaryDirectory() as tmp:
     with zipfile.ZipFile(rbz) as z:
         namen = z.namelist()
         assert "kp_kuechenplaner.rb" in namen and "kp_kuechenplaner/main.rb" in namen, "Paketstruktur falsch"
+        assert "kp_kuechenplaner/editor/index.html" in namen and "kp_kuechenplaner/editor_dialog.rb" in namen, "Editor fehlt im Paket"
         assert not any("\\" in n for n in namen), "Rückwärts-Schrägstriche im Paket"
         z.extractall(tmp)
     code = (

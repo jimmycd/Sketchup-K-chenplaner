@@ -55,7 +55,7 @@ module Kp
     def dateien
       return [] unless @src
 
-      Dir[File.join(@src, 'lib', '**', '*.rb')].sort + [File.join(@src, HAUPTDATEI)]
+      Dir[File.join(@src, 'lib', '**', '*.rb')].sort + [File.join(@src, HAUPTDATEI), File.join(@src, File.dirname(HAUPTDATEI), 'editor_dialog.rb')]
     end
 
     # Lädt alle Quelldateien neu (load statt require). Konstanten-Warnungen werden unterdrückt.
