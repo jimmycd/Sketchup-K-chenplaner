@@ -9,7 +9,7 @@
 #>
 param(
   [string]$Ziel = "E:\sketchup - küchenplaner",
-  [string]$Repo = "https://github.com/jimmycd/sketchup-k-chenplaner.git",
+  [string]$Repo = "https://github.com/jimmycd/Sketchup-K-chenplaner.git",
   [string]$Branch = "ccr-3164b6fe-v6h746"
 )
 $ErrorActionPreference = "Stop"
