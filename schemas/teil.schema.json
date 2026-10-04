@@ -235,8 +235,11 @@
           }
         },
         "werkzeug": {
-          "type": "string",
-          "description": "Optional; sonst wählt das Exporter-Profil"
+          "type": [
+            "string",
+            "integer"
+          ],
+          "description": "Optional; Werkzeugname oder TpaCAD-Werkzeugnummer (#205), sonst wählt das Exporter-Profil"
         },
         "gruppe": {
           "type": "string",
@@ -310,10 +313,6 @@
               "type": "number"
             }
           }
-        },
-        "werkzeug": {
-          "type": "integer",
-          "description": "Erzwingt eine TpaCAD-Werkzeugnummer (#205)"
         }
       },
       "required": [
