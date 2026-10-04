@@ -143,6 +143,14 @@ module Sketchup
 
     def active_model = @model
     def register_extension(*) = true
+    def extensions = []
+    def read_default(sec, key, default = nil) = (@defaults ||= {}).fetch([sec, key], default)
+    def write_default(sec, key, val) = ((@defaults ||= {})[[sec, key]] = val)
+    def clear_defaults! = @defaults = {}
+    def extensions = []
+    def read_default(sec, key, default = nil) = (@defaults ||= {}).fetch([sec, key], default)
+    def write_default(sec, key, val) = ((@defaults ||= {})[[sec, key]] = val)
+    def clear_defaults! = @defaults = {}
     def reset! = (@model = Model.new)
   end
 end

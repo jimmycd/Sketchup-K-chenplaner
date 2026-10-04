@@ -33,6 +33,10 @@ SketchUp-Plugins-Ordner (`%APPDATA%\SketchUp\SketchUp 20xx\SketchUp\Plugins`) di
 Neue Version holen: im Projektordner `git pull`, in SketchUp **Neu laden**. Nicht zusammen mit der installierten `.rbz` verwenden (im Erweiterungsmanager deaktivieren);
 der Dev-Lader meldet es in der Ruby-Konsole.
 
+Einfachster Weg ohne Skript: Projekt von GitHub klonen oder als ZIP herunterladen und entpacken, dann `dev/kp_dev_loader.rb` in den SketchUp-Plugins-Ordner kopieren
+(`%APPDATA%\SketchUp\SketchUp 20xx\SketchUp\Plugins`). Der Lader findet den Projektordner selbst (Umgebungsvariable `KP_SRC`, gemerkter Pfad,
+`E:/sketchup - küchenplaner`) oder fragt beim ersten Start einmalig danach und merkt ihn sich (*Quellpfad ändern…* im Menü ändert ihn).
+
 Manuell ohne Skript: in der Ruby-Konsole `load 'E:/sketchup - küchenplaner/dev/kp_dev_loader.rb'`.
 
 ## Projektdatei
