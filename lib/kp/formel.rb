@@ -51,8 +51,14 @@ module Kp
       out
     end
 
-    def peek = @t[@i]
-    def nimm = @t[(@i += 1) - 1]
+    def peek
+      @t[@i]
+    end
+
+    def nimm
+      @i += 1
+      @t[@i - 1]
+    end
 
     def oder
       v = und

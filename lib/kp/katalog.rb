@@ -36,7 +36,9 @@ module Kp
       aufgeloest
     end
 
-    def beschlag(id) = @beschlaege[id]
+    def beschlag(id)
+      @beschlaege[id]
+    end
 
     def beschlagset(id)
       set = @sets[id] or raise Fehler, "Beschlag-Set #{id} nicht gefunden"
@@ -61,6 +63,8 @@ module Kp
       end
     end
 
-    def lese(pfad) = JSON.parse(File.read(pfad, encoding: 'utf-8'))
+    def lese(pfad)
+      JSON.parse(File.read(pfad, encoding: 'utf-8'))
+    end
   end
 end

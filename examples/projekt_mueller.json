@@ -3,7 +3,7 @@
   "id": "kueche_mueller_2026",
   "name": "Küche Müller",
   "kataloge": [
-    "catalog"
+    "../catalog"
   ],
   "standards": {
     "bauweise": "seiten_durchgehend",
@@ -69,7 +69,7 @@
       }
     },
     "maschine": {
-      "exporter_profil": "examples/profile/werkstatt.tcnprofil.json"
+      "exporter_profil": "profile/werkstatt.tcnprofil.json"
     },
     "schubkasten": {
       "material": "spano_weiss_16"

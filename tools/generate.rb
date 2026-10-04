@@ -13,10 +13,10 @@ abort 'Aufruf: generate.rb projekt.json [zeile_id] [ausgabeordner]' unless proje
 
 wurzel = File.dirname(File.expand_path(projekt_pfad))
 projekt = JSON.parse(File.read(projekt_pfad, encoding: 'utf-8'))
-katalog = Kp::Katalog.new((projekt['kataloge'] || ['catalog']).map { |k| File.expand_path(k, File.join(wurzel, '..')) })
+katalog = Kp::Katalog.new((projekt['kataloge'] || [File.expand_path('../catalog', __dir__)]).map { |k| File.expand_path(k, wurzel) })
 gen = Kp::Generator.new(projekt, katalog)
 profil_pfad = projekt.dig('standards', 'maschine', 'exporter_profil')
-profil = profil_pfad && JSON.parse(File.read(File.expand_path(profil_pfad, File.join(wurzel, '..')), encoding: 'utf-8'))
+profil = profil_pfad && JSON.parse(File.read(File.expand_path(profil_pfad, wurzel), encoding: 'utf-8'))
 
 fehler = 0
 (projekt['zeilen'] || []).select { |z| zeile_id.nil? || zeile_id == '-' || z['id'] == zeile_id }.each do |zeile|

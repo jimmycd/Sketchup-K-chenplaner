@@ -64,7 +64,9 @@ module Kp
       tmpl
     end
 
-    def teil_ctx(ctx, l, w, d) = ctx.merge(vars: ctx[:vars].merge('L' => l, 'W' => w, 'D' => d))
+    def teil_ctx(ctx, l, w, d)
+      ctx.merge(vars: ctx[:vars].merge('L' => l, 'W' => w, 'D' => d))
+    end
 
     def material(ref)
       key = ref.start_with?('P.') ? ref[2..].split('.').reduce(@std) { |o, k| o[k] } : ref
@@ -333,7 +335,9 @@ module Kp
       b.merge('parameter' => params)
     end
 
-    def zahl_komma(v) = (v == v.round ? v.round.to_s : v.to_s).tr('.', ',')
+    def zahl_komma(v)
+      (v == v.round ? v.round.to_s : v.to_s).tr('.', ',')
+    end
 
     # ---- Regeln --------------------------------------------------------------
 
