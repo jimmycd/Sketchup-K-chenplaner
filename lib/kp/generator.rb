@@ -343,11 +343,11 @@ module Kp
     end
 
     # Fertigmaß (SketchUp-Konstruktion, inkl. Anleimer), Fräsmaß (TCN-Kopf = Fertigmaß - Anleimer) und Rohmaß (Zuschnitt =
-    # Fräsmaß + Aufmaß aus standards.zuschnitt.aufmass je Richtung, Standard 0) für Etiketten.
+    # Fräsmaß + Aufmaß aus standards.zuschnitt.aufmass je Richtung, Standard 10) für Etiketten.
     def massangaben(teil)
       f = teil['fertigmass']
       k = teil['kantenstaerke']
-      aufmass = (@std.dig('zuschnitt', 'aufmass') || 0).to_f
+      aufmass = (@std.dig('zuschnitt', 'aufmass') || 10).to_f
       fraes = { 'l' => (f['l'] - k['links'] - k['rechts']).round(3), 'w' => (f['w'] - k['vorne'] - k['hinten']).round(3), 'd' => f['d'] }
       { 'fertig' => f.dup, 'fraes' => fraes,
         'roh' => { 'l' => (fraes['l'] + aufmass).round(3), 'w' => (fraes['w'] + aufmass).round(3), 'd' => f['d'] } }

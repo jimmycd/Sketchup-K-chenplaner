@@ -49,9 +49,9 @@ class TestOcl < Minitest::Test
     sr = gen.schrank('pos' => 'A1', 'vorlage' => 'US-T1', 'breite' => 450).teile.find { |t| t['teil_id'] == 'sr' }
     assert_equal({ 'l' => 772.0, 'w' => 552.0, 'd' => 19.0 }, sr['masse']['fertig'])
     assert_equal({ 'l' => 768.0, 'w' => 550.0, 'd' => 19.0 }, sr['masse']['fraes']) # Anleimer links+rechts je 2, vorne 2
-    assert_equal sr['masse']['fraes'], sr['masse']['roh'] # Aufmaß Standard 0
+    assert_equal({ 'l' => 778.0, 'w' => 560.0, 'd' => 19.0 }, sr['masse']['roh']) # Fräsmaß + 10 mm je Richtung
     text = sr['ocl']['beschreibung']
-    assert_includes text, 'Rohmaß: 768 × 550 × 19'
+    assert_includes text, 'Rohmaß: 778 × 560 × 19'
     assert_includes text, 'Fräsmaß: 768 × 550 × 19'
     assert_includes text, 'Fertigmaß: 772 × 552 × 19'
     assert_includes text, '═' # Skizze
@@ -59,7 +59,7 @@ class TestOcl < Minitest::Test
 
   def test_rohmass_aufmass_setting
     p = projekt
-    p['standards']['zuschnitt'] = { 'aufmass' => 4 }
+    p['standards']['zuschnitt'] = { 'aufmass' => 4 } # überschreibt den Standard 10
     gen = Kp::Generator.new(p, Kp::Katalog.new(File.join(ROOT, 'catalog')))
     bo = gen.schrank('pos' => 'A1', 'vorlage' => 'US-T1', 'breite' => 450).teile.find { |t| t['teil_id'] == 'bo' }
     assert_equal 412.0 + 4, bo['masse']['roh']['l']

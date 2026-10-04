@@ -418,8 +418,8 @@
           "properties": {
             "aufmass": {
               "type": "number",
-              "default": 0,
-              "description": "Aufmaß des Zuschnitts gegenüber dem Fräsmaß je Richtung (Standard 0: Rohmaß = Fräsmaß)"
+              "default": 10,
+              "description": "Aufmaß des Zuschnitts gegenüber dem Fräsmaß je Richtung in mm (Standard 10: Rohmaß = Fräsmaß + 10 mm)"
             }
           }
         }

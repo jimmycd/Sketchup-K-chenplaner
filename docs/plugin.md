@@ -70,7 +70,7 @@ Die Beschreibung jeder Komponentendefinition enthält für das OCL-Etikett:
 ```
 Schrank A1 · A1 seite_r
 Material: Spanplatte melaminbeschichtet weiß
-Rohmaß: 768 × 550 × 19
+Rohmaß: 778 × 560 × 19
 Fräsmaß: 768 × 550 × 19
 Fertigmaß: 772 × 552 × 19
 Kanten vorne: ABS weiß 2 mm, links: ABS weiß 2 mm, rechts: ABS weiß 2 mm
@@ -79,8 +79,8 @@ Kanten vorne: ABS weiß 2 mm, links: ABS weiß 2 mm, rechts: ABS weiß 2 mm
 ...
 ```
 
-- **Fertigmaß:** Konstruktionsmaß in SketchUp inkl. Anleimer. **Fräsmaß:** Kopf der TCN-Datei, Fertigmaß minus Anleimer. **Rohmaß:** Zuschnitt = Fräsmaß + Aufmaß
-  (`standards.zuschnitt.aufmass`, Standard 0; bitte setzen, wenn der Zuschnitt größer als das Fräsmaß ist).
+- **Fertigmaß:** Konstruktionsmaß in SketchUp inkl. Anleimer. **Fräsmaß:** Kopf der TCN-Datei, Fertigmaß minus Anleimer. **Rohmaß:** Zuschnitt = Fräsmaß + 10 mm
+  je Richtung (`standards.zuschnitt.aufmass`, Standard 10, einstellbar).
 - **Skizze:** unten = Kante `vorne` des Teilsystems (y = 0), oben = `hinten`, links = x 0, rechts = x L, jeweils gesehen auf Fläche 1; `═`/`║` bedeutet Anleimer.
   In OCL (Etikettenlayout) das Element *Beschreibung* einblenden und eine Schrift mit gleicher Zeichenbreite (z. B. Courier) wählen. OCL zeigt die Kanten außerdem selbst als Symbole, da das
   Kantenmaterial auf den richtigen Seitenflächen liegt.
