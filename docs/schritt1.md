@@ -135,12 +135,15 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
   (`y-21,5`), wie in beiden Beispieltüren. DIN links: x nach unten, DIN rechts: x nach oben.
 - Topfbänder: Anzahl nach Türhöhe (`anzahl_tabelle`), Randabstand 100, Abstand auf das 32er-Raster gerundet, mittig verteilt; Ausgabe über
   das Makro `inge100`. Parameter `tb` (Topfabstand) wirkt über `y-{V.tb+17.5}` (Text mit `{Ausdruck}` wird eingesetzt).
-  Die Beispieldatei weicht um 2 mm ab (Erstes Band bei 90, wir berechnen 94,5 für eine 769er Tür; Abstand passt jeweils auf das 32er-Raster).
+  Die Bandkette wird als Ganzes so geschoben, dass die Bandmitten in Schrankhöhe auf der Systemlochreihe der Seite liegen
+  (Start 55 ab Fräskante, Raster 32, Beschlagmitte 16 mm neben einem Loch = Blum-Kreuzmontageplatte, `verteilung.lochreihe_versatz`).
+  Für `US-T1` (769er Tür) liegt das erste Band bei 101,5 im Fräsmaß. Die Montageplatte sitzt in der Systemlochreihe, an den Seiten
+  gibt es keine zusätzlichen Bohrungen.
 - Griff: Standard `grifflos`. Mit einem Griffmodell (`standards.front.griff` = Funktion im Set oder Beschlag-ID) kommen zwei Markierungsbohrungen
   Ø3 × 3 mm. Abstand, Mitte und Kante sind Parameter des Griffmodells (`catalog/hardware/griff_bohrabstand_160.json`), Standard Mitte = halbe Türhöhe,
   Kante 37 mm.
 - Teile tragen jetzt `lage` (Position und Ausrichtung im Schrank) statt interner Felder; das Schema kennt sie.
-- Offen: Bohrbild der Seite (Montageplatte), Doppeltür, Schubladen, Klappen.
+- Offen: Doppeltür, Schubladen, Klappen.
 
 ### Korpusverbindung mit Dübeln und Schrauben (neu)
 

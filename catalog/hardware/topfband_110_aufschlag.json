@@ -35,7 +35,8 @@
         "anzahl": 5
       }
     ],
-    "raster_fangen": true
+    "raster_fangen": true,
+    "lochreihe_versatz": 16
   },
   "bohrbilder": [
     {
@@ -62,35 +63,12 @@
           }
         }
       ]
-    },
-    {
-      "teil": "seite",
-      "bezug": {
-        "flaeche": "F1",
-        "punkt": "montagepunkt"
-      },
-      "bearbeitungen": [
-        {
-          "typ": "bohrung",
-          "x": -16,
-          "y": 37,
-          "d": 5,
-          "tiefe": 12
-        },
-        {
-          "typ": "bohrung",
-          "x": 16,
-          "y": 37,
-          "d": 5,
-          "tiefe": 12
-        }
-      ]
     }
   ],
   "bezeichnung": "Topfband 110°, aufschlagend (Bohrbild über Maschinenmakro inge100)",
   "geprueft": {
     "von": null,
     "am": null,
-    "quelle": "Makroparameter aus examples/tcn_referenz/T_rR.tcn und T_re_L_Topfband.tcn; Bohrbild der Seite (Montageplatte) noch ungeprüft"
+    "quelle": "Makroparameter aus examples/tcn_referenz/T_rR.tcn und T_re_L_Topfband.tcn; Montageplatte (Blum) sitzt in der Systemlochreihe, keine Extra-Bohrungen an der Seite"
   }
 }

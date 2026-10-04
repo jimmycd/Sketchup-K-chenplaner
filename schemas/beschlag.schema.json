@@ -185,6 +185,10 @@
           "type": "boolean",
           "default": false,
           "description": "Auf 32er-Lochreihe einrasten"
+        },
+        "lochreihe_versatz": {
+          "type": "number",
+          "description": "Mit raster_fangen: Abstand der Beschlagmitte zum nächsten Loch der Seitenlochreihe (Blum-Kreuzmontageplatte: 16, Beschlagmitte zwischen zwei Löchern). Fehlt der Wert, rastet die Mitte auf ein Loch."
         }
       }
     },
