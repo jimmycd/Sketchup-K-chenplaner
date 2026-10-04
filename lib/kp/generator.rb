@@ -30,6 +30,11 @@ module Kp
 
       ctx = basis_kontext(tmpl, instanz)
       ctx['V'] = {}
+      aufhaenger = aufhaenger_variablen(tmpl, ctx)
+      # Weitere Vorlagenparameter (über Overrides 'parameter.<name>.default' einstellbar) sind in Formeln als V.<name> nutzbar
+      (tmpl['parameter'] || {}).each do |k, p|
+        ctx['V'][k] = Formel.auswerten(p['default'], ctx) unless %w[breite hoehe tiefe].include?(k)
+      end
       (tmpl['variablen'] || {}).each { |k, v| ctx['V'][k] = Formel.auswerten(v, ctx) }
       pos = instanz['pos'] || 'A1'
 
@@ -38,6 +43,7 @@ module Kp
       teile += fronten(tmpl, ctx, pos, warn, teile)
       regeln_anwenden(tmpl, teile, ctx, instanz, warn)
       teile.each { |t| t['wenden'] = t['bearbeitungen'].any? { |b| b['flaeche'] == 'F2' } }
+      aufhaenger_bohrbild(aufhaenger, teile, ctx, warn)
       teile.each { |t| t['masse'] = massangaben(t) }
       teile.each { |t| t['ocl'] = ocl_daten(t) }
       Ergebnis.new(teile: teile, warnungen: warn)
@@ -55,6 +61,33 @@ module Kp
         ctx[:vars][var] = Formel.auswerten(wert, ctx).to_f
       end
       ctx
+    end
+
+    # Aufhängesystem (Hängeschrank): aufhaengung.beschlag ist eine Beschlag-ID oder 'set:<funktion>'. Die Parameter des Beschlags
+    # stehen als V.aufhaenger.<name> bereit (z. B. haken_tiefe für den Rückwandversatz).
+    def aufhaenger_variablen(tmpl, ctx)
+      id = tmpl.dig('aufhaengung', 'beschlag') or return nil
+      if id.start_with?('set:')
+        set = @katalog.beschlagset(@std['beschlag_set'])['zuordnung']
+        id = beschlag_id(set, id.delete_prefix('set:'), ctx) or raise Katalog::Fehler, "Aufhänger #{id} fehlt im Beschlag-Set"
+      end
+      hw = @katalog.beschlag(id) or raise Katalog::Fehler, "Aufhänger #{id} nicht im Katalog"
+      params = (hw['parameter'] || {}).to_h { |k, p| [k, Formel.auswerten(p['default'], ctx)] }
+      ctx['V']['aufhaenger'] = params.merge('id' => id)
+      hw
+    end
+
+    # Bohrbild des Aufhängers in den Seiten; solange keines hinterlegt ist, nur eine Warnung (Rückwandversatz gilt trotzdem)
+    def aufhaenger_bohrbild(hw, teile, ctx, warn)
+      return unless hw
+      return warn << "Aufhänger #{hw['id']}: kein Bohrbild hinterlegt (Datenblatt/Referenz-TCN nötig), Seiten ohne Aufhängerbohrung" if (hw['bohrbilder'] || []).empty?
+
+      params = ctx['V']['aufhaenger'].reject { |k, _| k == 'id' }
+      teile.select { |t| %w[seite_l seite_r].include?(t['rolle']) }.each do |seite|
+        sctx = teil_ctx(ctx, seite['fertigmass']['l'], seite['fertigmass']['w'], seite['fertigmass']['d'])
+        sctx = sctx.merge(vars: sctx[:vars].merge(kantenvariablen(seite)))
+        beschlag_bohrbild(hw, 'seite', seite, sctx, params, 'aufhaenger')
+      end
     end
 
     # Overrides: Punkt-Pfad -> Wert (Zahlen im Pfad = Arrayindex)

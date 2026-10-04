@@ -1,0 +1,30 @@
+{
+  "id": "haefele_aufhaenger_sichtbar",
+  "hersteller": "Häfele",
+  "bezeichnung": "Schrankaufhänger Oberschrank, zum Schrauben (im Schrank sichtbar)",
+  "kategorie": "schrankaufhaenger",
+  "artikelnummern": [
+    {
+      "artnr": "290.02.702",
+      "bezeichnung": "Anschlag links",
+      "menge": 1
+    },
+    {
+      "artnr": "<artnr>",
+      "bezeichnung": "Anschlag rechts",
+      "menge": 1
+    }
+  ],
+  "parameter": {
+    "haken_tiefe": {
+      "default": 14,
+      "beschreibung": "Mindestabstand Rückwand zur Hinterkante der Seiten (>= 14 in der Datenblattskizze); Aufhänger liegt sichtbar unter dem Deckel (Tiefe 55/60, Höhe 46)"
+    }
+  },
+  "bohrbilder": [],
+  "geprueft": {
+    "von": null,
+    "am": null,
+    "quelle": "Maßskizzen aus dem Häfele-Webshop (Screenshots von Jürgen); Bohrbild noch nicht übernommen, Rückwandversatz aus Maß 14 bzw. >= 14"
+  }
+}

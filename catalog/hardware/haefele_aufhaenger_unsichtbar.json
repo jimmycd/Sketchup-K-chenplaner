@@ -1,0 +1,24 @@
+{
+  "id": "haefele_aufhaenger_unsichtbar",
+  "hersteller": "Häfele",
+  "bezeichnung": "Schrankaufhänger Oberschrank, zum Einpressen und Schrauben (im Schrank unsichtbar)",
+  "kategorie": "schrankaufhaenger",
+  "artikelnummern": [
+    {
+      "artnr": "<artnr>",
+      "menge": 2
+    }
+  ],
+  "parameter": {
+    "haken_tiefe": {
+      "default": 14,
+      "beschreibung": "Mindestabstand Rückwand zur Hinterkante der Seiten (Maß 14 in der Datenblattskizze); Aufhänger sitzt zwischen Seite und Rückwand"
+    }
+  },
+  "bohrbilder": [],
+  "geprueft": {
+    "von": null,
+    "am": null,
+    "quelle": "Maßskizzen aus dem Häfele-Webshop (Screenshots von Jürgen); Bohrbild noch nicht übernommen, Rückwandversatz aus Maß 14 bzw. >= 14"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "code": "OS-T1",
+  "basis": "OS-BASIS",
+  "name": "Oberschrank, 1 Tür, 1 Einlegeboden",
+  "kategorie": "haengeschrank",
+  "suchbegriffe": [
+    "oberschrank",
+    "hängeschrank",
+    "1 tür",
+    "einlegeboden"
+  ],
+  "einbauten": [
+    {
+      "art": "einlegeboden",
+      "anzahl": 1,
+      "verteilung": "gleichmaessig",
+      "beschlag": "set:bodentraeger"
+    }
+  ],
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "tuer",
+        "anteil": 1,
+        "anschlag": "rechts",
+        "beschlag": "topfband"
+      }
+    ]
+  }
+}

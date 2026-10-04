@@ -1,0 +1,255 @@
+[
+  {
+    "id": "r_os_nut_seite_r",
+    "name": "Oberschrank Seite rechts: Rückwandnut (durchgehend, von oben einschiebbar), um V.versatz von hinten versetzt",
+    "art": "teil",
+    "prioritaet": 20,
+    "gilt_fuer": {
+      "kategorien": [
+        "haengeschrank"
+      ]
+    },
+    "rollen": [
+      "seite_r"
+    ],
+    "bearbeitungen": [
+      {
+        "typ": "nut",
+        "flaeche": "F1",
+        "von": [
+          0,
+          "=W-V.versatz-P.rueckwand.staerke"
+        ],
+        "bis": [
+          "=L",
+          "=W-V.versatz-P.rueckwand.staerke"
+        ],
+        "breite": "=P.rueckwand.staerke+0.5",
+        "tiefe": "=P.rueckwand.nuttiefe",
+        "bezug": "links"
+      }
+    ]
+  },
+  {
+    "id": "r_os_nut_seite_l",
+    "name": "Oberschrank Seite links: Rückwandnut (Teil-y von hinten), um V.versatz von hinten versetzt",
+    "art": "teil",
+    "prioritaet": 20,
+    "gilt_fuer": {
+      "kategorien": [
+        "haengeschrank"
+      ]
+    },
+    "rollen": [
+      "seite_l"
+    ],
+    "bearbeitungen": [
+      {
+        "typ": "nut",
+        "flaeche": "F1",
+        "von": [
+          0,
+          "=V.versatz-0.5"
+        ],
+        "bis": [
+          "=L",
+          "=V.versatz-0.5"
+        ],
+        "breite": "=P.rueckwand.staerke+0.5",
+        "tiefe": "=P.rueckwand.nuttiefe",
+        "bezug": "links"
+      }
+    ]
+  },
+  {
+    "id": "r_os_seite_verbindung",
+    "name": "Oberschrank Seite: Dübel (Ø8) und Schraubenlöcher zu Boden und Deckel, Lage nach Boden-/Deckeltiefe V.tb",
+    "art": "teil",
+    "prioritaet": 10,
+    "gilt_fuer": {
+      "kategorien": [
+        "haengeschrank"
+      ],
+      "bauweise": [
+        "seiten_durchgehend"
+      ]
+    },
+    "rollen": [
+      "seite_l",
+      "seite_r"
+    ],
+    "bearbeitungen": [
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y0+30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=(Y0+V.tb)/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=V.tb-30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y0+30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=(Y0+V.tb)/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=V.tb-30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y0+60",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=V.tb-60",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y0+50",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=V.tb-50",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      }
+    ]
+  },
+  {
+    "id": "r_os_rueckwand_schrauben",
+    "name": "Oberschrank Rückwand: Durchgangslöcher Ø3 zum Verschrauben mit der Hinterkante des Bodens (Mitte Bodenstärke)",
+    "art": "teil",
+    "prioritaet": 10,
+    "gilt_fuer": {
+      "kategorien": [
+        "haengeschrank"
+      ]
+    },
+    "rollen": [
+      "rueckwand"
+    ],
+    "bearbeitungen": [
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=P.rueckwand.nuttiefe-P.rueckwand.luft+50",
+        "y": "=P.korpus.staerke/2",
+        "d": 3,
+        "tiefe": "=D",
+        "durch": true
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=P.rueckwand.nuttiefe-P.rueckwand.luft+V.innen_b/2",
+        "y": "=P.korpus.staerke/2",
+        "d": 3,
+        "tiefe": "=D",
+        "durch": true
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=P.rueckwand.nuttiefe-P.rueckwand.luft+V.innen_b-50",
+        "y": "=P.korpus.staerke/2",
+        "d": 3,
+        "tiefe": "=D",
+        "durch": true
+      }
+    ]
+  },
+  {
+    "id": "r_os_boden_rueckwand",
+    "name": "Oberschrank Boden: Vorbohrungen Ø3 in der Hinterkante für die Rückwandschrauben",
+    "art": "teil",
+    "prioritaet": 10,
+    "gilt_fuer": {
+      "kategorien": [
+        "haengeschrank"
+      ]
+    },
+    "rollen": [
+      "boden"
+    ],
+    "bearbeitungen": [
+      {
+        "typ": "bohrung",
+        "flaeche": "F4",
+        "x": "=50",
+        "z": "=D/2",
+        "d": 3,
+        "tiefe": 25
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F4",
+        "x": "=L/2",
+        "z": "=D/2",
+        "d": 3,
+        "tiefe": 25
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F4",
+        "x": "=L-50",
+        "z": "=D/2",
+        "d": 3,
+        "tiefe": 25
+      }
+    ]
+  }
+]

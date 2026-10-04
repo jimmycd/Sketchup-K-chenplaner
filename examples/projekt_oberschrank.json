@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "id": "kueche_oberschrank_beispiel",
+  "name": "Beispiel Oberschränke",
+  "kataloge": [
+    "../catalog"
+  ],
+  "standards": {
+    "bauweise": "seiten_durchgehend",
+    "korpus": {
+      "staerke": 19,
+      "material": "spano_weiss_19",
+      "kante_sichtbar": "abs_weiss_2"
+    },
+    "front": {
+      "staerke": 19,
+      "material": "mdf_lack_19",
+      "kante": "abs_lack_2",
+      "fuge": 3,
+      "griff": "grifflos"
+    },
+    "rueckwand": {
+      "art": "aufgesetzt",
+      "staerke": 8,
+      "material": "hdf_weiss_8"
+    },
+    "hoehen": {
+      "sockel": 100,
+      "arbeitsplatte_staerke": 38,
+      "arbeitshoehe": 910
+    },
+    "tiefen": {
+      "us": 560,
+      "hs": 350,
+      "hoch": 560
+    },
+    "lochreihe": {
+      "raster": 32
+    },
+    "beschlag_set": "haefele_standard",
+    "materialien": {
+      "spano_weiss_19": {
+        "name": "Spanplatte melaminbeschichtet weiß",
+        "staerke": 19
+      },
+      "mdf_lack_19": {
+        "name": "MDF lackiert",
+        "staerke": 19
+      },
+      "hdf_weiss_8": {
+        "name": "HDF weiß",
+        "staerke": 8
+      },
+      "spano_weiss_16": {
+        "name": "Spanplatte melaminbeschichtet weiß 16",
+        "staerke": 16
+      }
+    },
+    "kanten": {
+      "abs_weiss_2": {
+        "name": "ABS weiß 2 mm",
+        "staerke": 2,
+        "hoehe": 23
+      },
+      "abs_lack_2": {
+        "name": "ABS lackfähig 2 mm",
+        "staerke": 2,
+        "hoehe": 23
+      }
+    },
+    "maschine": {
+      "exporter_profil": "profile/werkstatt.tcnprofil.json"
+    },
+    "schubkasten": {
+      "material": "spano_weiss_16"
+    }
+  },
+  "zeilen": [
+    {
+      "id": "zeile_o",
+      "name": "Zeile O Oberschränke",
+      "ebene": "oben",
+      "start": [
+        0,
+        0,
+        1500
+      ],
+      "wandlaenge": 1500,
+      "elemente": [
+        {
+          "pos": "O1",
+          "vorlage": "OS-T1",
+          "breite": 450
+        },
+        {
+          "pos": "O2",
+          "vorlage": "OS-T1",
+          "breite": 600,
+          "overrides": {
+            "aufhaengung.beschlag": "haefele_aufhaenger_sichtbar"
+          }
+        }
+      ]
+    }
+  ]
+}
