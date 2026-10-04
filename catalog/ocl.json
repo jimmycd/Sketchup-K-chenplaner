@@ -1,0 +1,13 @@
+{
+  "beschreibung": "Abbildung der Küchenplaner-Materialien auf OpenCutList-Materialattribute. Werte sind Annahmen und lassen sich hier ohne Codeänderung anpassen; Menü Küchenplaner > OCL-Attribute anzeigen zeigt, was OCL tatsächlich speichert.",
+  "dictionary": "fr.lairdubois.opencutlist",
+  "typen": { "platte": 2, "kante": 4 },
+  "einheit": "mm",
+  "schluessel": {
+    "typ": "type",
+    "staerke_platte": "std_thicknesses",
+    "staerke_kante": "std_thicknesses",
+    "hoehe_kante": "std_widths",
+    "maserung": "grained"
+  }
+}

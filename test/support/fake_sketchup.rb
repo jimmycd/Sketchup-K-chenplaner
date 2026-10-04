@@ -43,6 +43,17 @@ module Geom
 end
 
 module Sketchup
+  class Attrs
+    def attrs = (@attrs ||= {})
+    def set_attribute(d, k, v) = (attrs[[d, k]] = v)
+    def get_attribute(d, k, default = nil) = attrs.fetch([d, k], default)
+
+    def attribute_dictionary(d, *)
+      h = attrs.select { |(dd, _k), _v| dd == d }.to_h { |(_d, k), v| [k, v] }
+      h.empty? ? nil : h
+    end
+  end
+
   class Color
     attr_reader :red, :green, :blue
 
@@ -53,7 +64,7 @@ module Sketchup
     end
   end
 
-  class Material
+  class Material < Attrs
     attr_reader :name
     attr_accessor :color
 
@@ -121,12 +132,6 @@ module Sketchup
     end
 
     def grep(klass) = @items.grep(klass)
-  end
-
-  class Attrs
-    def attrs = (@attrs ||= {})
-    def set_attribute(d, k, v) = (attrs[[d, k]] = v)
-    def get_attribute(d, k, default = nil) = attrs.fetch([d, k], default)
   end
 
   class Group < Attrs
