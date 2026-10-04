@@ -224,28 +224,23 @@
             },
             "abstand_vorne": {
               "type": "number",
-              "default": 37
+              "default": 35,
+              "description": "Reihe vorne ab Fräskante (Beispiel: 35)"
             },
             "abstand_hinten": {
               "$ref": "common.schema.json#/$defs/mass",
-              "default": 37,
-              "description": "0 = keine hintere Reihe"
-            },
-            "bezug_z": {
-              "enum": [
-                "unterkante_seite",
-                "oberkante_boden"
-              ],
-              "default": "oberkante_boden"
+              "default": 35,
+              "description": "Reihe hinten ab Fräskante (Beispiel: y-35); 0 = keine hintere Reihe"
             },
             "start": {
               "type": "number",
-              "description": "Erstes Loch ab Bezug",
-              "default": 64
+              "default": 55,
+              "description": "Erstes Loch ab Fräskante am Bodenende (Seiten_.tcn: 55)"
             },
             "rand_oben_min": {
               "type": "number",
-              "default": 64
+              "default": 80,
+              "description": "Mindestabstand des letzten Lochs zur Fräskante am Ende (Seiten_.tcn: x-80)"
             }
           }
         },

@@ -35,9 +35,7 @@
       "hoch": 560
     },
     "lochreihe": {
-      "raster": 32,
-      "abstand_vorne": 37,
-      "abstand_hinten": 37
+      "raster": 32
     },
     "beschlag_set": "haefele_standard",
     "materialien": {

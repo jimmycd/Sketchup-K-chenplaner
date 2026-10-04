@@ -165,10 +165,14 @@ Es gibt kein Verbindersystem. Seite, Boden, Traverse werden mit Holzdübeln und 
 - Durchgangsbohrungen gehen jetzt 2 mm über die Dicke hinaus (`durchbohr_zugabe` = 2, wie 21 mm bei 19 mm Platte).
 - Verbinder (Minifix) sind entfernt; die Kontakterkennung ist nicht mehr nötig.
 
-### Auffällig im Vergleich mit dem Beispiel
+### Lochreihe (nach Beispieldatei)
 
-- Die Lochreihe der Beispieldatei beginnt bei 55 und endet bei `x-80` (Fräsmaß) und liegt bei y = 35 und `y-35`. Der Katalog hat Start 64 und Rand 64. Hinten sind es 35 ab der Fräskante,
-  im Katalog 37 ab Fertigkante. Welche Werte gelten?
+Standard jetzt wie in `Seiten_.tcn`: erstes Loch 55 mm ab Fräskante am Bodenende, letztes Loch spätestens 80 mm vor der Fräskante am anderen Ende
+(`x-80`), Reihen 35 mm von der vorderen und hinteren Fräskante (`35` und `y-35`), Raster 32, Ø5 × 12. Alle Werte stehen in den Projektstandards
+(`lochreihe.start`, `rand_oben_min`, `abstand_vorne`, `abstand_hinten`) und sind einstellbar. Ein Test vergleicht Start, Raster und Querpositionen mit der Beispieldatei.
+Die Einlegeböden rasten auf diese Reihe ein.
+
+- Dübeltiefe in der Stirn ist einstellbar: `verbindung.duebel.tiefe_stirn` (Standard 21, Annahme).
 
 ### Noch nicht umgesetzt
 

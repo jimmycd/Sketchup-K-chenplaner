@@ -1,7 +1,7 @@
 [
   {
     "id": "r_lochreihe",
-    "name": "Lochreihe 32er-System",
+    "name": "Lochreihe 32er-System (Maße aus Seiten_.tcn: Start 55, Ende x-80, Reihen bei 35 / y-35 ab Fräskante)",
     "art": "teil",
     "prioritaet": 50,
     "bedingung": "=P.lochreihe.aktiv",
@@ -20,40 +20,26 @@
         "typ": "bohrreihe",
         "flaeche": "F1",
         "start": [
-          "=S+P.lochreihe.start",
-          "=P.lochreihe.abstand_vorne"
+          "=X0+P.lochreihe.start",
+          "=Y0+P.lochreihe.abstand_vorne"
         ],
         "richtung": "+x",
         "raster": "=P.lochreihe.raster",
-        "anzahl": "=floor((L-2*S-P.lochreihe.start-P.lochreihe.rand_oben_min)/P.lochreihe.raster)+1",
+        "anzahl": "=floor((X1-P.lochreihe.rand_oben_min-X0-P.lochreihe.start)/P.lochreihe.raster)+1",
         "d": "=P.lochreihe.durchmesser",
         "tiefe": "=P.lochreihe.tiefe"
       },
       {
         "typ": "bohrreihe",
         "flaeche": "F1",
-        "bedingung": "=P.lochreihe.abstand_hinten>0 and P.rueckwand.art=='genutet'",
+        "bedingung": "=P.lochreihe.abstand_hinten>0",
         "start": [
-          "=S+P.lochreihe.start",
-          "=W-P.rueckwand.abstand_hinten-P.lochreihe.abstand_hinten"
+          "=X0+P.lochreihe.start",
+          "=Y1-P.lochreihe.abstand_hinten"
         ],
         "richtung": "+x",
         "raster": "=P.lochreihe.raster",
-        "anzahl": "=floor((L-2*S-P.lochreihe.start-P.lochreihe.rand_oben_min)/P.lochreihe.raster)+1",
-        "d": "=P.lochreihe.durchmesser",
-        "tiefe": "=P.lochreihe.tiefe"
-      },
-      {
-        "typ": "bohrreihe",
-        "flaeche": "F1",
-        "bedingung": "=P.lochreihe.abstand_hinten>0 and P.rueckwand.art!='genutet'",
-        "start": [
-          "=S+P.lochreihe.start",
-          "=W-P.lochreihe.abstand_hinten"
-        ],
-        "richtung": "+x",
-        "raster": "=P.lochreihe.raster",
-        "anzahl": "=floor((L-2*S-P.lochreihe.start-P.lochreihe.rand_oben_min)/P.lochreihe.raster)+1",
+        "anzahl": "=floor((X1-P.lochreihe.rand_oben_min-X0-P.lochreihe.start)/P.lochreihe.raster)+1",
         "d": "=P.lochreihe.durchmesser",
         "tiefe": "=P.lochreihe.tiefe"
       }

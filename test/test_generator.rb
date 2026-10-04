@@ -47,12 +47,13 @@ class TestGenerator < Minitest::Test
     sr = rows(teil(res, 'sr'))
     sl = rows(teil(res, 'sl'))
     assert_equal 2, sr.size
-    assert_equal 19, sr[0]['anzahl'] # floor((772-38-64-64)/32)+1
-    assert_equal [83.0, 37.0], sr[0]['start']
-    assert_equal [83.0, 552.0 - 37.0], sr[1]['start']
-    # linke Seite: y-Achse zeigt nach vorne, Reihen werden gespiegelt
-    assert_equal [83.0, 552.0 - 37.0], sl[0]['start']
-    assert_equal [83.0, 37.0], sl[1]['start']
+    # Seite 772 x 552, Anleimer vorne und an den Enden 2 mm: Start 55 + 2, Ende x-80, Reihen 35 ab Fräskante
+    assert_equal 20, sr[0]['anzahl'] # floor((770 - 80 - 2 - 55) / 32) + 1
+    assert_equal [57.0, 37.0], sr[0]['start']
+    assert_equal [57.0, 552.0 - 35.0], sr[1]['start']
+    # linke Seite: y-Achse zeigt nach vorne, Reihen werden gespiegelt (Anleimer sitzt bei y = W)
+    assert_equal [57.0, 552.0 - 37.0], sl[0]['start']
+    assert_equal [57.0, 35.0], sl[1]['start']
   end
 
   def test_no_groove_rule_for_aufgesetzte_rueckwand
@@ -140,6 +141,17 @@ class TestGenerator < Minitest::Test
       [numeric(x, 656, 551).to_f, numeric(y, 656, 551).to_f, numeric(z, 656, 551).to_f, d.to_f, w&.to_f]
     end
     assert_equal erwartet.sort, erzeugt.sort
+    # Lochreihen (Makro fittingx): gleicher Start, Raster und Querposition wie die Beispieldatei, letztes Loch <= x-80
+    ref = File.read(File.join(ROOT, 'examples/tcn_referenz/Seiten_Duebel.tcn')).split("\r\n").grep(/fittingx/)
+    ref_y = ref.map { |l| numeric(l[/#8518=(\S+)/, 1], 656, 551) }.sort
+    macro = out.files.first.content.split("\r\n").grep(/fittingx/)
+    assert_equal ref_y, macro.map { |l| l[/#8518=(\S+)/, 1].to_f }.sort
+    assert_equal 55.0, macro[0][/#8510=(\S+)/, 1].to_f
+    assert_equal 32.0, macro[0][/#8512=(\S+)/, 1].to_f
+    letztes = macro[0][/#8511=(\S+)/, 1].to_f
+    xf = numeric('x-80', 656, 551)
+    assert_operator letztes, :<=, xf
+    assert_operator letztes + 32, :>, xf
   end
 
   def test_boden_and_traverse_stirn_dowels_differ
@@ -160,7 +172,7 @@ class TestGenerator < Minitest::Test
     z = eb['fertigmass']
     assert_equal 410.0, z['l']
     assert_equal 532.0, z['w']
-    assert_equal 0, (((19 + 64) - 83) % 32) # Raster passt zur Lochreihe
+    assert_equal 0, (eb['lage']['position'][2] - (2 + 55)) % 32 # Raster passt zur Lochreihe (Start 55 + 2 mm Anleimer)
   end
 
   def test_generated_parts_export_to_tcn

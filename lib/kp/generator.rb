@@ -33,7 +33,7 @@ module Kp
       pos = instanz['pos'] || 'A1'
 
       teile = (tmpl['teile'] || []).flat_map { |t| teil(t, tmpl, ctx, pos) }.compact
-      teile += einbauten(tmpl, ctx, pos, warn)
+      teile += einbauten(tmpl, ctx, pos, warn, teile)
       teile += fronten(tmpl, ctx, pos, warn)
       regeln_anwenden(tmpl, teile, ctx, instanz, warn)
       teile.each { |t| t['wenden'] = t['bearbeitungen'].any? { |b| b['flaeche'] == 'F2' } }
@@ -108,7 +108,7 @@ module Kp
     end
 
     # Einlegeböden: Länge = Innenbreite − Spiel, Tiefe = Korpustiefe − Abzug; Höhe auf das 32er-Raster der Seiten.
-    def einbauten(tmpl, ctx, pos, warn)
+    def einbauten(tmpl, ctx, pos, warn, teile = [])
       (tmpl['einbauten'] || []).flat_map do |e|
         next warn.push("Einbau #{e['art']} noch nicht umgesetzt") && [] unless e['art'] == 'einlegeboden'
 
@@ -120,9 +120,10 @@ module Kp
         raster = @std['lochreihe']['raster']
         start = @std['lochreihe']['start']
         frei = ctx[:vars]['H'] - s - s
+        z0 = (teile.find { |t| t['rolle'] == 'seite_r' }&.dig('kantenstaerke', 'links') || 0).to_f
         (1..n).map do |i|
-          roh = frei * i / (n + 1.0)
-          z = s + start + (((roh - start) / raster).round * raster)
+          roh = s + frei * i / (n + 1.0)
+          z = z0 + start + (((roh - z0 - start) / raster).round * raster)
           mat = material(eb['material'] || 'P.korpus.material')
           {
             'uid' => "#{@projekt['id']}/#{pos}/eb#{i}", 'pos' => pos, 'teil_id' => "eb#{i}", 'rolle' => 'einlegeboden',
