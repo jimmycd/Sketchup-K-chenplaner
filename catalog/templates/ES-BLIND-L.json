@@ -1,0 +1,33 @@
+{
+  "code": "ES-BLIND-L",
+  "basis": "ES-BLIND",
+  "name": "Blind-Eckschrank, Blindteil links (Tür rechts)",
+  "kategorie": "eckschrank",
+  "suchbegriffe": [
+    "eckschrank",
+    "blindeck",
+    "blindschrank",
+    "blind links"
+  ],
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "tuer",
+        "anteil": 1,
+        "anschlag": "rechts",
+        "breite": "=V.tuer_b",
+        "ab": "rechts",
+        "beschlag": "topfband"
+      },
+      {
+        "art": "blende",
+        "anteil": 1,
+        "breite": "=B-V.tuer_b",
+        "ab": "links",
+        "neben": true
+      }
+    ]
+  }
+}

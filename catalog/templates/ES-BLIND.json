@@ -1,0 +1,34 @@
+{
+  "code": "ES-BLIND",
+  "basis": "US-BASIS",
+  "name": "Blind-Eckschrank (Basis)",
+  "kategorie": "eckschrank",
+  "abstrakt": true,
+  "beschreibung": "Gerader Eckunterschrank: eine Tür über der Öffnung, daneben eine feste Blindfront (Blende) vor dem Blindteil, das in die Ecke läuft. Türbreite einstellbar.",
+  "parameter": {
+    "breite": {
+      "default": 1000,
+      "werte": [
+        900,
+        1000,
+        1100,
+        1200
+      ],
+      "frei": true
+    },
+    "tuer_b": {
+      "default": 600,
+      "min": 400,
+      "max": 700,
+      "frei": true
+    }
+  },
+  "einbauten": [
+    {
+      "art": "einlegeboden",
+      "anzahl": 1,
+      "verteilung": "gleichmaessig",
+      "beschlag": "set:bodentraeger"
+    }
+  ]
+}

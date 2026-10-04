@@ -1,0 +1,12 @@
+{
+  "id": "geraetefront_befestigung",
+  "hersteller": "<Gerätehersteller>",
+  "kategorie": "sonstiges",
+  "bezeichnung": "Frontbefestigung an Geschirrspüler (Platzhalter: Bohrbild und Schablone des Geräteherstellers fehlen)",
+  "bohrbilder": [],
+  "geprueft": {
+    "von": null,
+    "am": null,
+    "quelle": "Referenz-TCN oder Montageanleitung des Geräts nötig"
+  }
+}

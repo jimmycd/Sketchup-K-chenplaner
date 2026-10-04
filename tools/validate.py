@@ -50,18 +50,18 @@ def pruefe_generierte_teile(registry):
         return 0
     fehler = 0
     validator = Draft202012Validator(load(SCHEMAS / "teil.schema.json"), registry=registry)
-    with tempfile.TemporaryDirectory() as tmp:
-        r = subprocess.run(["ruby", str(ROOT / "tools" / "generate.rb"), str(ROOT / "examples" / "projekt_mueller.json"), "-", tmp],
-                           capture_output=True, text=True)
-        if r.returncode != 0:
-            print("FEHLER Generator:", r.stderr[-300:])
-            return 1
-        for datei in sorted(pathlib.Path(tmp).glob("*.json")):
-            for err in validator.iter_errors(load(datei)):
-                fehler += 1
-                loc = "/".join(map(str, err.absolute_path)) or "(Wurzel)"
-                print(f"FEHLER generiertes Teil {datei.name} [{loc}]: {err.message[:150]}")
-        print(f"{len(list(pathlib.Path(tmp).glob('*.json')))} generierte Teile gegen teil.schema.json geprüft")
+    for projekt in sorted((ROOT / "examples").glob("projekt_*.json")):
+        with tempfile.TemporaryDirectory() as tmp:
+            r = subprocess.run(["ruby", str(ROOT / "tools" / "generate.rb"), str(projekt), "-", tmp], capture_output=True, text=True)
+            if r.returncode != 0:
+                print(f"FEHLER Generator ({projekt.name}):", r.stderr[-300:])
+                return 1
+            for datei in sorted(pathlib.Path(tmp).glob("*.json")):
+                for err in validator.iter_errors(load(datei)):
+                    fehler += 1
+                    loc = "/".join(map(str, err.absolute_path)) or "(Wurzel)"
+                    print(f"FEHLER generiertes Teil {datei.name} [{loc}]: {err.message[:150]}")
+            print(f"{len(list(pathlib.Path(tmp).glob('*.json')))} generierte Teile aus {projekt.name} gegen teil.schema.json geprüft")
     return fehler
 
 

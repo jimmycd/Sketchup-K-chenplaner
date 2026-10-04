@@ -1,0 +1,318 @@
+[
+  {
+    "id": "r_seite_duebel_nur_boden",
+    "name": "Seite ohne Traversen (Ofen-/Herdschrank): Dübel und Schrauben nur am Bodenende",
+    "art": "teil",
+    "prioritaet": 10,
+    "gilt_fuer": {
+      "bauweise": [
+        "seiten_durchgehend"
+      ],
+      "merkmal": [
+        "ohne_traverse"
+      ],
+      "ohne_merkmal": [
+        "ohne_boden",
+        "deckel",
+        "ohne_verbindung"
+      ]
+    },
+    "rollen": [
+      "seite_l",
+      "seite_r"
+    ],
+    "bearbeitungen": [
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y0+30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y1-30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=YM",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y0+60",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y1-60",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=YM-80",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=YM+80",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      }
+    ]
+  },
+  {
+    "id": "r_seite_duebel_nur_traversen",
+    "name": "Seite ohne Boden (Geräte-Nische): Dübel und Schrauben nur am Traversenende",
+    "art": "teil",
+    "prioritaet": 10,
+    "gilt_fuer": {
+      "bauweise": [
+        "seiten_durchgehend"
+      ],
+      "merkmal": [
+        "ohne_boden"
+      ],
+      "ohne_merkmal": [
+        "ohne_traverse",
+        "ohne_verbindung"
+      ]
+    },
+    "rollen": [
+      "seite_l",
+      "seite_r"
+    ],
+    "bearbeitungen": [
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y0+30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y0+75",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y1-30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y1-75",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y0+50",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y1-50",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      }
+    ]
+  },
+  {
+    "id": "r_seite_duebel_boden_deckel",
+    "name": "Hochschrank: Dübel und Schrauben an beiden Enden im Muster des Bodens (Boden unten, Deckel oben)",
+    "art": "teil",
+    "prioritaet": 10,
+    "gilt_fuer": {
+      "bauweise": [
+        "seiten_durchgehend"
+      ],
+      "merkmal": [
+        "deckel"
+      ],
+      "ohne_merkmal": [
+        "ohne_verbindung"
+      ]
+    },
+    "rollen": [
+      "seite_l",
+      "seite_r"
+    ],
+    "bearbeitungen": [
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y0+30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y1-30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=YM",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y0+60",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y1-60",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=YM-80",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=YM+80",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y0+30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y1-30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=YM",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y0+60",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y1-60",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=YM-80",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=YM+80",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      }
+    ]
+  }
+]

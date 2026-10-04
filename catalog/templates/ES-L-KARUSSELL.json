@@ -1,0 +1,21 @@
+{
+  "code": "ES-L-KARUSSELL",
+  "basis": "ES-L",
+  "name": "L-Eckschrank mit Karussell",
+  "kategorie": "eckschrank",
+  "suchbegriffe": [
+    "eckschrank",
+    "l-ecke",
+    "karussell",
+    "rondell"
+  ],
+  "einbauten": [
+    {
+      "art": "geraet",
+      "beschlag": "eck_karussell",
+      "geraet": {
+        "typ": "karussell"
+      }
+    }
+  ]
+}

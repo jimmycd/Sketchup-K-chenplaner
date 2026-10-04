@@ -1,0 +1,15 @@
+{
+  "code": "US-GS-FREI",
+  "basis": "US-GS",
+  "name": "Geschirrspüler freistehend/unterbaufähig (eigene Gerätefront)",
+  "kategorie": "sonderschrank",
+  "suchbegriffe": [
+    "spülmaschine",
+    "geschirrspüler",
+    "unterbau",
+    "freistehend"
+  ],
+  "front": {
+    "typ": "keine"
+  }
+}

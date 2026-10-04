@@ -1,0 +1,22 @@
+{
+  "code": "ES-L-LEMANS",
+  "basis": "ES-L",
+  "name": "L-Eckschrank mit LeMans-Auszug",
+  "kategorie": "eckschrank",
+  "suchbegriffe": [
+    "eckschrank",
+    "l-ecke",
+    "lemans",
+    "le mans",
+    "nierenauszug"
+  ],
+  "einbauten": [
+    {
+      "art": "geraet",
+      "beschlag": "eck_lemans",
+      "geraet": {
+        "typ": "lemans"
+      }
+    }
+  ]
+}

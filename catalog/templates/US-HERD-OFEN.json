@@ -1,0 +1,111 @@
+{
+  "code": "US-HERD-OFEN",
+  "basis": "US-BASIS",
+  "name": "Backofenschrank (Ofen im Unterschrank, 1 Schublade darunter, Kochfeld getrennt)",
+  "kategorie": "sonderschrank",
+  "suchbegriffe": [
+    "herd",
+    "backofen",
+    "backofenschrank",
+    "ofen",
+    "unterbau"
+  ],
+  "beschreibung": "Unterschrank mit Einbaubackofen (Nische 560 x 550 x 590) oben und einer Schublade darunter. Tragender Zwischenboden unter dem Ofen (Dübel in den Seiten), keine Traversen (Arbeitsplatte wird über Winkel an den Seiten befestigt), Lüftungsausschnitt in der Rückwand.",
+  "merkmale": [
+    "ohne_traverse",
+    "ohne_lochreihe"
+  ],
+  "parameter": {
+    "breite": {
+      "default": 600,
+      "werte": [
+        600
+      ],
+      "frei": false
+    },
+    "ofen_nische_h": {
+      "default": 590,
+      "min": 585,
+      "max": 600,
+      "frei": true
+    },
+    "lueftung_b": {
+      "default": 500,
+      "min": 200,
+      "max": 560,
+      "frei": true
+    }
+  },
+  "variablen": {
+    "zb_unten": "=H-V.ofen_nische_h-S"
+  },
+  "teile_ohne": [
+    "tv",
+    "th"
+  ],
+  "teile_zusatz": [
+    {
+      "id": "zb",
+      "rolle": "zwischenboden",
+      "name": "Zwischenboden unter Ofen",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.innen_b",
+        "breite": "=V.tk"
+      },
+      "position": [
+        "=S",
+        0,
+        "=V.zb_unten"
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    }
+  ],
+  "einbauten": [
+    {
+      "art": "geraet",
+      "geraet": {
+        "typ": "backofen",
+        "nischenmass": [
+          560,
+          550,
+          "=V.ofen_nische_h"
+        ]
+      }
+    }
+  ],
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "auszug",
+        "anteil": 1,
+        "beschlag": "schubkastensystem"
+      },
+      {
+        "art": "offen",
+        "hoehe": "=V.ofen_nische_h+S"
+      }
+    ]
+  },
+  "bearbeitungen": {
+    "rueckwand": [
+      {
+        "typ": "ausschnitt",
+        "flaeche": "F1",
+        "x": "=B/2",
+        "y": "=H-V.ofen_nische_h/2",
+        "laenge": "=V.lueftung_b",
+        "breite": "=V.ofen_nische_h-40",
+        "eckradius": 20
+      }
+    ]
+  }
+}

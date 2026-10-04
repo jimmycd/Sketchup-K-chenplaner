@@ -85,6 +85,11 @@
                 "string",
                 "null"
               ]
+            },
+            "material_wasserfest": {
+              "type": "string",
+              "default": "spano_wasserfest_19",
+              "description": "Schlüssel in materialien: wasserfeste Platte (Boden im Spülenschrank)"
             }
           }
         },
