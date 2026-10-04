@@ -7,7 +7,7 @@ require 'extensions'
 
 module Kp
   module Plugin
-    VERSION = '0.2.0'
+    VERSION = '0.3.0'
 
     unless defined?(EXT)
       EXT = SketchupExtension.new('Küchenplaner', File.join(__dir__, 'kp_kuechenplaner', 'main'))

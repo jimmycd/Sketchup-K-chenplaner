@@ -37,6 +37,7 @@ module Kp
       teile += fronten(tmpl, ctx, pos, warn, teile)
       regeln_anwenden(tmpl, teile, ctx, instanz, warn)
       teile.each { |t| t['wenden'] = t['bearbeitungen'].any? { |b| b['flaeche'] == 'F2' } }
+      teile.each { |t| t['ocl'] = ocl_daten(t) }
       Ergebnis.new(teile: teile, warnungen: warn)
     end
 
@@ -337,6 +338,25 @@ module Kp
 
     def zahl_komma(v)
       (v == v.round ? v.round.to_s : v.to_s).tr('.', ',')
+    end
+
+    # Daten für OpenCutList: Materialname, Kantenmaterial je Seite (wird in SketchUp auf die Kantenflächen gelegt) und ein Text
+    # für Etiketten mit den Kantenpositionen. OCL liest Material und Kanten aus SketchUp; Typ und Stärke der Materialien
+    # werden einmalig in OCL gepflegt.
+    def ocl_daten(teil)
+      mat = @std['materialien'][teil['material']]
+      kanten = KANTEN.to_h do |s|
+        key = teil['kanten'][s]
+        k = key && @std['kanten'][key]
+        [s, k && (k['ocl_material'] || k['name'] || key)]
+      end
+      text = KANTEN.select { |s| kanten[s] }.map { |s| "#{s}: #{kanten[s]}" }.join(', ')
+      {
+        'material' => mat['ocl_material'] || mat['name'] || teil['material'],
+        'farbe' => mat['farbe'],
+        'kanten' => kanten,
+        'beschreibung' => "Schrank #{teil['pos']} · #{teil['bezeichnung']} · #{teil['material']}" + (text.empty? ? ' · ohne Kanten' : " · Kanten #{text}")
+      }
     end
 
     # ---- Regeln --------------------------------------------------------------

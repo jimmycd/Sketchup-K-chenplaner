@@ -149,6 +149,40 @@
           }
         }
       }
+    },
+    "ocl": {
+      "type": "object",
+      "description": "Daten für OpenCutList (Material, Kantenmaterial je Seite, Etikettentext)",
+      "properties": {
+        "material": {
+          "type": "string",
+          "description": "Name des SketchUp-Materials, das OCL als Teilematerial liest"
+        },
+        "farbe": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "kanten": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "common.schema.json#/$defs/kantenseite"
+          },
+          "additionalProperties": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Name des Kantenmaterials (SketchUp), null = keine Kante"
+          }
+        },
+        "beschreibung": {
+          "type": "string",
+          "description": "Text für Etiketten, inkl. Kantenpositionen"
+        }
+      }
     }
   },
   "$defs": {

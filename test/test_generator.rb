@@ -293,3 +293,21 @@ class TestSchubkasten < Minitest::Test
     assert_equal f['fertigmass']['w'] - 37, marks[0]['y'] # 37 mm unter der Oberkante
   end
 end
+
+class TestOclDaten < Minitest::Test
+  ROOT = File.expand_path('..', __dir__)
+
+  def test_ocl_data_for_every_part
+    projekt = JSON.parse(File.read(File.join(ROOT, 'examples/projekt_mueller.json')))
+    gen = Kp::Generator.new(projekt, Kp::Katalog.new(File.join(ROOT, 'catalog')))
+    res = gen.schrank('pos' => 'A1', 'vorlage' => 'US-T1', 'breite' => 450)
+    assert(res.teile.all? { |t| t['ocl'] && t['ocl']['material'] })
+    sr = res.teile.find { |t| t['teil_id'] == 'sr' }
+    assert_equal 'Spanplatte melaminbeschichtet weiß', sr['ocl']['material']
+    assert_equal({ 'vorne' => 'ABS weiß 2 mm', 'hinten' => nil, 'links' => 'ABS weiß 2 mm', 'rechts' => 'ABS weiß 2 mm' }, sr['ocl']['kanten'])
+    assert_includes sr['ocl']['beschreibung'], 'Kanten vorne: ABS weiß 2 mm'
+    tuer = res.teile.find { |t| t['rolle'] == 'front_tuer' }
+    assert_equal 'MDF lackiert', tuer['ocl']['material']
+    assert_equal ['ABS lackfähig 2 mm'], tuer['ocl']['kanten'].values.uniq
+  end
+end

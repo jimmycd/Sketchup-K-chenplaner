@@ -19,7 +19,7 @@ require File.join(Kp::Plugin::BASE, 'lib', 'kp', 'tcn', 'exporter')
 
 module Kp
   module Plugin
-    VERSION = '0.2.0' unless defined?(VERSION)
+    VERSION = '0.3.0' unless defined?(VERSION)
     DICT = 'kp_part'
     GRUPPE = 'KP_Projekt'
     AXES = {
@@ -113,6 +113,7 @@ module Kp
       face.reverse! if face.normal.z < 0
       face.pushpull(mm(f['d']))
       df.set_attribute(DICT, 'data', JSON.generate(teil))
+      ocl_setzen(df, teil['ocl']) if teil['ocl']
       pos = teil['lage']['position'].map { |v| mm(v) }
       x = AXES.fetch(teil['lage']['ausrichtung']['x'])
       z = AXES.fetch(teil['lage']['ausrichtung']['z'])
@@ -120,7 +121,39 @@ module Kp
       tr = Geom::Transformation.axes(Geom::Point3d.new(*pos), Geom::Vector3d.new(*x), Geom::Vector3d.new(*y), Geom::Vector3d.new(*z))
       inst = entities.add_instance(df, tr)
       inst.name = teil['bezeichnung']
+      inst.material = material_holen(teil['ocl']['material'], teil['ocl']['farbe']) if teil['ocl']
       inst
+    end
+
+    # Material mit diesem Namen holen oder anlegen (Farbe nur beim Anlegen). Typ und Stärke pflegt man einmalig in OpenCutList.
+    def material_holen(name, farbe = nil)
+      mats = Sketchup.active_model.materials
+      vorhanden = mats[name]
+      return vorhanden if vorhanden
+
+      m = mats.add(name)
+      if farbe =~ /\A#(\h{2})(\h{2})(\h{2})\z/
+        m.color = Sketchup::Color.new(Regexp.last_match(1).hex, Regexp.last_match(2).hex, Regexp.last_match(3).hex)
+      end
+      m
+    end
+
+    NORMALEN = { 'vorne' => [0, -1, 0], 'hinten' => [0, 1, 0], 'links' => [-1, 0, 0], 'rechts' => [1, 0, 0] }.freeze
+
+    # OpenCutList erkennt Anleimer am Material der schmalen Seitenflächen des Teils. Beschreibung: Text für Etiketten.
+    def ocl_setzen(df, ocl)
+      df.description = ocl['beschreibung'] if ocl['beschreibung']
+      flaechen = df.entities.grep(Sketchup::Face)
+      (ocl['kanten'] || {}).each do |seite, name|
+        next unless name
+
+        n = NORMALEN.fetch(seite)
+        flaeche = flaechen.find do |f|
+          v = f.normal
+          (v.x - n[0]).abs < 1e-6 && (v.y - n[1]).abs < 1e-6 && (v.z - n[2]).abs < 1e-6
+        end
+        flaeche.material = material_holen(name) if flaeche
+      end
     end
 
     # Alle Teile (Definitionen mit kp_part) als TCN-Dateien schreiben.

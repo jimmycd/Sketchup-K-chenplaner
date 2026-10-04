@@ -88,3 +88,68 @@ class TestPlugin < Minitest::Test
     File.delete(bad) if bad && File.exist?(bad)
   end
 end
+
+# OpenCutList: Material je Teil, Kantenmaterial auf den Kantenflächen, Etikettentext
+class TestPluginOcl < Minitest::Test
+  ROOT = File.expand_path('..', __dir__)
+
+  def setup
+    Sketchup.reset!
+    UI.messages.clear
+    UI.answers = { openpanel: File.join(ROOT, 'examples', 'projekt_mueller.json') }
+    Kp::Plugin.generieren
+  end
+
+  def definition(teil_id)
+    Sketchup.active_model.definitions.find do |d|
+      j = d.get_attribute('kp_part', 'data')
+      j && JSON.parse(j)['teil_id'] == teil_id && JSON.parse(j)['pos'] == 'A1'
+    end
+  end
+
+  def instanz(bezeichnung)
+    alle = []
+    sammle = lambda do |ents|
+      ents.items.each do |e|
+        alle << e if e.is_a?(Sketchup::Instance)
+        sammle.call(e.entities) if e.is_a?(Sketchup::Group)
+      end
+    end
+    sammle.call(Sketchup.active_model.entities)
+    alle.find { |i| i.name == bezeichnung }
+  end
+
+  def test_part_material_is_set_on_instance
+    i = instanz('A1 seite_r')
+    assert_equal 'Spanplatte melaminbeschichtet weiß', i.material.name
+    assert_equal 'MDF lackiert', instanz('A1 Tür 1 DIN R').material.name
+    assert_equal 'HDF weiß', instanz('A1 Rückwand aufgesetzt').material.name
+  end
+
+  def test_edge_material_on_edge_faces_only
+    faces = definition('sr').entities.grep(Sketchup::Face)
+    mit = faces.select(&:material)
+    assert_equal 3, mit.size # vorne, links, rechts (Seitenenden)
+    assert_equal ['ABS weiß 2 mm'], mit.map { |f| f.material.name }.uniq
+    vorne = faces.find { |f| f.normal.y == -1 }
+    assert_equal 'ABS weiß 2 mm', vorne.material.name
+    assert_nil faces.find { |f| f.normal.y == 1 }.material # hinten ohne Kante
+    assert_nil faces.find { |f| f.normal.z == 1 }.material # Flächen bleiben ohne Kantenmaterial
+  end
+
+  def test_description_lists_edge_positions_for_labels
+    text = definition('sr').description
+    assert_includes text, 'A1'
+    assert_includes text, 'vorne: ABS weiß 2 mm'
+    assert_includes text, 'links: ABS weiß 2 mm'
+    refute_includes text, 'hinten'
+    assert_includes definition('rw').description, 'ohne Kanten'
+  end
+
+  def test_materials_are_reused_not_duplicated
+    mats = Sketchup.active_model.materials.map(&:name)
+    assert_equal mats.uniq, mats
+    assert_includes mats, 'ABS weiß 2 mm'
+    assert_includes mats, 'MDF lackiert'
+  end
+end

@@ -43,11 +43,54 @@ module Geom
 end
 
 module Sketchup
+  class Color
+    attr_reader :red, :green, :blue
+
+    def initialize(r, g, b)
+      @red = r
+      @green = g
+      @blue = b
+    end
+  end
+
+  class Material
+    attr_reader :name
+    attr_accessor :color
+
+    def initialize(name) = @name = name
+  end
+
+  class Materials
+    include Enumerable
+    def initialize = @list = {}
+    def [](name) = @list[name]
+    def add(name) = @list[name] = Material.new(name)
+    def each(&b) = @list.values.each(&b)
+  end
+
   class Face
-    def normal = Struct.new(:z).new(-1)
-    def reverse! = @reversed = true
-    def reversed? = @reversed
-    def pushpull(d) = @pushed = d
+    attr_accessor :material
+    attr_reader :normal
+
+    def initialize(parent = nil)
+      @parent = parent
+      @normal = Struct.new(:x, :y, :z).new(0, 0, -1)
+    end
+
+    def reverse!
+      @normal = Struct.new(:x, :y, :z).new(0, 0, 1)
+    end
+
+    # Nachbildung: Grundfläche wird zur Deckfläche, vier Seitenflächen und eine neue Bodenfläche entstehen
+    def pushpull(d)
+      @pushed = d
+      @normal = Struct.new(:x, :y, :z).new(0, 0, 1)
+      [[-1, 0, 0], [1, 0, 0], [0, -1, 0], [0, 1, 0], [0, 0, -1]].each do |x, y, z|
+        f = Face.new
+        f.instance_variable_set(:@normal, Struct.new(:x, :y, :z).new(x, y, z))
+        @parent&.items&.push(f)
+      end
+    end
     attr_reader :pushed
   end
 
@@ -65,7 +108,7 @@ module Sketchup
     end
 
     def add_face(*pts)
-      f = Face.new
+      f = Face.new(self)
       f.instance_variable_set(:@pts, pts)
       @items << f
       f
@@ -98,6 +141,7 @@ module Sketchup
   end
 
   class Definition < Attrs
+    attr_accessor :description
     attr_reader :name, :entities
 
     def initialize(name)
@@ -107,7 +151,7 @@ module Sketchup
   end
 
   class Instance
-    attr_accessor :name
+    attr_accessor :name, :material
     attr_reader :definition, :transformation
 
     def initialize(df, tr)
@@ -124,11 +168,12 @@ module Sketchup
   end
 
   class Model < Attrs
-    attr_reader :entities, :definitions, :operations
+    attr_reader :entities, :definitions, :operations, :materials
 
     def initialize
       @entities = Entities.new
       @definitions = Definitions.new
+      @materials = Materials.new
       @operations = []
     end
 
