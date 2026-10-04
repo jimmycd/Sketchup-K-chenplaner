@@ -127,10 +127,25 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
 - `plugin/`: SketchUp-Erweiterung mit Menü *Plugins → Küchenplaner* (Projekt wählen, Küche generieren, TCN exportieren). Erzeugt je Teil
   eine Komponentendefinition mit `kp_part.data`. **Nicht in SketchUp getestet**, nur Syntax geprüft.
 
+### Türen (neu)
+
+- Frontfeld `tuer`: Breite = B − Fuge, Höhe nach Anteilen (Fuge 3 mm zwischen Feldern), Frontkante rundum (2 mm), Fräsmaß = Fertigmaß − 4 mm.
+  Für `US-T1` bei B = 450: Tür 769 × 447, Fräsmaß 765 × 443.
+- DIN links/rechts über `anschlag` im Frontfeld (DIN L = Anschlag links). Teilachsen: F1 ist die Innenseite, das Topfband sitzt bei hohem y
+  (`y-21,5`), wie in beiden Beispieltüren. DIN links: x nach unten, DIN rechts: x nach oben.
+- Topfbänder: Anzahl nach Türhöhe (`anzahl_tabelle`), Randabstand 100, Abstand auf das 32er-Raster gerundet, mittig verteilt; Ausgabe über
+  das Makro `inge100`. Parameter `tb` (Topfabstand) wirkt über `y-{V.tb+17.5}` (Text mit `{Ausdruck}` wird eingesetzt).
+  Die Beispieldatei weicht um 2 mm ab (Erstes Band bei 90, wir berechnen 94,5 für eine 769er Tür; Abstand passt jeweils auf das 32er-Raster).
+- Griff: Standard `grifflos`. Mit einem Griffmodell (`standards.front.griff` = Funktion im Set oder Beschlag-ID) kommen zwei Markierungsbohrungen
+  Ø3 × 3 mm. Abstand, Mitte und Kante sind Parameter des Griffmodells (`catalog/hardware/griff_bohrabstand_160.json`), Standard Mitte = halbe Türhöhe,
+  Kante 37 mm.
+- Teile tragen jetzt `lage` (Position und Ausrichtung im Schrank) statt interner Felder; das Schema kennt sie.
+- Offen: Bohrbild der Seite (Montageplatte), Doppeltür, Schubladen, Klappen.
+
 ### Noch nicht umgesetzt
 
 - Verbindungsregeln (`r_seite_boden`): Kontakterkennung und echte Beschlag-Bohrbilder (Minifix usw.). Der Generator meldet eine Warnung.
-- Fronten (Türen, Schubkästen, Topfband-Verteilung), Typcode-Parser, Zeilen-Kurzform, Freitext.
+- Schubkästen, Klappen, Doppeltüren, Typcode-Parser, Zeilen-Kurzform, Freitext.
 - Rotation der Zeile (`richtung_grad`), Fräsungen aus `aussparen`.
 - Einlegeboden-Maße sind Annahmen (`standards.einlegeboden`: Spiel 2 mm, Tiefe −20 mm, Rücksprung vorne 10 mm).
 

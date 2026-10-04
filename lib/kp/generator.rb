@@ -34,10 +34,10 @@ module Kp
 
       teile = (tmpl['teile'] || []).flat_map { |t| teil(t, tmpl, ctx, pos) }.compact
       teile += einbauten(tmpl, ctx, pos, warn)
+      teile += fronten(tmpl, ctx, pos, warn)
       regeln_anwenden(tmpl, teile, ctx, instanz, warn)
-      warn << 'Front/Türen/Schubkästen werden noch nicht erzeugt (Roadmap 2)' if tmpl['front'] && tmpl['front']['felder']
       teile.each { |t| t['wenden'] = t['bearbeitungen'].any? { |b| b['flaeche'] == 'F2' } }
-      Ergebnis.new(teile: teile.map { |t| t.reject { |k, _| k.start_with?('_') } }, warnungen: warn)
+      Ergebnis.new(teile: teile, warnungen: warn)
     end
 
     private
@@ -101,8 +101,8 @@ module Kp
           'kantenstaerke' => KANTEN.to_h { |s| [s, kanten[s] ? @std['kanten'][kanten[s]]['staerke'].to_f : 0.0] },
           'sichtseite' => 'F1', 'wenden' => false, 'bearbeitungen' => [],
           'herkunft' => { 'vorlage' => tmpl['code'], 'generator_version' => VERSION },
-          '_position' => t['position'].map { |v| Formel.auswerten(v, ctx).to_f },
-          '_ausrichtung' => t['ausrichtung'] || { 'x' => '+x', 'z' => '+z' }
+          'lage' => { 'position' => t['position'].map { |v| Formel.auswerten(v, ctx).to_f },
+                      'ausrichtung' => t['ausrichtung'] || { 'x' => '+x', 'z' => '+z' } }
         }
       end
     end
@@ -133,12 +133,133 @@ module Kp
             'kantenstaerke' => KANTEN.to_h { |k| [k, k == 'vorne' ? @std['kanten'][kante('P.korpus.kante_sichtbar')]['staerke'].to_f : 0.0] },
             'sichtseite' => 'F1', 'wenden' => false, 'bearbeitungen' => [],
             'herkunft' => { 'vorlage' => tmpl['code'], 'generator_version' => VERSION },
-            '_position' => [s + eb['spiel_breite'] / 2.0, eb['ruecksprung_vorne'], z],
-            '_ausrichtung' => { 'x' => '+x', 'z' => '+z' }
+            'lage' => { 'position' => [s + eb['spiel_breite'] / 2.0, eb['ruecksprung_vorne'], z],
+                        'ausrichtung' => { 'x' => '+x', 'z' => '+z' } }
           }
         end
       end
     end
+
+    # ---- Fronten (zunächst nur Türen) ---------------------------------------------
+    # Aufschlagende Front: Breite = B - Fuge, Höhe verteilt nach Anteilen. Teilachsen so, dass F1 die Innenseite ist
+    # und das Topfband bei hohem y sitzt (wie in den Maschinenbeispielen): DIN links x nach unten, DIN rechts x nach oben.
+    def fronten(tmpl, ctx, pos, warn)
+      front = tmpl['front']
+      return [] unless front && front['felder'] && front['typ'] != 'keine'
+
+      cfg = @std['front'] || {}
+      fuge = (cfg['fuge'] || 3).to_f
+      felder = front['felder']
+      b = ctx[:vars]['B']
+      h_ges = ctx[:vars]['H'] - fuge + (cfg['ueberstand_unten'] || 0).to_f
+      summe = felder.sum { |f| (f['anteil'] || 1).to_f }
+      z = fuge / 2 - (cfg['ueberstand_unten'] || 0).to_f
+      d = (cfg['staerke'] || 19).to_f
+      felder.each_with_index.flat_map do |f, i|
+        hoehe = (h_ges - fuge * (felder.size - 1)) * (f['anteil'] || 1).to_f / summe
+        z0 = z
+        z += hoehe + fuge
+        unless f['art'] == 'tuer'
+          warn << "Frontfeld #{f['art']} noch nicht umgesetzt"
+          next []
+        end
+        tuer(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn)
+      end
+    end
+
+    def tuer(tmpl, ctx, pos, feld, nr, breite, hoehe, x0, z0, dicke, warn)
+      cfg = @std['front']
+      mat = material('P.front.material')
+      kante = kante('P.front.kante')
+      staerke = kante ? @std['kanten'][kante]['staerke'].to_f : 0.0
+      links = feld['anschlag'] == 'links'
+      tid = "tu#{nr}"
+      teil = {
+        'uid' => "#{@projekt['id']}/#{pos}/#{tid}", 'pos' => pos, 'teil_id' => tid, 'rolle' => 'front_tuer',
+        'bezeichnung' => "#{pos} Tür #{nr} DIN #{links ? 'L' : 'R'}", 'material' => mat,
+        'fertigmass' => { 'l' => hoehe.round(3), 'w' => breite.round(3), 'd' => dicke },
+        'maserung' => 'laenge', 'kanten' => KANTEN.to_h { |k| [k, kante] },
+        'kantenstaerke' => KANTEN.to_h { |k| [k, staerke] },
+        'sichtseite' => 'F2', 'wenden' => false, 'bearbeitungen' => [],
+        'herkunft' => { 'vorlage' => tmpl['code'], 'generator_version' => VERSION },
+        'lage' => { 'position' => links ? [x0 + breite, -dicke, z0 + hoehe] : [x0, -dicke, z0],
+                    'ausrichtung' => links ? { 'x' => '-z', 'z' => '+y' } : { 'x' => '+z', 'z' => '+y' } }
+      }
+      pctx = teil_ctx(ctx, hoehe, breite, dicke)
+      set = @katalog.beschlagset(@std['beschlag_set'])['zuordnung']
+      topfband_ops(teil, pctx, set, feld['beschlag'] || 'topfband', staerke, warn)
+      griff_ops(teil, pctx, set, cfg['griff'], warn)
+      [teil]
+    end
+
+    def beschlag_id(set, funktion, ctx)
+      z = set[funktion] or return nil
+      return z if z.is_a?(String)
+
+      vctx = ctx.merge('V' => (ctx['V'] || {}).merge('oeffnungswinkel' => 110))
+      z.find { |e| e['bedingung'].nil? || Formel.auswerten(e['bedingung'], vctx) }&.fetch('beschlag')
+    end
+
+    # Topfbänder: Anzahl nach Türhöhe (anzahl_tabelle), Randabstand, auf 32er-Raster einrasten, mittig verteilt.
+    def topfband_ops(teil, pctx, set, funktion, band, warn)
+      id = beschlag_id(set, funktion.sub('set:', ''), pctx) || funktion
+      hw = @katalog.beschlag(id) or return warn << "Beschlag #{id} nicht im Katalog"
+      l = teil['fertigmass']['l']
+      v = hw['verteilung'] || {}
+      n = (v['anzahl_tabelle'].find { |e| l <= e['bis'] } || v['anzahl_tabelle'].last)['anzahl']
+      rand = Formel.auswerten(v['randabstand'] || 100, pctx)
+      raster = v['raster_fangen'] ? @std['lochreihe']['raster'].to_f : nil
+      abstand = (l - 2 * rand) / (n - 1)
+      abstand = (abstand / raster).round * raster if raster
+      erste = (l - abstand * (n - 1)) / 2.0
+      params = (hw['parameter'] || {}).transform_values { |p| Formel.auswerten(p['default'], pctx) }
+      (0...n).each do |i|
+        # Makroparameter sind Fräsmaß-Koordinaten (TpaCAD): Anleimer am Teilanfang abziehen
+        x = erste + abstand * i - teil['kantenstaerke']['links']
+        beschlag_bohrbild(hw, 'front_tuer', teil, pctx, params.merge('x' => x), "topfband#{i + 1}")
+      end
+    end
+
+    def griff_ops(teil, pctx, set, griff, warn)
+      return if griff.nil? || griff == 'grifflos'
+
+      id = set[griff] || griff
+      hw = @katalog.beschlag(id) or return warn << "Griff #{id} nicht im Katalog"
+      params = (hw['parameter'] || {}).to_h { |k, p| [k, p['default']] }
+      pctx = pctx.merge('V' => params.transform_values { |x| Formel.auswerten(x, pctx) })
+      beschlag_bohrbild(hw, 'front_tuer', teil, pctx, pctx['V'], 'griff')
+    end
+
+    def beschlag_bohrbild(hw, rolle, teil, pctx, vars, kennung)
+      ctx = pctx.merge('V' => vars)
+      (hw['bohrbilder'] || []).select { |b| b['teil'] == rolle }.each do |bb|
+        bb['bearbeitungen'].each_with_index do |b, i|
+          next if b['bedingung'] && !Formel.auswerten(b['bedingung'], ctx)
+
+          op = b['typ'] == 'makro' ? makro_aufloesen(b, ctx) : aufloesen(b, ctx)
+          op.delete('bedingung')
+          op['flaeche'] ||= bb.dig('bezug', 'flaeche')
+          op['id'] = "#{kennung}.#{i + 1}"
+          op['quelle'] = { 'beschlag' => hw['id'] }
+          teil['bearbeitungen'] << op
+        end
+      end
+    end
+
+    # Makroparameter: Zahl/Formel auswerten; Text mit {Ausdruck} wird interpoliert (Zahl mit Komma, z. B. 'y-{V.tb+17.5}' -> 'y-21,5')
+    def makro_aufloesen(b, ctx)
+      params = b['parameter'].to_h do |k, v|
+        w = if v.is_a?(String) && v.include?('{')
+              v.gsub(/\{([^}]*)\}/) { zahl_komma(Formel.auswerten("=#{Regexp.last_match(1)}", ctx)) }
+            else
+              Formel.auswerten(v, ctx)
+            end
+        [k, w]
+      end
+      b.merge('parameter' => params)
+    end
+
+    def zahl_komma(v) = (v == v.round ? v.round.to_s : v.to_s).tr('.', ',')
 
     # ---- Regeln --------------------------------------------------------------
 
@@ -191,7 +312,7 @@ module Kp
 
     # Regeln beschreiben y als Abstand von vorne. Zeigt die Teil-y-Achse nach vorne (Seite links), wird gespiegelt.
     def spiegeln_y!(op, teil)
-      return unless y_nach_vorne?(teil['_ausrichtung'])
+      return unless y_nach_vorne?(teil['lage']['ausrichtung'])
 
       w = teil['fertigmass']['w']
       case op['typ']

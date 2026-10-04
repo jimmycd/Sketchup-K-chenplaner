@@ -83,11 +83,11 @@ module Kp
       face = df.entities.add_face([0, 0, 0], [mm(f['l']), 0, 0], [mm(f['l']), mm(f['w']), 0], [0, mm(f['w']), 0])
       face.reverse! if face.normal.z < 0
       face.pushpull(mm(f['d']))
-      daten = JSON.generate(teil.reject { |k, _| k.start_with?('_') })
+      daten = JSON.generate(teil)
       df.set_attribute(DICT, 'data', daten)
-      pos = teil['_position'].map { |v| mm(v) }
-      x = AXES.fetch(teil['_ausrichtung']['x'])
-      z = AXES.fetch(teil['_ausrichtung']['z'])
+      pos = teil['lage']['position'].map { |v| mm(v) }
+      x = AXES.fetch(teil['lage']['ausrichtung']['x'])
+      z = AXES.fetch(teil['lage']['ausrichtung']['z'])
       y = [z[1] * x[2] - z[2] * x[1], z[2] * x[0] - z[0] * x[2], z[0] * x[1] - z[1] * x[0]]
       tr = Geom::Transformation.axes(Geom::Point3d.new(*pos), Geom::Vector3d.new(*x), Geom::Vector3d.new(*y), Geom::Vector3d.new(*z))
       inst = entities.add_instance(df, tr)

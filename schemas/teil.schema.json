@@ -102,6 +102,53 @@
         "type": "number",
         "minimum": 0
       }
+    },
+    "lage": {
+      "type": "object",
+      "description": "Lage des Teils im Schrank-System (nur für SketchUp, nicht für den Export)",
+      "required": [
+        "position",
+        "ausrichtung"
+      ],
+      "properties": {
+        "position": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "ausrichtung": {
+          "type": "object",
+          "required": [
+            "x",
+            "z"
+          ],
+          "properties": {
+            "x": {
+              "enum": [
+                "+x",
+                "-x",
+                "+y",
+                "-y",
+                "+z",
+                "-z"
+              ]
+            },
+            "z": {
+              "enum": [
+                "+x",
+                "-x",
+                "+y",
+                "-y",
+                "+z",
+                "-z"
+              ]
+            }
+          }
+        }
+      }
     }
   },
   "$defs": {

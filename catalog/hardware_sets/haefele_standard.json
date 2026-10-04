@@ -5,13 +5,19 @@
     "verbinder": "haefele_minifix15",
     "duebel": "duebel_8x35",
     "topfband": [
-      { "bedingung": "=V.oeffnungswinkel>110", "beschlag": "topfband_155_aufschlag" },
-      { "beschlag": "topfband_110_aufschlag" }
+      {
+        "bedingung": "=V.oeffnungswinkel>110",
+        "beschlag": "topfband_155_aufschlag"
+      },
+      {
+        "beschlag": "topfband_110_aufschlag"
+      }
     ],
     "schubkasten_niedrig": "<schubkastensystem_niedrig>",
     "schubkasten_hoch": "<schubkastensystem_hoch>",
     "bodentraeger": "bodentraeger_5mm",
     "sockelfuss": "sockelfuss_100",
-    "schrankaufhaenger": "<aufhaenger>"
+    "schrankaufhaenger": "<aufhaenger>",
+    "griff": "griff_bohrabstand_160"
   }
 }
