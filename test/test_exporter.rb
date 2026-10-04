@@ -88,7 +88,7 @@ class TestExporter < Minitest::Test
 
   def test_through_hole_depth
     r = export([{ 'typ' => 'bohrung', 'flaeche' => 'F1', 'x' => 50, 'y' => 50, 'd' => 5, 'tiefe' => 19, 'durch' => true }])
-    assert_match(/#3=-20 /, lines(r.files[0]).grep(/W#81/)[0])
+    assert_match(/#3=-21 /, lines(r.files[0]).grep(/W#81/)[0])
   end
 
   def test_groove_saw_x_left_reference

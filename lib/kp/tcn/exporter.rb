@@ -22,7 +22,7 @@ module Kp
         @p = profil
         @tcn = { 'kopfzeile' => 'TPA\\ALBATROS\\EDICAD\\02.00:1224:r0w0h0s1', 'zeilenende' => 'crlf',
                  'tcn_version' => '2.6.14', 'bohrer_werkzeugtyp' => 0, 'saege_makro' => '..\\custom\\mcr\\lame.tmcr',
-                 'durchbohr_zugabe' => 1 }.merge(profil['tcn'] || {})
+                 'durchbohr_zugabe' => 2 }.merge(profil['tcn'] || {})
       end
 
       def export(teil)
@@ -148,7 +148,8 @@ module Kp
           z = durch ? depth_axis + @tcn['durchbohr_zugabe'] : tiefe
         end
         [w("W#81{ ::WTp #1002=#{fmt(op['d'])} #1=#{fmt(x)} #2=#{fmt(y)} #3=#{fmt(-z)} " \
-           "#8015=0 #201=1 #203=1 #1001=#{@tcn['bohrer_werkzeugtyp']} }W", face)]
+           "#8015=0 #201=1 #203=1#{op['werkzeug'] ? " #205=#{op['werkzeug'].to_i}" : ''} " \
+           "#1001=#{@tcn['bohrer_werkzeugtyp']} }W", face)]
       end
 
       # ---- Formatieren (Makro squad, W#1510) ----------------------------------------

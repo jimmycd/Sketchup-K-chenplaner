@@ -1,50 +1,5 @@
 [
   {
-    "id": "r_seite_boden",
-    "name": "Seite an Boden/Traverse, eingestellt",
-    "art": "verbindung",
-    "prioritaet": 10,
-    "gilt_fuer": {
-      "bauweise": [
-        "seiten_durchgehend"
-      ]
-    },
-    "teil_a": [
-      "seite_l",
-      "seite_r"
-    ],
-    "teil_b": [
-      "boden",
-      "deckel",
-      "traverse_vorne",
-      "traverse_hinten",
-      "zwischenboden"
-    ],
-    "stoss": "stumpf_flaeche_kante",
-    "elemente": [
-      {
-        "beschlag": "set:verbinder",
-        "verteilung": {
-          "modus": "randabstand_max",
-          "randabstand": "=P.verbindung.randabstand",
-          "max_abstand": "=P.verbindung.max_abstand",
-          "min_anzahl": 2
-        }
-      },
-      {
-        "beschlag": "set:duebel",
-        "bedingung": "=P.verbindung.duebel",
-        "verteilung": {
-          "modus": "randabstand_max",
-          "randabstand": "=P.verbindung.randabstand",
-          "max_abstand": "=P.verbindung.max_abstand",
-          "min_anzahl": 2,
-          "versatz": 32
-        }
-      }
-    ]
-  },
-  {
     "id": "r_lochreihe",
     "name": "Lochreihe 32er-System",
     "art": "teil",
@@ -139,6 +94,301 @@
         "breite": "=P.rueckwand.staerke+0.5",
         "tiefe": "=P.rueckwand.nuttiefe",
         "bezug": "links"
+      }
+    ]
+  },
+  {
+    "id": "r_seite_duebel_schraube",
+    "name": "Seite: Dübel (Ø8) und Schraubenlöcher (Ø5, durch) zu Boden und Traversen",
+    "art": "teil",
+    "prioritaet": 10,
+    "gilt_fuer": {
+      "bauweise": [
+        "seiten_durchgehend"
+      ]
+    },
+    "rollen": [
+      "seite_l",
+      "seite_r"
+    ],
+    "bearbeitungen": [
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y0+30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y1-30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=YM",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y0+30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y0+75",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y1-30",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y1-75",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_flaeche"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y0+60",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=Y1-60",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=YM-80",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=S/2",
+        "y": "=YM+80",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y0+50",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=L-S/2",
+        "y": "=Y1-50",
+        "d": "=P.verbindung.schraube.d",
+        "tiefe": "=D",
+        "durch": true,
+        "werkzeug": "=P.verbindung.schraube.werkzeug"
+      }
+    ]
+  },
+  {
+    "id": "r_boden_stirn_duebel",
+    "name": "Boden: stirnseitige Dübellöcher auf Materialstärke/2",
+    "art": "teil",
+    "prioritaet": 10,
+    "gilt_fuer": {
+      "bauweise": [
+        "seiten_durchgehend"
+      ]
+    },
+    "rollen": [
+      "boden",
+      "deckel",
+      "zwischenboden"
+    ],
+    "bearbeitungen": [
+      {
+        "typ": "bohrung",
+        "flaeche": "F5",
+        "y": "=Y0+30",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F5",
+        "y": "=Y1-30",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F5",
+        "y": "=YM",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F6",
+        "y": "=Y0+30",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F6",
+        "y": "=Y1-30",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F6",
+        "y": "=YM",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      }
+    ]
+  },
+  {
+    "id": "r_traverse_vorne_stirn_duebel",
+    "name": "Traverse vorne: stirnseitige Dübellöcher",
+    "art": "teil",
+    "prioritaet": 10,
+    "gilt_fuer": {
+      "bauweise": [
+        "seiten_durchgehend"
+      ]
+    },
+    "rollen": [
+      "traverse_vorne"
+    ],
+    "bearbeitungen": [
+      {
+        "typ": "bohrung",
+        "flaeche": "F5",
+        "y": "=Y0+30",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F5",
+        "y": "=Y0+75",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F6",
+        "y": "=Y0+30",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F6",
+        "y": "=Y0+75",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      }
+    ]
+  },
+  {
+    "id": "r_traverse_hinten_stirn_duebel",
+    "name": "Traverse hinten: stirnseitige Dübellöcher",
+    "art": "teil",
+    "prioritaet": 10,
+    "gilt_fuer": {
+      "bauweise": [
+        "seiten_durchgehend"
+      ]
+    },
+    "rollen": [
+      "traverse_hinten"
+    ],
+    "bearbeitungen": [
+      {
+        "typ": "bohrung",
+        "flaeche": "F5",
+        "y": "=Y1-30",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F5",
+        "y": "=Y1-75",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F6",
+        "y": "=Y1-30",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F6",
+        "y": "=Y1-75",
+        "z": "=D/2",
+        "d": "=P.verbindung.duebel.d",
+        "tiefe": "=P.verbindung.duebel.tiefe_stirn"
       }
     ]
   }

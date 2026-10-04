@@ -251,23 +251,41 @@
         },
         "verbindung": {
           "type": "object",
+          "description": "Korpusverbindung mit Holzdübeln und Schrauben (kein Verbindersystem)",
           "properties": {
-            "korpus": {
-              "type": "string",
-              "description": "Funktion im Beschlag-Set, z. B. 'verbinder'",
-              "default": "verbinder"
-            },
             "duebel": {
-              "type": "boolean",
-              "default": true
+              "type": "object",
+              "properties": {
+                "d": {
+                  "type": "number",
+                  "default": 8
+                },
+                "tiefe_flaeche": {
+                  "type": "number",
+                  "default": 14,
+                  "description": "Tiefe in der Seitenfläche (Beispiel Seiten_.tcn)"
+                },
+                "tiefe_stirn": {
+                  "type": "number",
+                  "default": 21,
+                  "description": "Tiefe in der Stirnseite von Boden/Traverse/Deckel (Annahme: Dübel 35 mm - 14)"
+                }
+              }
             },
-            "randabstand": {
-              "type": "number",
-              "default": 34
-            },
-            "max_abstand": {
-              "type": "number",
-              "default": 320
+            "schraube": {
+              "type": "object",
+              "properties": {
+                "d": {
+                  "type": "number",
+                  "default": 5,
+                  "description": "Durchgangsloch in der Seite"
+                },
+                "werkzeug": {
+                  "type": "integer",
+                  "default": 12,
+                  "description": "TpaCAD-Werkzeugnummer (#205)"
+                }
+              }
             }
           }
         },

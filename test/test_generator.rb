@@ -3,6 +3,7 @@
 require 'minitest/autorun'
 require 'json'
 require_relative '../lib/kp/generator'
+require_relative '../lib/kp/tcn/exporter'
 
 class TestGenerator < Minitest::Test
   ROOT = File.expand_path('..', __dir__)
@@ -28,16 +29,23 @@ class TestGenerator < Minitest::Test
   end
 
   def test_edge_thickness_resolved
-    t = teil(schrank, 'sl')
-    assert_equal 'abs_weiss_2', t['kanten']['vorne']
-    assert_equal 2.0, t['kantenstaerke']['vorne']
-    assert_equal 0.0, t['kantenstaerke']['links']
+    res = schrank
+    sr = teil(res, 'sr')
+    assert_equal 'abs_weiss_2', sr['kanten']['vorne']
+    assert_equal 2.0, sr['kantenstaerke']['vorne']
+    assert_equal 2.0, sr['kantenstaerke']['links'] # Seitenenden
+    # linke Seite: y zeigt nach vorne, die Schrankfront ist y = W, also Kante 'hinten' im Teilsystem
+    sl = teil(res, 'sl')
+    assert_equal 2.0, sl['kantenstaerke']['hinten']
+    assert_equal 0.0, sl['kantenstaerke']['vorne']
   end
+
+  def rows(t) = t['bearbeitungen'].select { |b| b['typ'] == 'bohrreihe' }
 
   def test_hole_row_count_and_mirroring
     res = schrank
-    sr = teil(res, 'sr')['bearbeitungen']
-    sl = teil(res, 'sl')['bearbeitungen']
+    sr = rows(teil(res, 'sr'))
+    sl = rows(teil(res, 'sl'))
     assert_equal 2, sr.size
     assert_equal 19, sr[0]['anzahl'] # floor((772-38-64-64)/32)+1
     assert_equal [83.0, 37.0], sr[0]['start']
@@ -67,7 +75,7 @@ class TestGenerator < Minitest::Test
 
   def test_override_and_warnings
     res = schrank('overrides' => { 'front.felder.0.anschlag' => 'links' })
-    assert(res.warnungen.any? { |w| w.include?('r_seite_boden') })
+    assert_empty(res.warnungen.grep(/r_seite_boden/))
   end
 
   def tuer(res) = teil(res, 'tu1')
@@ -101,6 +109,50 @@ class TestGenerator < Minitest::Test
     assert_equal 160.0, ops[1]['x'] - ops[0]['x']
     assert_equal [3, 3], ops.map { |o| o['tiefe'] }
     assert_equal 37.0, ops[0]['y']
+  end
+
+  # Referenz: examples/tcn_referenz/Seiten_Duebel.tcn (Kopf 656 x 551, 2 mm Anleimer vorne und an beiden Enden)
+  def sample_lines(datei)
+    File.read(File.join(ROOT, 'examples/tcn_referenz', datei)).split("\r\n").grep(/\AW#81/).map do |l|
+      v = ->(k) { l[/##{k}=(\S+)/, 1] }
+      [v.call(1), v.call(2), v.call(3), v.call(1002), v.call(205)]
+    end
+  end
+
+  def numeric(ausdruck, x, y)
+    s = ausdruck.tr(',', '.').gsub('x', x.to_s).gsub('y', y.to_s)
+    Kp::Formel.auswerten("=#{s}", { vars: {} })
+  end
+
+  def test_side_holes_match_reference_file
+    # Seite 660 hoch, 553 tief -> Fräsmaß 656 x 551 wie in der Beispieldatei
+    res = schrank('hoehe' => 660, 'tiefe' => 561)
+    sr = teil(res, 'sr')
+    assert_equal({ 'l' => 660.0, 'w' => 553.0, 'd' => 19.0 }, sr['fertigmass'])
+    profil = JSON.parse(File.read(File.join(ROOT, 'examples/profile/werkstatt.tcnprofil.json')))
+    out = Kp::Tcn::Exporter.new(profil).export(sr)
+    assert_empty out.fehler
+    erzeugt = out.files.first.content.split("\r\n").grep(/\AW#81/).map do |l|
+      v = ->(k) { l[/##{k}=(\S+)/, 1] }
+      [v.call(1).to_f, v.call(2).to_f, v.call(3).to_f, v.call(1002).to_f, v.call(205)&.to_f]
+    end
+    erwartet = sample_lines('Seiten_Duebel.tcn').map do |x, y, z, d, w|
+      [numeric(x, 656, 551).to_f, numeric(y, 656, 551).to_f, numeric(z, 656, 551).to_f, d.to_f, w&.to_f]
+    end
+    assert_equal erwartet.sort, erzeugt.sort
+  end
+
+  def test_boden_and_traverse_stirn_dowels_differ
+    res = schrank
+    stirn = ->(id) { teil(res, id)['bearbeitungen'].select { |b| %w[F5 F6].include?(b['flaeche']) } }
+    boden = stirn.call('bo')
+    assert_equal 6, boden.size # 3 je Stirnseite
+    assert_equal [32, 277, 522], boden.select { |b| b['flaeche'] == 'F5' }.map { |b| b['y'].round }.sort
+    assert_equal [9.5], boden.map { |b| b['z'] }.uniq # Materialstärke / 2
+    tv = stirn.call('tv').select { |b| b['flaeche'] == 'F5' }.map { |b| b['y'] }.sort
+    th = stirn.call('th').select { |b| b['flaeche'] == 'F5' }.map { |b| b['y'] }.sort
+    assert_equal [32.0, 77.0], tv # 30 und 75 ab Fräskante (Anleimer vorne 2 mm)
+    assert_equal [25.0, 70.0], th # 30 und 75 ab hinterer Kante, Traverse 100 breit
   end
 
   def test_einlegeboden_on_grid

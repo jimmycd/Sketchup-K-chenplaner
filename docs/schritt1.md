@@ -142,10 +142,37 @@ Aus `Seite`, `Boden`, `Deckel`, `Strebe`, `T_rR` übernommen bzw. bestätigt:
 - Teile tragen jetzt `lage` (Position und Ausrichtung im Schrank) statt interner Felder; das Schema kennt sie.
 - Offen: Bohrbild der Seite (Montageplatte), Doppeltür, Schubladen, Klappen.
 
+### Korpusverbindung mit Dübeln und Schrauben (neu)
+
+Es gibt kein Verbindersystem. Seite, Boden, Traverse werden mit Holzdübeln und Schrauben verbunden. Grundlage ist `examples/tcn_referenz/Seiten_Duebel.tcn`
+(Kopf 656 × 551, 2 mm Anleimer vorne und an beiden Enden). Der Generator erzeugt für 660 × 553 genau dieselben 13 Bohrungen wie die Maschinendatei (Test).
+
+| Teil | Bearbeitung | Position (Fräsmaß-Kanten, Anleimer eingerechnet) |
+|---|---|---|
+| Seite, Bodenende | 3 Dübel Ø8 × 14 | x = S/2, y = 30 / Mitte / 30 vor der hinteren Kante |
+| Seite, Bodenende | 4 Schrauben Ø5 durch (Werkzeug 12) | y = 60, hinten 60, Mitte ± 80 |
+| Seite, Traversenende | 4 Dübel | y = 30, 75 und hinten 30, 75 (x = L − S/2) |
+| Seite, Traversenende | 2 Schrauben | y = 50 und hinten 50 |
+| Boden/Deckel | stirnseitig links und rechts je 3 Dübel | y wie in der Seite, z = Materialstärke / 2 |
+| Traverse vorne | stirnseitig je 2 Dübel | y = 30, 75 ab Vorderkante |
+| Traverse hinten | stirnseitig je 2 Dübel | y = 30, 75 ab Hinterkante (anders als der durchgehende Boden) |
+
+- Die Seite hat Anleimer vorne und an beiden Enden. Boden: nur vorne. Daraus folgen die 2 mm Versatz (z. B. x = 7,5 statt 9,5).
+- Die Maße stehen in den Projektstandards `verbindung.duebel` (Ø 8, Tiefe Fläche 14, **Tiefe Stirn 21 = Annahme**, Dübel 35 − 14) und `verbindung.schraube`
+  (Ø 5, Werkzeug 12). Regeln: `catalog/rules/standard.json` (`r_seite_duebel_schraube`, `r_boden_stirn_duebel`, `r_traverse_*_stirn_duebel`).
+- Regeln können Kantenvariablen verwenden: `Y0`, `Y1`, `YM` (Fräsmaß-Kanten und -Mitte als Abstand von der Schrankfront in Fertigmaß-Koordinaten),
+  `X0`, `X1`, `XM`, `KV`, `KH`, `KL`, `KR` (Anleimer).
+- Durchgangsbohrungen gehen jetzt 2 mm über die Dicke hinaus (`durchbohr_zugabe` = 2, wie 21 mm bei 19 mm Platte).
+- Verbinder (Minifix) sind entfernt; die Kontakterkennung ist nicht mehr nötig.
+
+### Auffällig im Vergleich mit dem Beispiel
+
+- Die Lochreihe der Beispieldatei beginnt bei 55 und endet bei `x-80` (Fräsmaß) und liegt bei y = 35 und `y-35`. Der Katalog hat Start 64 und Rand 64. Hinten sind es 35 ab der Fräskante,
+  im Katalog 37 ab Fertigkante. Welche Werte gelten?
+
 ### Noch nicht umgesetzt
 
-- Verbindungsregeln (`r_seite_boden`): Kontakterkennung und echte Beschlag-Bohrbilder (Minifix usw.). Der Generator meldet eine Warnung.
-- Schubkästen, Klappen, Doppeltüren, Typcode-Parser, Zeilen-Kurzform, Freitext.
+- Bohrbild der Seite für Topfband-Montageplatte, Schubkästen, Klappen, Doppeltüren, Typcode-Parser, Zeilen-Kurzform, Freitext.
 - Rotation der Zeile (`richtung_grad`), Fräsungen aus `aussparen`.
 - Einlegeboden-Maße sind Annahmen (`standards.einlegeboden`: Spiel 2 mm, Tiefe −20 mm, Rücksprung vorne 10 mm).
 

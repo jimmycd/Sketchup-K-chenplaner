@@ -287,6 +287,7 @@ module Kp
 
     def teilregel(r, teil, tmpl, ctx, warn)
       pctx = teil_ctx(ctx, teil['fertigmass']['l'], teil['fertigmass']['w'], teil['fertigmass']['d'])
+      pctx = pctx.merge(vars: pctx[:vars].merge(kantenvariablen(teil)))
       if (r['aussparen'] || []).any? && (tmpl.dig('front', 'felder') || []).any? { |f| r['aussparen'].any? { |a| (a['art'] || []).include?(f['art']) } }
         warn << "Regel #{r['id']}: Aussparung hinter Schubkästen noch nicht umgesetzt (#{teil['uid']})"
       end
@@ -300,6 +301,21 @@ module Kp
         spiegeln_y!(op, teil)
         teil['bearbeitungen'] << op
       end
+    end
+
+    # Kanten- und Fräsmaß-Variablen für Regeln. Regeln denken aus Sicht des Schranks (vorne = Schrankfront):
+    # KV/KH Anleimer an Schrankfront/-rückseite, Y0/Y1/YM Fräsmaß-Kanten und -Mitte in Fertigmaß-Koordinaten (Abstand von vorne),
+    # KL/KR Anleimer an den Teilenden, X0/X1/XM entsprechend entlang der Länge.
+    def kantenvariablen(teil)
+      k = teil['kantenstaerke']
+      f = teil['fertigmass']
+      kv, kh = y_nach_vorne?(teil['lage']['ausrichtung']) ? [k['hinten'], k['vorne']] : [k['vorne'], k['hinten']]
+      y0 = kv
+      y1 = f['w'] - kh
+      x0 = k['links']
+      x1 = f['l'] - k['rechts']
+      { 'KV' => kv, 'KH' => kh, 'KL' => k['links'], 'KR' => k['rechts'],
+        'Y0' => y0, 'Y1' => y1, 'YM' => (y0 + y1) / 2.0, 'X0' => x0, 'X1' => x1, 'XM' => (x0 + x1) / 2.0 }
     end
 
     def aufloesen(wert, ctx)

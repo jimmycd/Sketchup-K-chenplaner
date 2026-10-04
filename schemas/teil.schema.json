@@ -276,6 +276,10 @@
               "type": "number"
             }
           }
+        },
+        "werkzeug": {
+          "type": "integer",
+          "description": "Erzwingt eine TpaCAD-Werkzeugnummer (#205)"
         }
       },
       "required": [

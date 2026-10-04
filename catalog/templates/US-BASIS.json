@@ -56,7 +56,9 @@
         "z": "+x"
       },
       "kanten": {
-        "vorne": "P.korpus.kante_sichtbar"
+        "hinten": "P.korpus.kante_sichtbar",
+        "links": "P.korpus.kante_sichtbar",
+        "rechts": "P.korpus.kante_sichtbar"
       }
     },
     {
@@ -77,7 +79,9 @@
         "z": "-x"
       },
       "kanten": {
-        "vorne": "P.korpus.kante_sichtbar"
+        "vorne": "P.korpus.kante_sichtbar",
+        "links": "P.korpus.kante_sichtbar",
+        "rechts": "P.korpus.kante_sichtbar"
       }
     },
     {
@@ -162,5 +166,5 @@
       "maserung": "keine"
     }
   ],
-  "beschreibung": "Unterschrank-Korpus; Rückwand 8 mm aufgesetzt, in der Gesamttiefe T enthalten (Seiten/Boden/Traversen = T - Rückwandstärke). Teilachsen rechtshändig (y = z × x): Seite links hat y nach vorne (Ursprung hinten), Seite rechts y nach hinten; F1 zeigt bei beiden Seiten in den Korpus."
+  "beschreibung": "Unterschrank-Korpus; Rückwand 8 mm aufgesetzt, in der Gesamttiefe T enthalten (Seiten/Boden/Traversen = T - Rückwandstärke). Teilachsen rechtshändig (y = z × x): Seite links hat y nach vorne (Ursprung hinten), Seite rechts y nach hinten; F1 zeigt bei beiden Seiten in den Korpus.. Seiten: Anleimer an der Vorderkante und an beiden Enden (Fräsmaß = Fertigmaß - 4 mm Länge)."
 }
