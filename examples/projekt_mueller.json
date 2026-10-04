@@ -50,6 +50,10 @@
       "hdf_weiss_8": {
         "name": "HDF weiß",
         "staerke": 8
+      },
+      "spano_weiss_16": {
+        "name": "Spanplatte melaminbeschichtet weiß 16",
+        "staerke": 16
       }
     },
     "kanten": {
@@ -66,6 +70,9 @@
     },
     "maschine": {
       "exporter_profil": "examples/profile/werkstatt.tcnprofil.json"
+    },
+    "schubkasten": {
+      "material": "spano_weiss_16"
     }
   },
   "zeilen": [
@@ -84,6 +91,11 @@
           "pos": "A1",
           "vorlage": "US-T1",
           "breite": 450
+        },
+        {
+          "pos": "A2",
+          "vorlage": "US-S2",
+          "breite": 600
         }
       ]
     }

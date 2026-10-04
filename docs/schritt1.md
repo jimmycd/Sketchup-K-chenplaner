@@ -174,9 +174,33 @@ Die Einlegeböden rasten auf diese Reihe ein.
 
 - Dübeltiefe in der Stirn ist einstellbar: `verbindung.duebel.tiefe_stirn` (Standard 21, Annahme).
 
+### Schubkästen (Blum LEGRABOX free, neu)
+
+Unterlagen: `docs/blum_legrabox_free_montage.pdf`, `examples/tcn_referenz/Seiten_SK_L.tcn`, `Seiten_SK_R.tcn`, `Schubkastenboden.tcn`.
+Vorlage `US-S2` (zwei Schubladen, Anteile 2 : 1). CNC-relevant sind nur Front, Boden und die Seitenteile des Schranks; Schubkastenrückwand und Metallteile werden nicht erzeugt.
+
+| Teil | Erzeugt | Quelle |
+|---|---|---|
+| Schubladenfront | Maße wie Tür (B − Fuge, Höhe nach Anteilen), Kante rundum, Formatieren | Frontbefestigung und Griff fehlen noch (Warnung) |
+| Schubkastenboden | 16 mm, Breite = lichte Weite − 35, Tiefe = NL − 10, Falz 38 × 8 mm an beiden Seiten über das Makro `rect` (`W#1022`) | Blum (LW − 35, Falz 38/8); Tiefe aus dem Beispielboden abgeleitet |
+| Seiten des Schranks | je Schiene 5 Bohrungen Ø5 × 14 bei 37 + {0, 32, 224, 256, 320} mm ab Schrankfront; Lochreihe entfällt | `Seiten_SK_L/R.tcn` und Blum-Maße für NL 400–500 (40 kg) |
+
+- NL: größte Standardlänge ≤ Korpustiefe − 3 (bei Tiefe 552 → 500); einstellbar über `schubkasten.nl`. Boden-Bohrbild des Beispielboden-Beispiels
+  (DL 525, DH 340): 525 = LW − 35 bei LW 560, 340 = NL − 10 bei NL 350.
+- Höhe der Schienenbohrungen: Frontunterkante + 55,5 mm (`schiene_offset`). Das gibt für die unterste Front x = 55 (Fräsmaß) wie im Beispiel.
+  Für weitere Fronten ist die Regel offen: im Beispiel stehen die drei Schienen bei x = 55, 350 und 532.
+- Der Test vergleicht die vier `rect`-Zeilen und die Schienenlöcher mit den Beispieldateien. Die Beispiele `Seiten_SK_L/R.tcn` enthalten bei der fünften
+  Bohrung `35-32+192+32+64 = 291`, das ist doppelt zur vierten; erwartet wird `35+32+192+32+64 = 355` (= 37 + 320 − 2), der Test prüft das so.
+- Im Beispielboden stehen Ø3-Markierungen bei y bis 397 mm bei DH = 340. Die Datei passt also nicht ganz zu dem System, sie wird nicht verwendet.
+- Die Beispieldateien der Seitenteile verwenden für L und R gespiegelte y-Werte (L: ab y = 0, R: ab y = DH). Der Generator rechnet mit Abstand von der
+  Schrankfront und spiegelt je Teil.
+
+Offen: Frontbefestigung der Schubladenfront (Blum: 32/64/32-Raster, Bohrdurchmesser und -tiefe), Griff an der Schubladenfront, Schienenhöhe bei mehreren Schubladen,
+Bohrbild für NL 550–600 und 70 kg, Werkzeug im Makro `rect` (Beispiel 1000, Formatieren ist 1300).
+
 ### Noch nicht umgesetzt
 
-- Bohrbild der Seite für Topfband-Montageplatte, Schubkästen, Klappen, Doppeltüren, Typcode-Parser, Zeilen-Kurzform, Freitext.
+- Bohrbild der Seite für Topfband-Montageplatte, Klappen, Doppeltüren, Typcode-Parser, Zeilen-Kurzform, Freitext.
 - Rotation der Zeile (`richtung_grad`), Fräsungen aus `aussparen`.
 - Einlegeboden-Maße sind Annahmen (`standards.einlegeboden`: Spiel 2 mm, Tiefe −20 mm, Rücksprung vorne 10 mm).
 

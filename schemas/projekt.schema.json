@@ -379,6 +379,30 @@
               "type": "string"
             }
           }
+        },
+        "schubkasten": {
+          "type": "object",
+          "description": "Schubkastensystem Blum LEGRABOX free",
+          "properties": {
+            "material": {
+              "type": "string",
+              "description": "Schlüssel in materialien, 16 mm (Boden)"
+            },
+            "nl": {
+              "type": "integer",
+              "description": "Nennlänge; ohne Angabe: größte Standardlänge <= Korpustiefe - 3"
+            },
+            "boden_laenge_abzug": {
+              "type": "number",
+              "default": 10,
+              "description": "Boden Tiefe = NL - Abzug (aus Schubkastenboden.tcn: 350 -> 340, bitte prüfen)"
+            },
+            "boden_breite_abzug": {
+              "type": "number",
+              "default": 35,
+              "description": "Boden Breite = lichte Weite - Abzug (Blum: LW - 35)"
+            }
+          }
         }
       }
     }

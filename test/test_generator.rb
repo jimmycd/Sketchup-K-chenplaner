@@ -185,3 +185,61 @@ class TestGenerator < Minitest::Test
     end
   end
 end
+
+class TestSchubkasten < Minitest::Test
+  ROOT = File.expand_path('..', __dir__)
+
+  def setup
+    @projekt = JSON.parse(File.read(File.join(ROOT, 'examples/projekt_mueller.json')))
+    @gen = Kp::Generator.new(@projekt, Kp::Katalog.new(File.join(ROOT, 'catalog')))
+    @res = @gen.schrank('pos' => 'A2', 'vorlage' => 'US-S2', 'breite' => 600)
+    @profil = JSON.parse(File.read(File.join(ROOT, 'examples/profile/werkstatt.tcnprofil.json')))
+  end
+
+  def teil(id) = @res.teile.find { |t| t['teil_id'] == id }
+
+  def tcn(id)
+    r = Kp::Tcn::Exporter.new(@profil).export(teil(id))
+    assert_empty r.fehler
+    r.files.first.content.split("\r\n")
+  end
+
+  def test_parts_present
+    assert_equal %w[sl sr bo tv th rw sk1f sk1b sk2f sk2b], @res.teile.map { |t| t['teil_id'] }
+  end
+
+  def test_boden_size_and_falz_macros_match_reference
+    b = teil('sk1b')
+    assert_equal({ 'l' => 527.0, 'w' => 490.0, 'd' => 16.0 }, b['fertigmass']) # LW 562 - 35, NL 500 - 10
+    macros = tcn('sk1b').grep(/W#1022/)
+    ref = File.read(File.join(ROOT, 'examples/tcn_referenz/Schubkastenboden.tcn')).split("\r\n").grep(/W#1022/)
+    norm = ->(l) { l.sub(/ WS=\d+ /, ' ').squeeze(' ') }
+    assert_equal ref.map(&norm), macros.map(&norm)
+  end
+
+  def test_rail_holes_in_both_sides_without_lochreihe
+    %w[sl sr].each do |id|
+      ops = teil(id)['bearbeitungen']
+      refute(ops.any? { |o| o['typ'] == 'bohrreihe' }, 'Lochreihe entfällt bei Schubladenschrank (wie Seiten_SK)')
+      schienen = ops.select { |o| o['id'].to_s.start_with?('schiene1') }
+      assert_equal 5, schienen.size
+      assert_equal [57.0], schienen.map { |o| o['x'] }.uniq # Frontunterkante 1,5 + 55,5
+    end
+  end
+
+  def numeric(ausdruck, y)
+    Kp::Formel.auswerten("=#{ausdruck.tr(',', '.').gsub('y', y.to_s)}", { vars: {} })
+  end
+
+  def test_rail_hole_pattern_matches_reference
+    # Seitenteil 660 hoch, 553 tief: Fräsmaß 656 x 551 wie in Seiten_SK_L.tcn
+    res = @gen.schrank('pos' => 'A2', 'vorlage' => 'US-S2', 'breite' => 600, 'hoehe' => 660, 'tiefe' => 561)
+    sr = res.teile.find { |t| t['teil_id'] == 'sr' }
+    out = Kp::Tcn::Exporter.new(@profil).export(sr).files.first.content.split("\r\n").grep(/#1002=5 #1=55 #2=\S+ #3=-14 /)
+    ys = out.map { |l| l[/#2=(\S+)/, 1].to_f }.sort
+    ref = File.read(File.join(ROOT, 'examples/tcn_referenz/Seiten_SK_L.tcn')).split("\r\n").grep(/#1=55 .*#1002=5/)
+    ref_y = ref.map { |l| numeric(l[/#2=(\S+)/, 1], 551) }.sort
+    assert_equal ref_y.first(4), ys.first(4) # 35, 67, 259, 291
+    assert_equal 355.0, ys.last # Beispieldatei: 35-32+192+32+64 = 291 (vermutlich Tippfehler statt 355 = 37 + 320 - 2)
+  end
+end

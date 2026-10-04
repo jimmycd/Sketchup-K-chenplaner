@@ -34,7 +34,7 @@ module Kp
 
       teile = (tmpl['teile'] || []).flat_map { |t| teil(t, tmpl, ctx, pos) }.compact
       teile += einbauten(tmpl, ctx, pos, warn, teile)
-      teile += fronten(tmpl, ctx, pos, warn)
+      teile += fronten(tmpl, ctx, pos, warn, teile)
       regeln_anwenden(tmpl, teile, ctx, instanz, warn)
       teile.each { |t| t['wenden'] = t['bearbeitungen'].any? { |b| b['flaeche'] == 'F2' } }
       Ergebnis.new(teile: teile, warnungen: warn)
@@ -144,7 +144,7 @@ module Kp
     # ---- Fronten (zunächst nur Türen) ---------------------------------------------
     # Aufschlagende Front: Breite = B - Fuge, Höhe verteilt nach Anteilen. Teilachsen so, dass F1 die Innenseite ist
     # und das Topfband bei hohem y sitzt (wie in den Maschinenbeispielen): DIN links x nach unten, DIN rechts x nach oben.
-    def fronten(tmpl, ctx, pos, warn)
+    def fronten(tmpl, ctx, pos, warn, teile = [])
       front = tmpl['front']
       return [] unless front && front['felder'] && front['typ'] != 'keine'
 
@@ -160,11 +160,13 @@ module Kp
         hoehe = (h_ges - fuge * (felder.size - 1)) * (f['anteil'] || 1).to_f / summe
         z0 = z
         z += hoehe + fuge
-        unless f['art'] == 'tuer'
+        case f['art']
+        when 'tuer' then tuer(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn)
+        when 'schublade', 'auszug' then schublade(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn, teile)
+        else
           warn << "Frontfeld #{f['art']} noch nicht umgesetzt"
-          next []
+          []
         end
-        tuer(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn)
       end
     end
 
@@ -191,6 +193,55 @@ module Kp
       topfband_ops(teil, pctx, set, feld['beschlag'] || 'topfband', staerke, warn)
       griff_ops(teil, pctx, set, cfg['griff'], warn)
       [teil]
+    end
+
+    # Schublade (Blum LEGRABOX free): Front und Schubkastenboden werden gefräst, die Seiten bekommen die Schienenbohrungen.
+    # Rückwand und Metallteile des Systems sind nicht Teil der CNC-Fertigung.
+    def schublade(tmpl, ctx, pos, feld, nr, breite, hoehe, x0, z0, dicke, warn, teile)
+      cfg = @std['schubkasten'] || {}
+      mat = material('P.front.material')
+      kante = kante('P.front.kante')
+      staerke = kante ? @std['kanten'][kante]['staerke'].to_f : 0.0
+      front = {
+        'uid' => "#{@projekt['id']}/#{pos}/sk#{nr}f", 'pos' => pos, 'teil_id' => "sk#{nr}f", 'rolle' => 'front_schublade',
+        'bezeichnung' => "#{pos} Schubladenfront #{nr}", 'material' => mat,
+        'fertigmass' => { 'l' => breite.round(3), 'w' => hoehe.round(3), 'd' => dicke },
+        'maserung' => 'laenge', 'kanten' => KANTEN.to_h { |k| [k, kante] },
+        'kantenstaerke' => KANTEN.to_h { |k| [k, staerke] },
+        'sichtseite' => 'F2', 'wenden' => false, 'bearbeitungen' => [],
+        'herkunft' => { 'vorlage' => tmpl['code'], 'generator_version' => VERSION },
+        'lage' => { 'position' => [x0, -dicke, z0 + hoehe], 'ausrichtung' => { 'x' => '+x', 'z' => '+y' } }
+      }
+      warn << "Schubladenfront #{nr}: Frontbefestigung (Blum-Bohrbild) und Griff noch nicht umgesetzt"
+      return [front] unless cfg['material']
+
+      hw = @katalog.beschlag('blum_legrabox_free') or (warn << 'Beschlag blum_legrabox_free fehlt' and return [front])
+      params = hw['parameter'].to_h { |k, p| [k, p['default']] }
+      s = ctx[:vars]['S']
+      tk = ctx['V']['tk'] || ctx[:vars]['T']
+      lw = ctx['V']['innen_b'] || (ctx[:vars]['B'] - 2 * s)
+      nl = cfg['nl'] || (((tk - 3) / 50).floor * 50)
+      warn << "Schubkasten NL #{nl}: Bohrbild der Seite nur für NL 400-500 (40 kg) belegt" unless (400..500).cover?(nl)
+      bmat = material("P.schubkasten.material")
+      boden = {
+        'uid' => "#{@projekt['id']}/#{pos}/sk#{nr}b", 'pos' => pos, 'teil_id' => "sk#{nr}b", 'rolle' => 'sk_boden',
+        'bezeichnung' => "#{pos} Schubkastenboden #{nr}", 'material' => bmat,
+        'fertigmass' => { 'l' => (lw - (cfg['boden_breite_abzug'] || 35)).round(3), 'w' => (nl - (cfg['boden_laenge_abzug'] || 10)).round(3),
+                          'd' => @std['materialien'][bmat]['staerke'].to_f },
+        'maserung' => 'laenge', 'kanten' => KANTEN.to_h { |k| [k, nil] }, 'kantenstaerke' => KANTEN.to_h { |k| [k, 0.0] },
+        'sichtseite' => 'F1', 'wenden' => false, 'bearbeitungen' => [],
+        'herkunft' => { 'vorlage' => tmpl['code'], 'generator_version' => VERSION },
+        'lage' => { 'position' => [s + 17.5, 0.0, z0 + 20.0], 'ausrichtung' => { 'x' => '+x', 'z' => '+z' } }
+      }
+      bctx = teil_ctx(ctx, boden['fertigmass']['l'], boden['fertigmass']['w'], boden['fertigmass']['d'])
+      beschlag_bohrbild(hw, 'sk_boden', boden, bctx, params, "sk#{nr}")
+      x_schiene = z0 + params['schiene_offset']
+      teile.select { |t| %w[seite_l seite_r].include?(t['rolle']) }.each do |seite|
+        sctx = teil_ctx(ctx, seite['fertigmass']['l'], seite['fertigmass']['w'], seite['fertigmass']['d'])
+        sctx = sctx.merge(vars: sctx[:vars].merge(kantenvariablen(seite)))
+        beschlag_bohrbild(hw, 'seite', seite, sctx, params.merge('x' => x_schiene), "schiene#{nr}")
+      end
+      [front, boden]
     end
 
     def beschlag_id(set, funktion, ctx)
@@ -233,7 +284,8 @@ module Kp
 
     def beschlag_bohrbild(hw, rolle, teil, pctx, vars, kennung)
       ctx = pctx.merge('V' => vars)
-      (hw['bohrbilder'] || []).select { |b| b['teil'] == rolle }.each do |bb|
+      rolle = teil['rolle'] if rolle == 'seite'
+      (hw['bohrbilder'] || []).select { |b| b['teil'] == rolle || (b['teil'] == 'seite' && %w[seite_l seite_r].include?(rolle)) }.each do |bb|
         bb['bearbeitungen'].each_with_index do |b, i|
           next if b['bedingung'] && !Formel.auswerten(b['bedingung'], ctx)
 
@@ -242,6 +294,7 @@ module Kp
           op['flaeche'] ||= bb.dig('bezug', 'flaeche')
           op['id'] = "#{kennung}.#{i + 1}"
           op['quelle'] = { 'beschlag' => hw['id'] }
+          spiegeln_y!(op, teil) if bb['y_ab'] == 'schrankfront'
           teil['bearbeitungen'] << op
         end
       end
@@ -289,9 +342,13 @@ module Kp
     def teilregel(r, teil, tmpl, ctx, warn)
       pctx = teil_ctx(ctx, teil['fertigmass']['l'], teil['fertigmass']['w'], teil['fertigmass']['d'])
       pctx = pctx.merge(vars: pctx[:vars].merge(kantenvariablen(teil)))
-      if (r['aussparen'] || []).any? && (tmpl.dig('front', 'felder') || []).any? { |f| r['aussparen'].any? { |a| (a['art'] || []).include?(f['art']) } }
-        warn << "Regel #{r['id']}: Aussparung hinter Schubkästen noch nicht umgesetzt (#{teil['uid']})"
-      end
+      arten = (r['aussparen'] || []).flat_map { |a| a['art'] || [] }
+      felder = tmpl.dig('front', 'felder') || []
+      betroffen = felder.select { |f| arten.include?(f['art']) }
+      # Regel entfällt, wenn alle Frontfelder ausgespart sind (wie Seiten_SK_L/R.tcn ohne Lochreihe); teilweise: Warnung
+      return if !betroffen.empty? && betroffen.size == felder.size
+
+      warn << "Regel #{r['id']}: Aussparung nur hinter einem Teil der Fronten noch nicht umgesetzt (#{teil['uid']})" unless betroffen.empty?
       r['bearbeitungen'].each_with_index do |b, i|
         next if b['bedingung'] && !Formel.auswerten(b['bedingung'], pctx)
 

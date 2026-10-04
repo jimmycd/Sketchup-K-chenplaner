@@ -1,0 +1,207 @@
+{
+  "id": "blum_legrabox_free",
+  "hersteller": "Blum",
+  "bezeichnung": "LEGRABOX free (Montageanleitung MD-015/4)",
+  "kategorie": "schubkastensystem",
+  "datenblatt": "docs/blum_legrabox_free_montage.pdf",
+  "parameter": {
+    "schiene_offset": {
+      "default": 55.5,
+      "beschreibung": "Höhe der Schienenbohrungen über der Frontunterkante (Beispiel: erste Schiene bei x=55 Fräsmaß, Front unten 1,5 mm)"
+    },
+    "falz_tiefe": {
+      "default": 8,
+      "beschreibung": "Falztiefe im 16-mm-Boden (Blum: 8 mm)"
+    },
+    "falz_breite": {
+      "default": 38,
+      "beschreibung": "Falzbreite an den Bodenseiten (Blum: 38 mm)"
+    },
+    "fraeser": {
+      "default": 1000,
+      "beschreibung": "Werkzeug-ID im Makro rect (Beispiel Schubkastenboden.tcn: 1000)"
+    }
+  },
+  "bohrbilder": [
+    {
+      "teil": "sk_boden",
+      "bezug": {
+        "flaeche": "F1",
+        "punkt": "ecke_vorne_unten"
+      },
+      "bearbeitungen": [
+        {
+          "typ": "makro",
+          "nummer": 1022,
+          "datei": "rect",
+          "pfad": "",
+          "parameter": {
+            "6": 1,
+            "8015": 0,
+            "8020": "x-19",
+            "8021": "y/2",
+            "8101": 0,
+            "8103": 0,
+            "8104": 0,
+            "8100": 0,
+            "8505": 2,
+            "8509": "=V.falz_breite",
+            "8510": "h+20",
+            "8511": 0,
+            "8512": 0,
+            "8514": "=-V.falz_tiefe",
+            "8515": 100,
+            "8516": 0,
+            "8520": 1,
+            "8521": 1,
+            "8522": "=V.fraeser",
+            "8524": 0,
+            "8525": 0
+          }
+        },
+        {
+          "typ": "makro",
+          "nummer": 1022,
+          "datei": "rect",
+          "pfad": "",
+          "parameter": {
+            "6": 1,
+            "8015": 0,
+            "8020": "x-19",
+            "8021": "y/2",
+            "8101": 0,
+            "8103": 0,
+            "8104": 0,
+            "8100": 0,
+            "8505": 2,
+            "8509": 20,
+            "8510": "h",
+            "8511": 0,
+            "8512": 0,
+            "8514": "=-V.falz_tiefe",
+            "8515": 100,
+            "8516": 0,
+            "8520": 1,
+            "8521": 1,
+            "8522": "=V.fraeser",
+            "8524": 0,
+            "8525": 0
+          }
+        },
+        {
+          "typ": "makro",
+          "nummer": 1022,
+          "datei": "rect",
+          "pfad": "",
+          "parameter": {
+            "6": 1,
+            "8015": 0,
+            "8020": 19,
+            "8021": "y/2",
+            "8101": 0,
+            "8103": 0,
+            "8104": 0,
+            "8100": 0,
+            "8505": 2,
+            "8509": "=V.falz_breite",
+            "8510": "h+20",
+            "8511": 0,
+            "8512": 0,
+            "8514": "=-V.falz_tiefe",
+            "8515": 100,
+            "8516": 0,
+            "8520": 1,
+            "8521": 1,
+            "8522": "=V.fraeser",
+            "8524": 0,
+            "8525": 0
+          }
+        },
+        {
+          "typ": "makro",
+          "nummer": 1022,
+          "datei": "rect",
+          "pfad": "",
+          "parameter": {
+            "6": 1,
+            "8015": 0,
+            "8020": 19,
+            "8021": "y/2",
+            "8101": 0,
+            "8103": 0,
+            "8104": 0,
+            "8100": 0,
+            "8505": 2,
+            "8509": 20,
+            "8510": "h",
+            "8511": 0,
+            "8512": 0,
+            "8514": "=-V.falz_tiefe",
+            "8515": 100,
+            "8516": 0,
+            "8520": 1,
+            "8521": 1,
+            "8522": "=V.fraeser",
+            "8524": 0,
+            "8525": 0
+          }
+        }
+      ]
+    },
+    {
+      "teil": "seite",
+      "y_ab": "schrankfront",
+      "bezug": {
+        "flaeche": "F1",
+        "punkt": "ecke_vorne_unten"
+      },
+      "bearbeitungen": [
+        {
+          "typ": "bohrung",
+          "flaeche": "F1",
+          "x": "=V.x",
+          "y": "=Y0+35",
+          "d": 5,
+          "tiefe": 14
+        },
+        {
+          "typ": "bohrung",
+          "flaeche": "F1",
+          "x": "=V.x",
+          "y": "=Y0+35+32",
+          "d": 5,
+          "tiefe": 14
+        },
+        {
+          "typ": "bohrung",
+          "flaeche": "F1",
+          "x": "=V.x",
+          "y": "=Y0+35+224",
+          "d": 5,
+          "tiefe": 14
+        },
+        {
+          "typ": "bohrung",
+          "flaeche": "F1",
+          "x": "=V.x",
+          "y": "=Y0+35+256",
+          "d": 5,
+          "tiefe": 14
+        },
+        {
+          "typ": "bohrung",
+          "flaeche": "F1",
+          "x": "=V.x",
+          "y": "=Y0+35+320",
+          "d": 5,
+          "tiefe": 14
+        }
+      ]
+    }
+  ],
+  "geprueft": {
+    "von": null,
+    "am": null,
+    "quelle": "Seiten_SK_L/R.tcn, Schubkastenboden.tcn und Blum-Anleitung (NL 400-500, 40 kg: 37 / 32 / 224 / 256 / 320); Front-Bohrbild fehlt noch"
+  }
+}

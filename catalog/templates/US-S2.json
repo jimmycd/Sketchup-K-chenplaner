@@ -1,0 +1,28 @@
+{
+  "code": "US-S2",
+  "basis": "US-BASIS",
+  "name": "Standard-Unterschrank mit 2 Schubladen",
+  "kategorie": "unterschrank",
+  "suchbegriffe": [
+    "schubladenschrank",
+    "2 schubladen",
+    "zwei schubkästen",
+    "auszugschrank"
+  ],
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "schublade",
+        "anteil": 2,
+        "beschlag": "schubkastensystem"
+      },
+      {
+        "art": "schublade",
+        "anteil": 1,
+        "beschlag": "schubkastensystem"
+      }
+    ]
+  }
+}

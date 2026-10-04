@@ -223,7 +223,7 @@ module Kp
       def macro(op, gewendet)
         face = tpa_face(op['flaeche'], gewendet)
         params = (op['parameter'] || {}).map { |k, v| "##{k}=#{v.is_a?(Numeric) ? fmt(v) : v}" }
-        [w("W##{op['nummer']}{ ::WT2 #8098=#{@tcn['makro_pfad'] || '..\\custom\\mcr\\'}#{op['datei']}.tmcr " \
+        [w("W##{op['nummer']}{ ::WT2 #8098=#{op.key?('pfad') ? op['pfad'] : (@tcn['makro_pfad'] || '..\\custom\\mcr\\')}#{op['datei']}.tmcr " \
            "#{params.join(' ')} }W", face)]
       end
 
