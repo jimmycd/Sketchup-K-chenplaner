@@ -310,4 +310,46 @@ class TestOclDaten < Minitest::Test
     assert_equal 'MDF lackiert', tuer['ocl']['material']
     assert_equal ['ABS lackfähig 2 mm'], tuer['ocl']['kanten'].values.uniq
   end
+
+end
+
+class TestFrontvarianten < Minitest::Test
+  ROOT = File.expand_path('..', __dir__)
+
+  def setup
+    projekt = JSON.parse(File.read(File.join(ROOT, 'examples/projekt_mueller.json')))
+    @gen = Kp::Generator.new(projekt, Kp::Katalog.new(File.join(ROOT, 'catalog')))
+  end
+
+  def schrank(inst = {}) = @gen.schrank({ 'pos' => 'A1', 'vorlage' => 'US-T1', 'breite' => 450 }.merge(inst))
+
+  def teil(res, id) = res.teile.find { |t| t['teil_id'] == id }
+
+  def test_double_door_two_leaves
+    res = schrank('vorlage' => 'US-T2', 'breite' => 800)
+    l = teil(res, 'tu1l')
+    r = teil(res, 'tu1r')
+    assert_equal({ 'l' => 769.0, 'w' => 397.0, 'd' => 19.0 }, l['fertigmass']) # (800 - 2 * Fuge) / 2 = 397; mit Fugen 1,5 + 397 + 3 + 397 + 1,5
+    assert_equal l['fertigmass'], r['fertigmass']
+    assert_equal({ 'x' => '-z', 'z' => '+y' }, l['lage']['ausrichtung'])
+    assert_equal({ 'x' => '+z', 'z' => '+y' }, r['lage']['ausrichtung'])
+    assert_in_delta 1.5 + 397, l['lage']['position'][0], 1e-6 # DIN links: Position an der Scharnierkante
+    assert_in_delta 1.5 + 397 + 3, r['lage']['position'][0], 1e-6
+    assert l['bearbeitungen'].any? { |o| o['typ'] == 'makro' }, 'Topfbänder an jeder Tür'
+    assert r['bearbeitungen'].any? { |o| o['typ'] == 'makro' }
+    assert l['ocl'] && r['ocl']
+  end
+
+  def test_flap_geometry_and_warning
+    res = schrank('vorlage' => 'US-K1', 'breite' => 600)
+    k = teil(res, 'kl1')
+    assert_equal 'front_klappe', k['rolle']
+    assert_equal({ 'l' => 597.0, 'w' => 769.0, 'd' => 19.0 }, k['fertigmass'])
+    assert_equal({ 'x' => '-x', 'z' => '+y' }, k['lage']['ausrichtung'])
+    assert_equal 2.0, k['kantenstaerke']['links']
+    assert k['ocl']
+    assert(res.warnungen.any? { |w| w.include?('Aventos') || w.include?('blum_aventos_hk_s') })
+    unten = schrank('vorlage' => 'US-K1', 'overrides' => { 'front.felder.0.art' => 'klappe_unten' })
+    assert_equal({ 'x' => '+x', 'z' => '-z' }, teil(unten, 'kl1')['lage']['ausrichtung'])
+  end
 end

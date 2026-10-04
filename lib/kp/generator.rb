@@ -167,6 +167,8 @@ module Kp
         z += hoehe + fuge
         case f['art']
         when 'tuer' then tuer(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn)
+        when 'tuer_doppelt' then doppeltuer(tmpl, ctx, pos, f, i + 1, b, hoehe, fuge, z0, d, warn)
+        when 'klappe_oben', 'klappe_unten' then klappe(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn)
         when 'schublade', 'auszug' then schublade(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn, teile)
         else
           warn << "Frontfeld #{f['art']} noch nicht umgesetzt"
@@ -175,13 +177,20 @@ module Kp
       end
     end
 
-    def tuer(tmpl, ctx, pos, feld, nr, breite, hoehe, x0, z0, dicke, warn)
+    # Doppeltür: zwei gleich breite Türen, außen Fuge/2, in der Mitte eine volle Fuge; links DIN L, rechts DIN R.
+    def doppeltuer(tmpl, ctx, pos, feld, nr, b, hoehe, fuge, z0, dicke, warn)
+      bt = (b - 2 * fuge) / 2
+      [['links', fuge / 2, 'l'], ['rechts', fuge / 2 + bt + fuge, 'r']].flat_map do |seite, x0, k|
+        tuer(tmpl, ctx, pos, feld.merge('anschlag' => seite), nr, bt, hoehe, x0, z0, dicke, warn, "tu#{nr}#{k}")
+      end
+    end
+
+    def tuer(tmpl, ctx, pos, feld, nr, breite, hoehe, x0, z0, dicke, warn, tid = "tu#{nr}")
       cfg = @std['front']
       mat = material('P.front.material')
       kante = kante('P.front.kante')
       staerke = kante ? @std['kanten'][kante]['staerke'].to_f : 0.0
       links = feld['anschlag'] == 'links'
-      tid = "tu#{nr}"
       teil = {
         'uid' => "#{@projekt['id']}/#{pos}/#{tid}", 'pos' => pos, 'teil_id' => tid, 'rolle' => 'front_tuer',
         'bezeichnung' => "#{pos} Tür #{nr} DIN #{links ? 'L' : 'R'}", 'material' => mat,
@@ -265,6 +274,43 @@ module Kp
         von, bis = k.split('-').map(&:to_i)
         nl.between?(von, bis || von)
       end
+    end
+
+    # Klappe (Blum Aventos): Teil liegt quer (l = Breite, w = Höhe); Scharnierkante bei hohem y, wie bei der Tür.
+    # klappe_oben: Scharnierseite oben; klappe_unten: unten. Aventos hat keine Topfbänder; solange kein Bohrbild
+    # hinterlegt ist, bleibt die Front ohne Beschlagbohrung (Warnung). Mit 'beschlag: topfband' entstehen Topfbandbohrungen.
+    def klappe(tmpl, ctx, pos, feld, nr, breite, hoehe, x0, z0, dicke, warn)
+      cfg = @std['front']
+      mat = material('P.front.material')
+      kante = kante('P.front.kante')
+      staerke = kante ? @std['kanten'][kante]['staerke'].to_f : 0.0
+      oben = feld['art'] == 'klappe_oben'
+      tid = "kl#{nr}"
+      teil = {
+        'uid' => "#{@projekt['id']}/#{pos}/#{tid}", 'pos' => pos, 'teil_id' => tid, 'rolle' => 'front_klappe',
+        'bezeichnung' => "#{pos} Klappe #{nr} #{oben ? 'oben' : 'unten'} angeschlagen", 'material' => mat,
+        'fertigmass' => { 'l' => breite.round(3), 'w' => hoehe.round(3), 'd' => dicke },
+        'maserung' => 'laenge', 'kanten' => KANTEN.to_h { |k| [k, kante] },
+        'kantenstaerke' => KANTEN.to_h { |k| [k, staerke] },
+        'sichtseite' => 'F2', 'wenden' => false, 'bearbeitungen' => [],
+        'herkunft' => { 'vorlage' => tmpl['code'], 'generator_version' => VERSION },
+        'lage' => { 'position' => oben ? [x0 + breite, -dicke, z0] : [x0, -dicke, z0 + hoehe],
+                    'ausrichtung' => oben ? { 'x' => '-x', 'z' => '+y' } : { 'x' => '+x', 'z' => '-z' } }
+      }
+      pctx = teil_ctx(ctx, breite, hoehe, dicke)
+      set = @katalog.beschlagset(@std['beschlag_set'])['zuordnung']
+      funktion = feld['beschlag'] || 'klappenbeschlag'
+      hw = @katalog.beschlag(beschlag_id(set, funktion.sub('set:', ''), pctx) || funktion)
+      if hw && hw['kategorie'] == 'topfband'
+        topfband_ops(teil, pctx, set, funktion, staerke, warn)
+      elsif hw
+        warn << "Klappe #{pos}/#{tid}: für #{hw['id']} ist kein Bohrbild hinterlegt (Referenz-TCN nötig)" if (hw['bohrbilder'] || []).empty?
+        beschlag_bohrbild(hw, 'front_klappe', teil, pctx, {}, 'klappe')
+      else
+        warn << "Beschlag #{funktion} nicht im Katalog"
+      end
+      griff_ops(teil, pctx, set, cfg['griff'], warn)
+      [teil]
     end
 
     def beschlag_id(set, funktion, ctx)
