@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Küchenplaner – Editor</title>
+<link rel="stylesheet" href="editor.css">
+</head>
+<body>
+<header>
+  <nav>
+    <button class="tab aktiv" data-tab="projekt">Projekt</button>
+    <button class="tab" data-tab="katalog">Katalog</button>
+  </nav>
+  <label class="live" title="Jede Änderung wird gespeichert und die Küche in SketchUp neu gezeichnet">
+    <input type="checkbox" id="live"> Live-Änderung
+  </label>
+  <button id="rueckgaengig" title="Letzte Änderung zurücknehmen">↶ Rückgängig</button>
+  <button id="uebernehmen" class="primaer" title="Speichern und Küche neu zeichnen">Übernehmen</button>
+  <span id="status" role="status"></span>
+</header>
+<main>
+  <aside id="seitenleiste"></aside>
+  <section id="detail"></section>
+</main>
+<footer id="fehlerliste" hidden></footer>
+<script src="editor.js"></script>
+</body>
+</html>

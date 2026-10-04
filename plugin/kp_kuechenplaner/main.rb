@@ -18,10 +18,11 @@ end
 require File.join(Kp::Plugin::BASE, 'lib', 'kp', 'generator')
 require File.join(Kp::Plugin::BASE, 'lib', 'kp', 'tcn', 'exporter')
 require File.join(Kp::Plugin::BASE, 'lib', 'kp', 'ocl')
+require File.join(Kp::Plugin::BASE, 'lib', 'kp', 'editor', 'sitzung')
 
 module Kp
   module Plugin
-    VERSION = '0.4.0' unless defined?(VERSION)
+    VERSION = '0.5.0' unless defined?(VERSION)
     DICT = 'kp_part'
     GRUPPE = 'KP_Projekt'
     AXES = {
@@ -72,19 +73,27 @@ module Kp
       projekt, katalog, = lade_projekt
       return unless projekt
 
+      meldungen = zeichne_projekt(projekt, katalog)
+      meldung(meldungen.uniq.first(15).join("\n")) unless meldungen.empty?
+    rescue StandardError => e
+      meldung("Fehler beim Generieren:\n#{e.message}\n#{e.backtrace.first(3).join("\n")}")
+    end
+
+    # Zeichnet das übergebene Projekt (Hash) neu und gibt die Meldungen zurück. Wird vom Editor auch bei jeder Live-Änderung genutzt.
+    def zeichne_projekt(projekt, katalog, vorgang = 'Küche generieren')
       model = Sketchup.active_model
       meldungen = []
-      model.start_operation('Küche generieren', true)
+      model.start_operation(vorgang, true)
       model.entities.grep(Sketchup::Group).select { |g| g.name == GRUPPE }.each(&:erase!)
       wurzel = model.entities.add_group
       wurzel.name = GRUPPE
       gen = Generator.new(projekt, katalog)
       (projekt['zeilen'] || []).each { |zeile| zeile_bauen(zeile, gen, wurzel, meldungen) }
       model.commit_operation
-      meldung(meldungen.uniq.first(15).join("\n")) unless meldungen.empty?
-    rescue StandardError => e
+      meldungen
+    rescue StandardError
       model&.abort_operation
-      meldung("Fehler beim Generieren:\n#{e.message}\n#{e.backtrace.first(3).join("\n")}")
+      raise
     end
 
     def zeile_bauen(zeile, gen, wurzel, meldungen)
@@ -287,11 +296,14 @@ module Kp
       zeilen = ["Küchenplaner #{VERSION}", "Basis: #{BASE}", "Ruby #{RUBY_VERSION}"]
       ok = true
       %w[lib/kp/generator.rb lib/kp/formel.rb lib/kp/tcn/exporter.rb schemas/teil.schema.json catalog/templates/US-BASIS.json
-         examples/projekt_mueller.json examples/profile/werkstatt.tcnprofil.json catalog/ocl.json].each do |rel|
+         examples/projekt_mueller.json examples/profile/werkstatt.tcnprofil.json catalog/ocl.json lib/kp/editor/sitzung.rb].each do |rel|
         da = File.exist?(File.join(BASE, rel))
         ok &&= da
         zeilen << "#{da ? 'OK    ' : 'FEHLT '}#{rel}"
       end
+      da = %w[index.html editor.js editor.css].all? { |f| File.exist?(File.join(EDITOR_ORDNER, f)) }
+      ok &&= da
+      zeilen << "#{da ? 'OK    ' : 'FEHLT '}Editor-Oberfläche (editor/)"
       begin
         pfad = File.join(BASE, 'examples', 'projekt_mueller.json')
         projekt = JSON.parse(File.read(pfad, encoding: 'utf-8'))
@@ -323,10 +335,13 @@ module Kp
       ok
     end
 
+    require_relative 'editor_dialog'
+
     unless file_loaded?(__FILE__)
       menu = UI.menu('Plugins').add_submenu('Küchenplaner')
       menu.add_item('Projekt wählen…') { projekt_waehlen }
       menu.add_item('Beispielprojekt wählen') { beispielprojekt_laden }
+      menu.add_item('Editor…') { editor_oeffnen }
       menu.add_item('Küche generieren') { generieren }
       menu.add_item('TCN exportieren…') { tcn_exportieren }
       menu.add_item('OCL-Materialien anlegen') { ocl_materialien_anlegen }

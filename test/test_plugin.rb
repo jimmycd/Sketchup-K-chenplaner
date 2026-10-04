@@ -4,6 +4,7 @@ $LOAD_PATH.unshift(File.expand_path('support', __dir__))
 require 'minitest/autorun'
 require 'json'
 require 'tmpdir'
+require 'fileutils'
 require 'sketchup'
 require_relative '../plugin/kp_kuechenplaner'
 require_relative '../plugin/kp_kuechenplaner/main'
@@ -86,6 +87,79 @@ class TestPlugin < Minitest::Test
     assert_match(/Fehler beim Generieren/, UI.messages.last)
   ensure
     File.delete(bad) if bad && File.exist?(bad)
+  end
+end
+
+# Editor-Dialog: HtmlDialog, Brücke zu Kp::Editor::Sitzung, Live-Neuzeichnen
+class TestPluginEditor < Minitest::Test
+  ROOT = File.expand_path('..', __dir__)
+
+  def setup
+    Sketchup.reset!
+    UI.messages.clear
+    @tmp = Dir.mktmpdir('kp_editor_plugin')
+    @projekt = File.join(@tmp, 'projekt.json')
+    doc = JSON.parse(File.read(File.join(ROOT, 'examples', 'projekt_mueller.json')))
+    doc['kataloge'] = [File.join(ROOT, 'catalog')]
+    File.write(@projekt, JSON.pretty_generate(doc))
+    Sketchup.active_model.set_attribute('kp_project', 'pfad', @projekt)
+    Kp::Plugin.instance_variable_set(:@editor, nil)
+  end
+
+  def teardown
+    FileUtils.remove_entry(@tmp)
+  end
+
+  # Ruft den Dialog-Callback wie die Oberfläche auf und gibt die Antwort zurück
+  def aufruf(dlg, aktion, daten = {})
+    @id = (@id || 0) + 1
+    dlg.callbacks['kp'].call(nil, JSON.generate(id: @id, aktion: aktion, daten: daten))
+    skript = dlg.scripts.last
+    assert_match(/\AkpAntwort\(#{@id}, /, skript)
+    JSON.parse(JSON.parse(skript[/\AkpAntwort\(\d+, (.*)\)\z/m, 1]))
+  end
+
+  def test_menue_und_dialog
+    sub = UI.menu('Plugins').items.find { |i| i[0] == :submenu && i[1] == 'Küchenplaner' }
+    assert_includes sub[2].items.select { |i| i[0] == :item }.map { |i| i[1] }, 'Editor…'
+    dlg = Kp::Plugin.editor_oeffnen
+    assert dlg.visible?
+    assert File.exist?(dlg.file), dlg.file
+    assert_equal 'index.html', File.basename(dlg.file)
+    assert_same dlg, Kp::Plugin.editor_oeffnen, 'zweiter Aufruf holt den offenen Dialog nach vorn'
+  end
+
+  def test_init_liefert_projekt_und_katalog
+    antwort = aufruf(Kp::Plugin.editor_oeffnen, 'init')
+    assert_equal @projekt, antwort['projekt']['pfad']
+    assert_includes antwort['katalog']['vorlagen'].map { |v| v['code'] }, 'US-S2'
+  end
+
+  def test_live_aenderung_zeichnet_neu_und_speichert
+    dlg = Kp::Plugin.editor_oeffnen
+    doc = aufruf(dlg, 'init')['projekt']['doc']
+    doc['zeilen'][0]['elemente'][1]['overrides'] = {
+      'front.felder' => [{ 'art' => 'schublade', 'anteil' => 1 }, { 'art' => 'schublade', 'anteil' => 1 }, { 'art' => 'schublade', 'anteil' => 1 }]
+    }
+    doc['zeilen'][0]['elemente'][1]['breite'] = 800
+    antwort = aufruf(dlg, 'speichern', 'art' => 'projekt', 'pfad' => @projekt, 'doc' => doc, 'zeichnen' => true)
+    assert antwort['gezeichnet'], antwort.inspect
+    model = Sketchup.active_model
+    assert_equal [:start, 'Küche live'], model.operations.last(2).first
+    wurzeln = model.entities.grep(Sketchup::Group).reject(&:erased)
+    assert_equal 1, wurzeln.size
+    daten = model.definitions.map { |d| d.get_attribute('kp_part', 'data') }.compact.map { |j| JSON.parse(j) }
+    assert_equal 3, daten.count { |t| t['pos'] == 'A2' && t['rolle'] == 'front_schublade' }
+    assert_equal 800, JSON.parse(File.read(@projekt))['zeilen'][0]['elemente'][1]['breite']
+  end
+
+  def test_ungueltige_aenderung_zeichnet_nicht
+    dlg = Kp::Plugin.editor_oeffnen
+    doc = aufruf(dlg, 'init')['projekt']['doc']
+    doc['zeilen'][0]['elemente'][1]['breite'] = 'viel'
+    antwort = aufruf(dlg, 'speichern', 'art' => 'projekt', 'pfad' => @projekt, 'doc' => doc, 'zeichnen' => true)
+    refute antwort['gespeichert']
+    assert_empty Sketchup.active_model.operations
   end
 end
 
