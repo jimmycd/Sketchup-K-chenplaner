@@ -2,6 +2,7 @@
 
 require 'json'
 require 'fileutils'
+require 'tmpdir'
 
 module Kp
   # Anbindung an die SketchUp-API. Die Rechenlogik liegt in lib/kp (ohne SketchUp lauffähig und getestet).
@@ -16,10 +17,11 @@ end
 
 require File.join(Kp::Plugin::BASE, 'lib', 'kp', 'generator')
 require File.join(Kp::Plugin::BASE, 'lib', 'kp', 'tcn', 'exporter')
+require File.join(Kp::Plugin::BASE, 'lib', 'kp', 'ocl')
 
 module Kp
   module Plugin
-    VERSION = '0.3.0' unless defined?(VERSION)
+    VERSION = '0.4.0' unless defined?(VERSION)
     DICT = 'kp_part'
     GRUPPE = 'KP_Projekt'
     AXES = {
@@ -188,12 +190,104 @@ module Kp
       { anzahl: anzahl, fehler: fehler }
     end
 
+    # Namen der Materialien (Platten und Kanten), die die erzeugten Teile verwenden
+    def verwendete_materialnamen
+      namen = []
+      Sketchup.active_model.definitions.each do |d|
+        json = d.get_attribute(DICT, 'data')
+        next unless json
+
+        ocl = JSON.parse(json)['ocl'] || {}
+        namen << ocl['material']
+        namen.concat((ocl['kanten'] || {}).values)
+      end
+      namen.compact.uniq
+    end
+
+    # Legt die verwendeten Materialien an (falls nötig) und setzt ihre OpenCutList-Eigenschaften (Typ, Stärke, Kantenhöhe, Maserung).
+    # Bevorzugt über die OCL-eigene Klasse (falls vorhanden), sonst direkt in das OCL-Attributverzeichnis. Siehe catalog/ocl.json.
+    def ocl_materialien_anlegen
+      projekt, = lade_projekt
+      return unless projekt
+
+      namen = verwendete_materialnamen
+      specs = Ocl.materialien(projekt['standards'], namen.empty? ? nil : namen)
+      map = Ocl.mapping(File.join(BASE, 'catalog', 'ocl.json'))
+      ergebnisse = specs.map do |spec|
+        mat = material_holen(spec[:name], spec[:farbe])
+        ocl_schreiben(mat, spec, map)
+      end
+      zeilen = ergebnisse.map do |e|
+        "#{e[:name]} (#{e[:art] == :platte ? 'Platte' : 'Kante'}): #{e[:weg] == :api ? 'über OCL' : 'direkt'}" +
+          (e[:fehlend].empty? ? '' : " – nicht gesetzt: #{e[:fehlend].join(', ')}")
+      end
+      meldung("OCL-Materialien (#{ergebnisse.size}):\n#{zeilen.join("\n")}\n\nBitte in OpenCutList unter Materialien prüfen. " \
+              'Weicht die Anzeige ab: Menü OCL-Attribute anzeigen und das Ergebnis schicken.')
+      ergebnisse
+    end
+
+    def ocl_klasse
+      return nil unless defined?(::Ladb::OpenCutList::MaterialAttributes)
+
+      ::Ladb::OpenCutList::MaterialAttributes
+    end
+
+    def ocl_schreiben(mat, spec, map)
+      attribute = Ocl.attribute(spec, map)
+      fehlend = []
+      weg = :attribute
+      klasse = ocl_klasse
+      if klasse
+        begin
+          obj = klasse.new(mat)
+          attribute.each do |k, v|
+            setter = "#{k}="
+            obj.respond_to?(setter) ? obj.public_send(setter, v) : fehlend << k
+          end
+          if obj.respond_to?(:write_to_attributes)
+            obj.write_to_attributes
+            weg = :api
+          else
+            fehlend = []
+          end
+        rescue StandardError => e
+          puts "[Küchenplaner] OCL-Klasse nicht nutzbar (#{e.class}: #{e.message}), schreibe direkt"
+          fehlend = []
+        end
+      end
+      if weg == :attribute
+        attribute.each { |k, v| mat.set_attribute(map['dictionary'], k, v) }
+      end
+      { name: spec[:name], art: spec[:art], weg: weg, fehlend: fehlend }
+    end
+
+    # Schreibt die OCL-Attribute der verwendeten Materialien (und die Methoden der OCL-Klasse) in eine Textdatei, damit man sehen
+    # kann, wie OpenCutList seine Daten tatsächlich ablegt.
+    def ocl_diagnose
+      map = Ocl.mapping(File.join(BASE, 'catalog', 'ocl.json'))
+      zeilen = ["Küchenplaner #{VERSION}", "OCL-Klasse: #{ocl_klasse ? ocl_klasse.name : 'nicht gefunden'}"]
+      zeilen << "Methoden: #{ocl_klasse.instance_methods(false).sort.join(', ')}" if ocl_klasse
+      Sketchup.active_model.materials.each do |mat|
+        dict = mat.attribute_dictionary(map['dictionary'])
+        next unless dict
+
+        zeilen << "Material #{mat.name}:"
+        dict.each_pair { |k, v| zeilen << "  #{k} = #{v.inspect}" }
+      end
+      zeilen << '(keine Materialien mit OCL-Attributen)' if zeilen.size <= 3 && !ocl_klasse
+      pfad = File.join(Dir.tmpdir, 'kp_ocl_diagnose.txt')
+      File.write(pfad, zeilen.join("\n"), encoding: 'utf-8')
+      puts zeilen.join("\n")
+      meldung("#{zeilen.first(12).join("\n")}\n\nVollständig in: #{pfad}")
+      pfad
+    end
+
     # Prüft die Installation, ohne das Modell zu verändern: Dateien, Katalog, Generator, Exporter.
     def selbsttest
       zeilen = ["Küchenplaner #{VERSION}", "Basis: #{BASE}", "Ruby #{RUBY_VERSION}"]
       ok = true
       %w[lib/kp/generator.rb lib/kp/formel.rb lib/kp/tcn/exporter.rb schemas/teil.schema.json catalog/templates/US-BASIS.json
-         examples/projekt_mueller.json examples/profile/werkstatt.tcnprofil.json].each do |rel|
+         examples/projekt_mueller.json examples/profile/werkstatt.tcnprofil.json catalog/ocl.json].each do |rel|
         da = File.exist?(File.join(BASE, rel))
         ok &&= da
         zeilen << "#{da ? 'OK    ' : 'FEHLT '}#{rel}"
@@ -235,7 +329,9 @@ module Kp
       menu.add_item('Beispielprojekt wählen') { beispielprojekt_laden }
       menu.add_item('Küche generieren') { generieren }
       menu.add_item('TCN exportieren…') { tcn_exportieren }
+      menu.add_item('OCL-Materialien anlegen') { ocl_materialien_anlegen }
       menu.add_separator
+      menu.add_item('OCL-Attribute anzeigen') { ocl_diagnose }
       menu.add_item('Selbsttest') { selbsttest }
       file_loaded(__FILE__)
     end

@@ -183,6 +183,74 @@
           "description": "Text für Etiketten, inkl. Kantenpositionen"
         }
       }
+    },
+    "masse": {
+      "type": "object",
+      "description": "Maße für Etiketten: Fertigmaß (inkl. Anleimer), Fräsmaß (TCN-Kopf), Rohmaß (Zuschnitt)",
+      "required": [
+        "fertig",
+        "fraes",
+        "roh"
+      ],
+      "properties": {
+        "fertig": {
+          "type": "object",
+          "required": [
+            "l",
+            "w",
+            "d"
+          ],
+          "properties": {
+            "l": {
+              "type": "number"
+            },
+            "w": {
+              "type": "number"
+            },
+            "d": {
+              "type": "number"
+            }
+          }
+        },
+        "fraes": {
+          "type": "object",
+          "required": [
+            "l",
+            "w",
+            "d"
+          ],
+          "properties": {
+            "l": {
+              "type": "number"
+            },
+            "w": {
+              "type": "number"
+            },
+            "d": {
+              "type": "number"
+            }
+          }
+        },
+        "roh": {
+          "type": "object",
+          "required": [
+            "l",
+            "w",
+            "d"
+          ],
+          "properties": {
+            "l": {
+              "type": "number"
+            },
+            "w": {
+              "type": "number"
+            },
+            "d": {
+              "type": "number"
+            }
+          }
+        }
+      }
     }
   },
   "$defs": {

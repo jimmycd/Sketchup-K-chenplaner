@@ -411,6 +411,17 @@
               "description": "Tragfähigkeit in kg (bestimmt das Bohrbild der Seite)"
             }
           }
+        },
+        "zuschnitt": {
+          "type": "object",
+          "description": "Rohmaß für Etiketten",
+          "properties": {
+            "aufmass": {
+              "type": "number",
+              "default": 10,
+              "description": "Aufmaß des Zuschnitts gegenüber dem Fräsmaß je Richtung in mm (Standard 10: Rohmaß = Fräsmaß + 10 mm)"
+            }
+          }
         }
       }
     }

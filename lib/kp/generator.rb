@@ -3,6 +3,7 @@
 require_relative 'formel'
 require_relative 'katalog'
 require_relative 'standards'
+require_relative 'ocl'
 
 module Kp
   # Erzeugt aus Projekt, Katalog und einer Schrank-Instanz die Fertigungsteile (Schema 4).
@@ -37,6 +38,7 @@ module Kp
       teile += fronten(tmpl, ctx, pos, warn, teile)
       regeln_anwenden(tmpl, teile, ctx, instanz, warn)
       teile.each { |t| t['wenden'] = t['bearbeitungen'].any? { |b| b['flaeche'] == 'F2' } }
+      teile.each { |t| t['masse'] = massangaben(t) }
       teile.each { |t| t['ocl'] = ocl_daten(t) }
       Ergebnis.new(teile: teile, warnungen: warn)
     end
@@ -340,9 +342,19 @@ module Kp
       (v == v.round ? v.round.to_s : v.to_s).tr('.', ',')
     end
 
+    # Fertigmaß (SketchUp-Konstruktion, inkl. Anleimer), Fräsmaß (TCN-Kopf = Fertigmaß - Anleimer) und Rohmaß (Zuschnitt =
+    # Fräsmaß + Aufmaß aus standards.zuschnitt.aufmass je Richtung, Standard 10) für Etiketten.
+    def massangaben(teil)
+      f = teil['fertigmass']
+      k = teil['kantenstaerke']
+      aufmass = (@std.dig('zuschnitt', 'aufmass') || 10).to_f
+      fraes = { 'l' => (f['l'] - k['links'] - k['rechts']).round(3), 'w' => (f['w'] - k['vorne'] - k['hinten']).round(3), 'd' => f['d'] }
+      { 'fertig' => f.dup, 'fraes' => fraes,
+        'roh' => { 'l' => (fraes['l'] + aufmass).round(3), 'w' => (fraes['w'] + aufmass).round(3), 'd' => f['d'] } }
+    end
+
     # Daten für OpenCutList: Materialname, Kantenmaterial je Seite (wird in SketchUp auf die Kantenflächen gelegt) und ein Text
-    # für Etiketten mit den Kantenpositionen. OCL liest Material und Kanten aus SketchUp; Typ und Stärke der Materialien
-    # werden einmalig in OCL gepflegt.
+    # für Etiketten mit Maßen und Kantenpositionen. OCL liest Material und Kanten aus SketchUp.
     def ocl_daten(teil)
       mat = @std['materialien'][teil['material']]
       kanten = KANTEN.to_h do |s|
@@ -350,12 +362,12 @@ module Kp
         k = key && @std['kanten'][key]
         [s, k && (k['ocl_material'] || k['name'] || key)]
       end
-      text = KANTEN.select { |s| kanten[s] }.map { |s| "#{s}: #{kanten[s]}" }.join(', ')
+      name = mat['ocl_material'] || mat['name'] || teil['material']
       {
-        'material' => mat['ocl_material'] || mat['name'] || teil['material'],
+        'material' => name,
         'farbe' => mat['farbe'],
         'kanten' => kanten,
-        'beschreibung' => "Schrank #{teil['pos']} · #{teil['bezeichnung']} · #{teil['material']}" + (text.empty? ? ' · ohne Kanten' : " · Kanten #{text}")
+        'beschreibung' => Ocl.beschreibung(teil, name, kanten)
       }
     end
 

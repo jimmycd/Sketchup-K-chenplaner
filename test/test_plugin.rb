@@ -143,7 +143,7 @@ class TestPluginOcl < Minitest::Test
     assert_includes text, 'vorne: ABS weiß 2 mm'
     assert_includes text, 'links: ABS weiß 2 mm'
     refute_includes text, 'hinten'
-    assert_includes definition('rw').description, 'ohne Kanten'
+    assert_includes definition('rw').description, 'Kanten: keine'
   end
 
   def test_materials_are_reused_not_duplicated
@@ -151,5 +151,85 @@ class TestPluginOcl < Minitest::Test
     assert_equal mats.uniq, mats
     assert_includes mats, 'ABS weiß 2 mm'
     assert_includes mats, 'MDF lackiert'
+  end
+end
+
+# OCL-Materialien anlegen (direkt und über die OCL-eigene Klasse) und Diagnose
+class TestPluginOclMaterialien < Minitest::Test
+  ROOT = File.expand_path('..', __dir__)
+
+  def setup
+    Sketchup.reset!
+    UI.messages.clear
+    UI.answers = { openpanel: File.join(ROOT, 'examples', 'projekt_mueller.json') }
+    Kp::Plugin.generieren
+    @dict = 'fr.lairdubois.opencutlist'
+  end
+
+  def teardown
+    Object.send(:remove_const, :Ladb) if defined?(::Ladb)
+  end
+
+  def mat(name)
+    Sketchup.active_model.materials[name]
+  end
+
+  def test_direct_attributes_without_ocl_class
+    refute defined?(::Ladb)
+    ergebnisse = Kp::Plugin.ocl_materialien_anlegen
+    assert(ergebnisse.all? { |e| e[:weg] == :attribute })
+    platte = mat('Spanplatte melaminbeschichtet weiß')
+    assert_equal 2, platte.get_attribute(@dict, 'type')
+    assert_equal '19mm', platte.get_attribute(@dict, 'std_thicknesses')
+    kante = mat('ABS weiß 2 mm')
+    assert_equal 4, kante.get_attribute(@dict, 'type')
+    assert_equal '23mm', kante.get_attribute(@dict, 'std_widths')
+  end
+
+  def test_unused_material_is_not_created
+    Kp::Plugin.ocl_materialien_anlegen
+    # Im Beispielprojekt ist 'ABS lackfähig 2 mm' (Fronten) verwendet, ein nicht verwendetes Material aus den Standards wird nicht angelegt
+    assert mat('ABS lackfähig 2 mm')
+    refute_includes Kp::Plugin.verwendete_materialnamen, 'Unbekannt'
+  end
+
+  def test_uses_ocl_class_when_available
+    Object.const_set(:Ladb, Module.new)
+    Ladb.const_set(:OpenCutList, Module.new)
+    klasse = Class.new do
+      attr_accessor :type, :std_thicknesses
+      attr_reader :material, :geschrieben
+
+      def initialize(material)
+        @material = material
+      end
+
+      def write_to_attributes
+        @geschrieben = true
+      end
+    end
+    Ladb::OpenCutList.const_set(:MaterialAttributes, klasse)
+    ergebnisse = Kp::Plugin.ocl_materialien_anlegen
+    assert(ergebnisse.all? { |e| e[:weg] == :api })
+    assert_equal [], ergebnisse.find { |e| e[:name] == 'Spanplatte melaminbeschichtet weiß' }[:fehlend]
+    kante = ergebnisse.find { |e| e[:name] == 'ABS weiß 2 mm' }
+    assert_equal ['std_widths'], kante[:fehlend] # die Klasse kennt std_widths= nicht
+    assert_nil mat('ABS weiß 2 mm').get_attribute(@dict, 'type') # nichts direkt geschrieben
+  end
+
+  def test_diagnose_lists_attributes_and_writes_file
+    Kp::Plugin.ocl_materialien_anlegen
+    pfad = Kp::Plugin.ocl_diagnose
+    text = File.read(pfad, encoding: 'utf-8')
+    assert_includes text, 'Material ABS weiß 2 mm:'
+    assert_includes text, 'type = 4'
+    assert_includes text, 'OCL-Klasse: nicht gefunden'
+  end
+
+  def test_menu_has_ocl_items
+    sub = UI.menu('Plugins').items.find { |i| i[0] == :submenu && i[1] == 'Küchenplaner' }
+    namen = sub[2].items.select { |i| i[0] == :item }.map { |i| i[1] }
+    assert_includes namen, 'OCL-Materialien anlegen'
+    assert_includes namen, 'OCL-Attribute anzeigen'
   end
 end
