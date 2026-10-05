@@ -171,7 +171,7 @@
   },
   {
     "id": "r_os_rueckwand_schrauben",
-    "name": "Oberschrank Rückwand: Durchgangslöcher Ø3 zum Verschrauben mit der Hinterkante des Bodens (Mitte Bodenstärke)",
+    "name": "Oberschrank Rückwand: Durchgangslöcher Ø3 zum Verschrauben mit der Hinterkante von Boden und Deckel (Mitte Plattenstärke)",
     "art": "teil",
     "prioritaet": 10,
     "gilt_fuer": {
@@ -209,12 +209,39 @@
         "d": 3,
         "tiefe": "=D",
         "durch": true
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=P.rueckwand.nuttiefe-P.rueckwand.luft+50",
+        "y": "=H-P.korpus.staerke/2",
+        "d": 3,
+        "tiefe": "=D",
+        "durch": true
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=P.rueckwand.nuttiefe-P.rueckwand.luft+V.innen_b/2",
+        "y": "=H-P.korpus.staerke/2",
+        "d": 3,
+        "tiefe": "=D",
+        "durch": true
+      },
+      {
+        "typ": "bohrung",
+        "flaeche": "F1",
+        "x": "=P.rueckwand.nuttiefe-P.rueckwand.luft+V.innen_b-50",
+        "y": "=H-P.korpus.staerke/2",
+        "d": 3,
+        "tiefe": "=D",
+        "durch": true
       }
     ]
   },
   {
     "id": "r_os_boden_rueckwand",
-    "name": "Oberschrank Boden: Vorbohrungen Ø3 in der Hinterkante für die Rückwandschrauben",
+    "name": "Oberschrank Boden und Deckel: Vorbohrungen Ø3 in der Hinterkante für die Rückwandschrauben",
     "art": "teil",
     "prioritaet": 10,
     "gilt_fuer": {
@@ -223,7 +250,8 @@
       ]
     },
     "rollen": [
-      "boden"
+      "boden",
+      "deckel"
     ],
     "bearbeitungen": [
       {

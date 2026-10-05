@@ -65,15 +65,20 @@ class TestOberschrank < Minitest::Test
     end
   end
 
-  def test_rueckwand_screwed_to_boden
+  def test_rueckwand_screwed_to_boden_and_deckel
     res = schrank
+    rw_x0 = teil(res, 'rw')['lage']['position'][0]
     rw = ops(teil(res, 'rw'), 'bohrung')
-    bo = ops(teil(res, 'bo'), 'bohrung').select { |b| b['flaeche'] == 'F4' }
-    assert_equal 3, rw.size
-    assert_equal 3, bo.size
-    # gleiche Schrankposition: Rückwand-x + Versatz zur Seite = Boden-x + Seitenstärke
-    assert_equal bo.map { |b| b['x'] + 19.0 }, rw.map { |b| b['x'] + teil(res, 'rw')['lage']['position'][0] }
-    assert(rw.all? { |b| b['durch'] && b['y'] == 9.5 }) # Mitte der Bodenstärke
+    assert_equal 6, rw.size
+    assert(rw.all? { |b| b['durch'] })
+    { 'bo' => 9.5, 'de' => 710.5 }.each do |id, z_mitte| # Mitte der Platte in Schrankhöhe
+      stirn = ops(teil(res, id), 'bohrung').select { |b| b['flaeche'] == 'F4' }
+      assert_equal 3, stirn.size, id
+      loecher = rw.select { |b| b['y'] == z_mitte }
+      assert_equal 3, loecher.size, id
+      # gleiche Schrankposition: Rückwand-x + Versatz zur Seite = Platten-x + Seitenstärke
+      assert_equal stirn.map { |b| b['x'] + 19.0 }, loecher.map { |b| b['x'] + rw_x0 }, id
+    end
   end
 
   def test_aufhaenger_choice_sets_versatz

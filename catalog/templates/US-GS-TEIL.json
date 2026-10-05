@@ -1,0 +1,35 @@
+{
+  "code": "US-GS-TEIL",
+  "basis": "US-GS",
+  "name": "Geschirrspüler teilintegriert (Bedienblende des Geräts sichtbar)",
+  "kategorie": "sonderschrank",
+  "suchbegriffe": [
+    "spülmaschine",
+    "geschirrspüler",
+    "teilintegriert"
+  ],
+  "parameter": {
+    "bedienblende_h": {
+      "default": 90,
+      "min": 60,
+      "max": 150,
+      "frei": true
+    }
+  },
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "tuer",
+        "anteil": 1,
+        "anschlag": "unten",
+        "beschlag": "keiner"
+      },
+      {
+        "art": "offen",
+        "hoehe": "=V.bedienblende_h"
+      }
+    ]
+  }
+}

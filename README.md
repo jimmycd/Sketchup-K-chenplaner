@@ -14,7 +14,7 @@ Siehe `docs/schritt1.md` für den Plan, was vorbereitet ist und was noch blockie
 | Pfad | Inhalt |
 |---|---|
 | `schemas/` | JSON-Schemata (Draft 2020-12), 1:1 aus dem Konzept |
-| `catalog/templates/` | Schranktyp-Vorlagen (`US-BASIS`, `US-T1`) |
+| `catalog/templates/` | Schranktyp-Vorlagen (`US-BASIS`, `US-T1`, Sonderschränke: siehe `docs/sonderschraenke.md`) |
 | `catalog/rules/` | Konstruktionsregeln |
 | `catalog/hardware/`, `catalog/hardware_sets/` | Beschläge und Sets (Bohrbilder noch Platzhalter) |
 | `examples/` | Beispielprojekt |

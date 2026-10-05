@@ -1,0 +1,82 @@
+{
+  "code": "US-HERD-KF",
+  "basis": "US-BASIS",
+  "name": "Schrank unter Kochfeld mit Muldenlüfter (Abluft in der Herdplatte), 2 Schubladen",
+  "kategorie": "sonderschrank",
+  "suchbegriffe": [
+    "kochfeld",
+    "herd",
+    "muldenlüfter",
+    "downdraft",
+    "abluft",
+    "kochfeldschrank"
+  ],
+  "beschreibung": "Unterschrank unter einem Kochfeld mit integrierter Abluft (Muldenlüfter). Der Abluftkanal läuft hinten durch den Schrank nach unten: hintere Traverse entfällt, Ausschnitt im Boden, die Schubkästen werden um die Kanaltiefe kürzer (NL).",
+  "merkmale": [
+    "ohne_lochreihe"
+  ],
+  "parameter": {
+    "breite": {
+      "default": 800,
+      "werte": [
+        600,
+        800,
+        900
+      ],
+      "frei": true
+    },
+    "kanal_b": {
+      "default": 230,
+      "min": 100,
+      "max": 400,
+      "frei": true
+    },
+    "kanal_t": {
+      "default": 120,
+      "min": 80,
+      "max": 250,
+      "frei": true
+    },
+    "kanal_x": {
+      "default": "=B/2",
+      "min": 0,
+      "max": 1200,
+      "frei": true
+    }
+  },
+  "teile_ohne": [
+    "th"
+  ],
+  "schubkasten": {
+    "nl": "=floor((V.tk-3-V.kanal_t)/50)*50"
+  },
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "auszug",
+        "anteil": 2,
+        "beschlag": "schubkastensystem"
+      },
+      {
+        "art": "auszug",
+        "anteil": 1,
+        "beschlag": "schubkastensystem"
+      }
+    ]
+  },
+  "bearbeitungen": {
+    "boden": [
+      {
+        "typ": "ausschnitt",
+        "flaeche": "F1",
+        "x": "=V.kanal_x-S",
+        "y": "=W-V.kanal_t/2",
+        "laenge": "=V.kanal_b",
+        "breite": "=V.kanal_t",
+        "eckradius": 20
+      }
+    ]
+  }
+}

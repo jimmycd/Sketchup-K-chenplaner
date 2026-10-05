@@ -202,7 +202,8 @@
           "y": "=Y0+69+96",
           "d": 3,
           "tiefe": 5,
-          "werkzeug": 6
+          "werkzeug": 6,
+          "bedingung": "=W>=69+96+25"
         },
         {
           "typ": "bohrung",
@@ -211,7 +212,8 @@
           "y": "=Y0+69+128",
           "d": 3,
           "tiefe": 5,
-          "werkzeug": 6
+          "werkzeug": 6,
+          "bedingung": "=W>=69+128+25"
         },
         {
           "typ": "bohrung",
@@ -238,7 +240,8 @@
           "y": "=Y0+69+96",
           "d": 3,
           "tiefe": 5,
-          "werkzeug": 6
+          "werkzeug": 6,
+          "bedingung": "=W>=69+96+25"
         },
         {
           "typ": "bohrung",
@@ -247,7 +250,8 @@
           "y": "=Y0+69+128",
           "d": 3,
           "tiefe": 5,
-          "werkzeug": 6
+          "werkzeug": 6,
+          "bedingung": "=W>=69+128+25"
         }
       ]
     }

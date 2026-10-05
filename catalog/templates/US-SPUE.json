@@ -1,0 +1,123 @@
+{
+  "code": "US-SPUE",
+  "basis": "US-BASIS",
+  "name": "Spülenschrank mit Frontauszug (Mülltrennung) und Siphonausschnitt",
+  "kategorie": "unterschrank",
+  "suchbegriffe": [
+    "spüle",
+    "spülenschrank",
+    "mülltonne",
+    "mülleimer",
+    "abfall",
+    "frontauszug"
+  ],
+  "beschreibung": "Spülenunterschrank: wasserfester Boden, Rückwand mit Anschlussausschnitt, ein hoher Frontauszug (Blum, Abfalltrennsystem) mit U-Ausschnitt im Boden für den Siphon und oben eine feste Blende. Die Lochreihe der Seiten entfällt (Regel r_lochreihe nimmt US-SPUE aus).",
+  "parameter": {
+    "breite": {
+      "default": 900,
+      "werte": [
+        450,
+        500,
+        600,
+        800,
+        900,
+        1000,
+        1200
+      ],
+      "frei": true
+    },
+    "blende_h": {
+      "default": 130,
+      "min": 80,
+      "max": 250,
+      "frei": true
+    },
+    "anschluss_x": {
+      "default": "=B/2",
+      "min": 0,
+      "max": 1200,
+      "frei": true
+    },
+    "anschluss_y": {
+      "default": 300,
+      "min": 50,
+      "max": 700,
+      "frei": true
+    },
+    "anschluss_b": {
+      "default": 300,
+      "min": 100,
+      "max": 600,
+      "frei": true
+    },
+    "anschluss_h": {
+      "default": 250,
+      "min": 100,
+      "max": 500,
+      "frei": true
+    },
+    "siphon_b": {
+      "default": 240,
+      "min": 100,
+      "max": 500,
+      "frei": true
+    },
+    "siphon_t": {
+      "default": 180,
+      "min": 80,
+      "max": 300,
+      "frei": true
+    }
+  },
+  "teile_aendern": {
+    "bo": {
+      "material": "P.korpus.material_wasserfest",
+      "name": "Boden wasserfest"
+    }
+  },
+  "einbauten": [
+    {
+      "art": "auszug_innen",
+      "beschlag": "blum_muellsystem"
+    }
+  ],
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "auszug",
+        "anteil": 1,
+        "beschlag": "schubkastensystem"
+      },
+      {
+        "art": "blende",
+        "hoehe": "=V.blende_h"
+      }
+    ]
+  },
+  "bearbeitungen": {
+    "rueckwand": [
+      {
+        "typ": "ausschnitt",
+        "flaeche": "F1",
+        "x": "=V.anschluss_x",
+        "y": "=V.anschluss_y",
+        "laenge": "=V.anschluss_b",
+        "breite": "=V.anschluss_h",
+        "eckradius": 20
+      }
+    ],
+    "sk_boden": [
+      {
+        "typ": "ausschnitt",
+        "flaeche": "F1",
+        "x": "=L/2",
+        "y": "=W-V.siphon_t/2",
+        "laenge": "=V.siphon_b",
+        "breite": "=V.siphon_t",
+        "eckradius": 20
+      }
+    ]
+  }
+}

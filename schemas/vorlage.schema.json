@@ -52,6 +52,21 @@
       "items": { "$ref": "#/$defs/einbau" }
     },
     "front": { "$ref": "#/$defs/front" },
+    "merkmale": {
+      "description": "Steuern Regeln (gilt_fuer.merkmal / ohne_merkmal), z. B. ohne_boden, ohne_traverse, deckel, ohne_lochreihe, ohne_verbindung, verbindung_offen",
+      "type": "array", "items": { "type": "string" }
+    },
+    "teile_ohne": { "description": "Teil-IDs der Basisvorlage, die entfallen", "type": "array", "items": { "type": "string" } },
+    "teile_aendern": {
+      "description": "Teil-ID -> Felder, die in das Basisteil gemischt werden",
+      "type": "object", "additionalProperties": { "type": "object" }
+    },
+    "teile_zusatz": { "description": "Zusätzliche Teile (Aufbau wie teile)", "type": "array", "items": { "$ref": "#/$defs/teil_vorlage" } },
+    "bearbeitungen": {
+      "description": "Bearbeitungen je Teilrolle im Teilsystem; Typ 'ausschnitt' (x, y = Mitte, laenge, breite, eckradius, tiefe) wird zu einer Kontur",
+      "type": "object", "additionalProperties": { "type": "array", "items": { "type": "object", "required": ["typ"] } }
+    },
+    "schubkasten": { "description": "Überschreibt standards.schubkasten für diese Vorlage (z. B. nl, last)", "type": "object" },
     "regeln": {
       "description": "Regel-IDs zusätzlich zu den automatisch passenden; '-id' schließt eine Regel aus",
       "type": "array", "items": { "type": "string" }
@@ -115,6 +130,10 @@
         "anzahl": { "$ref": "common.schema.json#/$defs/mass" },
         "verteilung": { "enum": ["gleichmaessig", "raster", "fest"], "default": "gleichmaessig" },
         "positionen_z": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/mass" } },
+        "bereich": {
+          "description": "Unter- und Oberkante des Faches in Schrankhöhe (Einlegeböden)",
+          "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "common.schema.json#/$defs/mass" }
+        },
         "beschlag": { "type": "string", "description": "z. B. 'set:bodentraeger'" },
         "geraet": {
           "type": "object",
@@ -142,10 +161,13 @@
       "type": "object",
       "required": ["art"],
       "properties": {
-        "art": { "enum": ["tuer", "tuer_doppelt", "schublade", "auszug", "klappe_oben", "klappe_unten", "blende", "offen"] },
+        "art": { "enum": ["tuer", "tuer_doppelt", "schublade", "auszug", "klappe_oben", "klappe_unten", "blende", "offen", "eckfront"] },
         "anteil": { "type": "number", "description": "Relative Höhe bei aufteilung=anteile" },
         "hoehe": { "$ref": "common.schema.json#/$defs/mass", "description": "Fronthöhe bei aufteilung=fest" },
         "anschlag": { "enum": ["links", "rechts", "oben", "unten"], "description": "Nur Türen/Klappen" },
+        "breite": { "$ref": "common.schema.json#/$defs/mass", "description": "Breite des Feldes (Standard: ganze Schrankbreite)" },
+        "ab": { "enum": ["links", "rechts"], "description": "Seite, an der ein schmaleres Feld sitzt" },
+        "neben": { "type": "boolean", "default": false, "description": "Feld steht neben dem vorherigen in derselben Zeile (Höhe und Lage übernommen)" },
         "beschlag": { "type": "string", "description": "Funktion im Set oder Beschlag-ID; Default nach art" },
         "innenschubkasten": { "type": "integer", "minimum": 0, "default": 0 },
         "griff": { "type": "string" }

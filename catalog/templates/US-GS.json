@@ -1,0 +1,67 @@
+{
+  "code": "US-GS",
+  "name": "Geschirrspüler-Nische (Basis)",
+  "kategorie": "sonderschrank",
+  "abstrakt": true,
+  "basis": "US-BASIS",
+  "beschreibung": "Nische für einen Geschirrspüler, Breite = lichte Nische zwischen den Nachbarschränken (keine eigenen Seiten, Boden und Rückwand). Es bleiben die vordere und hintere Traverse als Streben zur Befestigung der Arbeitsplatte (Schraubwinkel an den Nachbarseiten, keine Dübel). Nischenmaß 600 x 550 x 815 (Gerät 598 x 550 x 815..875).",
+  "merkmale": [
+    "ohne_boden",
+    "ohne_lochreihe",
+    "ohne_verbindung"
+  ],
+  "parameter": {
+    "breite": {
+      "default": 600,
+      "werte": [
+        450,
+        600
+      ],
+      "frei": false
+    }
+  },
+  "variablen": {
+    "innen_b": "=B"
+  },
+  "teile_ohne": [
+    "sl",
+    "sr",
+    "bo",
+    "rw"
+  ],
+  "teile_aendern": {
+    "tv": {
+      "abmessungen": {
+        "laenge": "=B"
+      },
+      "position": [
+        0,
+        0,
+        "=H-S"
+      ]
+    },
+    "th": {
+      "abmessungen": {
+        "laenge": "=B"
+      },
+      "position": [
+        0,
+        "=V.tk-100",
+        "=H-S"
+      ]
+    }
+  },
+  "einbauten": [
+    {
+      "art": "geraet",
+      "geraet": {
+        "typ": "geschirrspueler",
+        "nischenmass": [
+          "=B-2",
+          550,
+          815
+        ]
+      }
+    }
+  ]
+}

@@ -6,7 +6,7 @@ Vorlagen: `OS-BASIS` (abstrakt, Korpus) und `OS-T1` (Grundvorlage: 1 Tür, 1 Ein
 - Seiten durchgehend über die volle Tiefe (Standard `tiefen.hs` = 350, Höhe `hoehen.korpus_hs` = 720).
 - Boden und voller Deckel zwischen den Seiten, keine Traversen. Beide enden an der Vorderkante der Rückwand (Tiefe = T − Versatz − Rückwandstärke).
 - Rückwand genutet, von oben einschiebbar: die Nut in den Seiten läuft durch (Regeln `r_os_nut_seite_l/_r`). Rückwand = Innenbreite + 2 × (Nuttiefe − Luft) breit, 1 mm niedriger als die Seiten.
-- Der Boden stößt hinten gegen die Rückwand; sie wird mit dem Boden verschraubt (Ø3 durch in der Rückwand, Vorbohrung Ø3 × 25 in der Hinterkante des Bodens, 3 Stück).
+- Boden und Deckel stoßen hinten gegen die Rückwand; sie wird mit beiden verschraubt (je 3 Löcher Ø3 durch in der Rückwand, je 3 Vorbohrungen Ø3 × 25 in der Hinterkante von Boden und Deckel).
 - Dübel und Schrauben Seite zu Boden/Deckel: Regel `r_os_seite_verbindung`, Lage nach der Boden-/Deckeltiefe `V.tb`.
 
 ## Aufhängesystem und Rückwandversatz
@@ -16,5 +16,5 @@ Der Rückwandversatz (Abstand der Rückwand-Rückseite von der Hinterkante der S
 
 ## Offen
 - Die Bohrbilder der Aufhänger fehlen noch (Beschläge haben `bohrbilder: []`, Generator warnt). Aus den Skizzen sind nur Maß 14 / ≥14 sicher übernommen.
-- Der sichtbare Aufhänger belegt oben unter dem Deckel etwa 46 mm Höhe und 55–60 mm Tiefe; das wird für Einlegeböden noch nicht berücksichtigt.
+- Der sichtbare Aufhänger belegt oben unter dem Deckel etwa 46 mm Höhe und 55–60 mm Tiefe; Einlegeböden kommen nie so hoch, deshalb keine Berücksichtigung nötig.
 - Beispielprojekt: `examples/projekt_oberschrank.json`, Tests: `test/test_oberschrank.rb`.

@@ -1,0 +1,22 @@
+{
+  "code": "ES-LR-KARUSSELL",
+  "basis": "ES-LR",
+  "name": "L-Eckschrank rechts mit Karussell",
+  "kategorie": "eckschrank",
+  "suchbegriffe": [
+    "eckschrank",
+    "l-ecke",
+    "karussell",
+    "rondell",
+    "ecke rechts"
+  ],
+  "einbauten": [
+    {
+      "art": "geraet",
+      "beschlag": "eck_karussell",
+      "geraet": {
+        "typ": "karussell"
+      }
+    }
+  ]
+}
