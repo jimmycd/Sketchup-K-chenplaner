@@ -22,7 +22,7 @@ require File.join(Kp::Plugin::BASE, 'lib', 'kp', 'editor', 'sitzung')
 
 module Kp
   module Plugin
-    VERSION = '0.6.0' unless defined?(VERSION)
+    VERSION = '0.7.0' unless defined?(VERSION)
     DICT = 'kp_part'
     GRUPPE = 'KP_Projekt'
     AXES = {
