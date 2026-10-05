@@ -10,7 +10,7 @@
 
 ## Installation (fertiges Paket)
 
-1. `dist/kp_kuechenplaner_0.5.0.rbz` (liegt im Repository).
+1. `dist/kp_kuechenplaner_0.6.0.rbz` (liegt im Repository).
 2. SketchUp: **Fenster → Erweiterungsmanager → Erweiterung installieren** und die `.rbz` wählen, SketchUp neu starten.
 3. Menü **Erweiterungen → Küchenplaner**: *Beispielprojekt wählen*, *Editor…*, *Selbsttest*, *Küche generieren*, *TCN exportieren…*.
 

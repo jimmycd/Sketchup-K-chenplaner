@@ -1,0 +1,23 @@
+{
+  "code": "US-GS-VOLL",
+  "basis": "US-GS",
+  "name": "Geschirrspüler vollintegriert (Front am Gerät)",
+  "kategorie": "sonderschrank",
+  "suchbegriffe": [
+    "spülmaschine",
+    "geschirrspüler",
+    "vollintegriert"
+  ],
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "tuer",
+        "anteil": 1,
+        "anschlag": "unten",
+        "beschlag": "keiner"
+      }
+    ]
+  }
+}

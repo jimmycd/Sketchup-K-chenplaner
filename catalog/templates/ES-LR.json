@@ -1,0 +1,281 @@
+{
+  "code": "ES-LR",
+  "basis": "US-BASIS",
+  "name": "L-Eckunterschrank, Ecke hinten rechts (Basis)",
+  "kategorie": "eckschrank",
+  "abstrakt": true,
+  "beschreibung": "Spiegelbild von ES-L: Ecke hinten rechts (Wand B rechts bei x = B). Schenkel 1 läuft hinten entlang (x = 0 .. B - Schenkeltiefe), Schenkel 2 rechts nach vorn. Eckfront-Flügel im inneren Eck bei (B - Schenkeltiefe, T - Schenkeltiefe), Topfbänder am linken Schenkelende. Teile gleiche IDs wie ES-L.",
+  "merkmale": [
+    "ohne_verbindung",
+    "verbindung_offen",
+    "ohne_lochreihe"
+  ],
+  "parameter": {
+    "breite": {
+      "default": 900,
+      "werte": [
+        900,
+        1000,
+        1100,
+        1200
+      ],
+      "frei": true
+    },
+    "tiefe": {
+      "default": 900,
+      "werte": [
+        900,
+        1000,
+        1100,
+        1200
+      ],
+      "frei": true
+    },
+    "schenkel_t": {
+      "default": "=P.tiefen.us",
+      "min": 450,
+      "max": 700,
+      "frei": true
+    }
+  },
+  "variablen": {
+    "dd": "=T-SR",
+    "jy": "=T-V.schenkel_t",
+    "ecke_rechts": 1
+  },
+  "teile_ohne": [
+    "sl",
+    "sr",
+    "bo",
+    "tv",
+    "th",
+    "rw"
+  ],
+  "teile_zusatz": [
+    {
+      "id": "sl",
+      "rolle": "seite_r",
+      "name": "Seite rechts (Wand B)",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=H",
+        "breite": "=V.dd"
+      },
+      "position": [
+        "=B",
+        0,
+        0
+      ],
+      "ausrichtung": {
+        "x": "+z",
+        "z": "-x"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar",
+        "links": "P.korpus.kante_sichtbar",
+        "rechts": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "sv",
+      "rolle": "sonstiges",
+      "name": "Abschluss Schenkel 2",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.schenkel_t-S",
+        "breite": "=H"
+      },
+      "position": [
+        "=B-V.schenkel_t",
+        "=S",
+        0
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "-y"
+      }
+    },
+    {
+      "id": "sa",
+      "rolle": "seite_l",
+      "name": "Seite Schenkelende",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=H",
+        "breite": "=V.dd-V.jy"
+      },
+      "position": [
+        0,
+        "=V.dd",
+        0
+      ],
+      "ausrichtung": {
+        "x": "+z",
+        "z": "+x"
+      },
+      "kanten": {
+        "hinten": "P.korpus.kante_sichtbar",
+        "links": "P.korpus.kante_sichtbar",
+        "rechts": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "bo1",
+      "rolle": "boden",
+      "name": "Boden Schenkel 1 und Ecke",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=B-2*S",
+        "breite": "=V.dd-V.jy"
+      },
+      "position": [
+        "=S",
+        "=V.jy",
+        0
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "bo2",
+      "rolle": "boden",
+      "name": "Boden Schenkel 2",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.schenkel_t-S",
+        "breite": "=V.jy-S"
+      },
+      "position": [
+        "=B-V.schenkel_t",
+        "=S",
+        0
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "kanten": {
+        "links": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "tv1",
+      "rolle": "traverse_vorne",
+      "name": "Traverse vorne Schenkel 1",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=B-S-V.schenkel_t",
+        "breite": 100
+      },
+      "position": [
+        "=S",
+        "=V.jy",
+        "=H-S"
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "tv2",
+      "rolle": "sonstiges",
+      "name": "Traverse vorne Schenkel 2",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.jy-S",
+        "breite": 100
+      },
+      "position": [
+        "=B-V.schenkel_t",
+        "=V.jy",
+        "=H-S"
+      ],
+      "ausrichtung": {
+        "x": "-y",
+        "z": "+z"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "th",
+      "rolle": "traverse_hinten",
+      "name": "Traverse hinten",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=B-2*S",
+        "breite": 100
+      },
+      "position": [
+        "=S",
+        "=V.dd-100",
+        "=H-S"
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      }
+    },
+    {
+      "id": "tl",
+      "rolle": "sonstiges",
+      "name": "Traverse rechts",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.dd-100-S",
+        "breite": 100
+      },
+      "position": [
+        "=B-S-100",
+        "=V.dd-100",
+        "=H-S"
+      ],
+      "ausrichtung": {
+        "x": "-y",
+        "z": "+z"
+      }
+    },
+    {
+      "id": "rw",
+      "rolle": "rueckwand",
+      "material": "hdf_weiss_8",
+      "name": "Rückwand aufgesetzt",
+      "abmessungen": {
+        "laenge": "=B",
+        "breite": "=H",
+        "dicke": "=P.rueckwand.staerke"
+      },
+      "position": [
+        0,
+        "=T",
+        0
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "-y"
+      },
+      "maserung": "keine"
+    }
+  ],
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "eckfront",
+        "anteil": 1,
+        "beschlag": "topfband"
+      }
+    ]
+  }
+}

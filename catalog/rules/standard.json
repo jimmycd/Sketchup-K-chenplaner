@@ -8,6 +8,9 @@
     "gilt_fuer": {
       "vorlagen_ausser": [
         "US-SPUE"
+      ],
+      "ohne_merkmal": [
+        "ohne_lochreihe"
       ]
     },
     "rollen": [
@@ -91,6 +94,12 @@
     "gilt_fuer": {
       "bauweise": [
         "seiten_durchgehend"
+      ],
+      "ohne_merkmal": [
+        "ohne_boden",
+        "ohne_traverse",
+        "deckel",
+        "ohne_verbindung"
       ]
     },
     "rollen": [
@@ -224,6 +233,9 @@
     "gilt_fuer": {
       "bauweise": [
         "seiten_durchgehend"
+      ],
+      "ohne_merkmal": [
+        "ohne_verbindung"
       ]
     },
     "rollen": [
@@ -290,6 +302,9 @@
     "gilt_fuer": {
       "bauweise": [
         "seiten_durchgehend"
+      ],
+      "ohne_merkmal": [
+        "ohne_verbindung"
       ]
     },
     "rollen": [
@@ -338,6 +353,9 @@
     "gilt_fuer": {
       "bauweise": [
         "seiten_durchgehend"
+      ],
+      "ohne_merkmal": [
+        "ohne_verbindung"
       ]
     },
     "rollen": [

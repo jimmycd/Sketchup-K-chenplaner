@@ -15,7 +15,9 @@
       "properties": {
         "kategorien": { "type": "array", "items": { "type": "string" } },
         "bauweise": { "type": "array", "items": { "type": "string" } },
-        "vorlagen_ausser": { "type": "array", "items": { "type": "string" } }
+        "vorlagen_ausser": { "type": "array", "items": { "type": "string" } },
+        "merkmal": { "type": "array", "items": { "type": "string" }, "description": "Nur Vorlagen, die alle diese Merkmale tragen" },
+        "ohne_merkmal": { "type": "array", "items": { "type": "string" }, "description": "Nicht für Vorlagen mit einem dieser Merkmale" }
       }
     }
   },

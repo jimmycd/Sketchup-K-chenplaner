@@ -30,13 +30,21 @@ module Kp
 
       ctx = basis_kontext(tmpl, instanz)
       ctx['V'] = {}
+      # Weitere Vorlagenparameter (über Overrides 'parameter.<name>.default' einstellbar) sind in Formeln als V.<name> nutzbar
+      (tmpl['parameter'] || {}).each do |k, p|
+        ctx['V'][k] = Formel.auswerten(p['default'], ctx) unless %w[breite hoehe tiefe].include?(k)
+      end
       (tmpl['variablen'] || {}).each { |k, v| ctx['V'][k] = Formel.auswerten(v, ctx) }
       pos = instanz['pos'] || 'A1'
+      @vorlage_sk = (tmpl['schubkasten'] || {}).transform_values { |v| Formel.auswerten(v, ctx) }
 
-      teile = (tmpl['teile'] || []).flat_map { |t| teil(t, tmpl, ctx, pos) }.compact
+      teile = teile_vorlagen(tmpl).flat_map { |t| teil(t, tmpl, ctx, pos) }.compact
       teile += einbauten(tmpl, ctx, pos, warn, teile)
       teile += fronten(tmpl, ctx, pos, warn, teile)
+      rollen_bearbeitungen(tmpl, teile, ctx)
       regeln_anwenden(tmpl, teile, ctx, instanz, warn)
+      zwischenboden_bohrungen(teile, tmpl, ctx, warn)
+      warn << "#{tmpl['code']}: Verbindungsbohrungen (Dübel, Schrauben) für diesen Grundriss noch nicht erzeugt" if (tmpl['merkmale'] || []).include?('verbindung_offen')
       teile.each { |t| t['wenden'] = t['bearbeitungen'].any? { |b| b['flaeche'] == 'F2' } }
       teile.each { |t| t['masse'] = massangaben(t) }
       teile.each { |t| t['ocl'] = ocl_daten(t) }
@@ -55,6 +63,74 @@ module Kp
         ctx[:vars][var] = Formel.auswerten(wert, ctx).to_f
       end
       ctx
+    end
+
+    # Teileliste der Vorlage: 'teile_ohne' streicht Teile der Basis (nach id), 'teile_aendern' mischt Felder in ein Basisteil,
+    # 'teile_zusatz' hängt weitere Teile an.
+    def teile_vorlagen(tmpl)
+      ohne = tmpl['teile_ohne'] || []
+      aendern = tmpl['teile_aendern'] || {}
+      liste = (tmpl['teile'] || []).reject { |t| ohne.include?(t['id']) }
+      liste = liste.map { |t| aendern[t['id']] ? Katalog.mischen(t, aendern[t['id']]) : t }
+      liste + (tmpl['teile_zusatz'] || [])
+    end
+
+    # Bearbeitungen der Vorlage je Teilrolle ({"rueckwand": [...]}), Koordinaten im Teilsystem (x Länge, y Breite, ab Fertigmaß-Ecke).
+    # Typ 'ausschnitt' (Rechteck, optional mit Eckradius) wird zu einer geschlossenen Kontur.
+    def rollen_bearbeitungen(tmpl, teile, ctx)
+      (tmpl['bearbeitungen'] || {}).each do |rolle, ops|
+        teile.select { |t| t['rolle'] == rolle }.each do |t|
+          pctx = teil_ctx(ctx, t['fertigmass']['l'], t['fertigmass']['w'], t['fertigmass']['d'])
+          pctx = pctx.merge(vars: pctx[:vars].merge(kantenvariablen(t)))
+          ops.each_with_index do |b, i|
+            next if b['bedingung'] && !Formel.auswerten(b['bedingung'], pctx)
+
+            op = aufloesen(b, pctx)
+            op.delete('bedingung')
+            op = ausschnitt_zu_kontur(op, t) if op['typ'] == 'ausschnitt'
+            op['id'] = "#{tmpl['code']}.#{rolle}.#{i + 1}"
+            op['quelle'] = { 'regel' => "vorlage:#{tmpl['code']}" }
+            t['bearbeitungen'] << op
+          end
+        end
+      end
+    end
+
+    # x, y = Mitte (bezug 'ecke': untere linke Ecke), laenge entlang Teil-x, breite entlang Teil-y; ohne tiefe: durchgehend
+    def ausschnitt_zu_kontur(op, teil)
+      lx = op['laenge'].to_f
+      ly = op['breite'].to_f
+      ecke = op['bezug'] == 'ecke'
+      x0 = ecke ? op['x'].to_f : op['x'].to_f - lx / 2
+      y0 = ecke ? op['y'].to_f : op['y'].to_f - ly / 2
+      x1 = x0 + lx
+      y1 = y0 + ly
+      r = op['eckradius'].to_f
+      bogen = { 'r' => r, 'cw' => false }
+      pfad = if r.positive?
+               [[x0 + r, y0], [x1 - r, y0], [x1, y0 + r, bogen], [x1, y1 - r], [x1 - r, y1, bogen],
+                [x0 + r, y1], [x0, y1 - r, bogen], [x0, y0 + r], [x0 + r, y0, bogen]]
+             else
+               [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
+             end
+      pfad = pfad.map { |x, y, b| { 'x' => x.round(3), 'y' => y.round(3) }.merge(b ? { 'bogen' => b } : {}) }
+      { 'typ' => 'kontur', 'flaeche' => op['flaeche'] || 'F1', 'pfad' => pfad, 'geschlossen' => true, 'korrektur' => 'links',
+        'tiefe' => op['tiefe'] || (teil['fertigmass']['d'] + 2.0) }
+    end
+
+    # Feste Zwischenböden (Rolle zwischenboden) brauchen die Gegenstück-Dübel in beiden Seiten (Muster wie am Boden-Ende).
+    def zwischenboden_bohrungen(teile, tmpl, ctx, _warn)
+      s = ctx[:vars]['S']
+      teile.select { |t| t['rolle'] == 'zwischenboden' }.each_with_index do |zb, i|
+        zu = zb['lage']['position'][2]
+        bohr = %w[Y0+30 YM Y1-30].map do |y|
+          { 'typ' => 'bohrung', 'flaeche' => 'F1', 'x' => "=ZU+S/2", 'y' => "=#{y}", 'd' => '=P.verbindung.duebel.d',
+            'tiefe' => '=P.verbindung.duebel.tiefe_flaeche' }
+        end
+        regel = { 'id' => "r_zwischenboden_duebel#{i + 1}", 'rollen' => %w[seite_l seite_r], 'bearbeitungen' => bohr }
+        zctx = ctx.merge(vars: ctx[:vars].merge('ZU' => zu, 'S' => s))
+        teile.each { |t| teilregel(regel, t, tmpl, zctx, []) if regel['rollen'].include?(t['rolle']) }
+      end
     end
 
     # Overrides: Punkt-Pfad -> Wert (Zahlen im Pfad = Arrayindex)
@@ -115,6 +191,7 @@ module Kp
     # Einlegeböden: Länge = Innenbreite − Spiel, Tiefe = Korpustiefe − Abzug; Höhe auf das 32er-Raster der Seiten.
     def einbauten(tmpl, ctx, pos, warn, teile = [])
       (tmpl['einbauten'] || []).flat_map do |e|
+        next nischen_pruefen(e, ctx, warn) if %w[geraet auszug_innen].include?(e['art']) # Gerät/Zubehör: keine Fertigungsteile
         next warn.push("Einbau #{e['art']} noch nicht umgesetzt") && [] unless e['art'] == 'einlegeboden'
 
         eb = @std['einlegeboden']
@@ -124,10 +201,12 @@ module Kp
         innen_b = ctx['V']['innen_b'] || (ctx[:vars]['B'] - 2 * s)
         raster = @std['lochreihe']['raster']
         start = @std['lochreihe']['start']
-        frei = ctx[:vars]['H'] - s - s
+        # Bereich (Unter- und Oberkante des Faches in Schrankhöhe); ohne Angabe der ganze Korpus
+        von, bis = (e['bereich'] || [s, ctx[:vars]['H'] - s]).map { |v| Formel.auswerten(v, ctx).to_f }
+        frei = bis - von
         z0 = (teile.find { |t| t['rolle'] == 'seite_r' }&.dig('kantenstaerke', 'links') || 0).to_f
         (1..n).map do |i|
-          roh = s + frei * i / (n + 1.0)
+          roh = von + frei * i / (n + 1.0)
           z = z0 + start + (((roh - z0 - start) / raster).round * raster)
           mat = material(eb['material'] || 'P.korpus.material')
           {
@@ -146,6 +225,21 @@ module Kp
       end
     end
 
+    # Geräte-Nische (Spülmaschine, Backofen) und Innenauszüge erzeugen keine Teile; es wird nur geprüft, ob die Nische passt.
+    # nischenmass = [Breite, Tiefe, Höhe]; die Höhe gilt über Boden (Korpushöhe plus Sockel).
+    def nischen_pruefen(e, ctx, warn)
+      mass = e.dig('geraet', 'nischenmass')
+      if mass
+        nb, nt, nh = mass.map { |v| Formel.auswerten(v, ctx).to_f }
+        innen_b = ctx['V']['innen_b'] || (ctx[:vars]['B'] - 2 * ctx[:vars]['S'])
+        warn << "Nische #{e['geraet']['typ']}: lichte Breite #{innen_b} kleiner als Gerätemaß #{nb}" if innen_b < nb - 1e-6
+        warn << "Nische #{e['geraet']['typ']}: Tiefe #{ctx[:vars]['T']} kleiner als Gerätemaß #{nt}" if ctx[:vars]['T'] < nt - 1e-6
+        hoehe = ctx[:vars]['H'] + @std['hoehen']['sockel'].to_f
+        warn << "Nische #{e['geraet']['typ']}: Höhe #{hoehe} (mit Sockel) kleiner als Gerätemaß #{nh}" if hoehe < nh - 1e-6
+      end
+      []
+    end
+
     # ---- Fronten (zunächst nur Türen) ---------------------------------------------
     # Aufschlagende Front: Breite = B - Fuge, Höhe verteilt nach Anteilen. Teilachsen so, dass F1 die Innenseite ist
     # und das Topfband bei hohem y sitzt (wie in den Maschinenbeispielen): DIN links x nach unten, DIN rechts x nach oben.
@@ -158,21 +252,36 @@ module Kp
       felder = front['felder']
       b = ctx[:vars]['B']
       h_ges = ctx[:vars]['H'] - fuge + (cfg['ueberstand_unten'] || 0).to_f
-      summe = felder.sum { |f| (f['anteil'] || 1).to_f }
+      zeilen = felder.reject { |f| f['neben'] } # 'neben': Feld steht in der Zeile des vorherigen (Höhe und Lage übernommen)
+      fest = zeilen.sum { |f| f['hoehe'] ? Formel.auswerten(f['hoehe'], ctx).to_f : 0.0 }
+      summe = zeilen.sum { |f| f['hoehe'] ? 0.0 : (f['anteil'] || 1).to_f }
+      frei = h_ges - fuge * (zeilen.size - 1) - fest
       z = fuge / 2 - (cfg['ueberstand_unten'] || 0).to_f
       d = (cfg['staerke'] || 19).to_f
       # Unterkante der Seite in Schrankhöhe (Fräskante): Bezug der Systemlochreihe
       seite = teile.find { |t| t['rolle'] == 'seite_r' }
       seite_z0 = seite ? seite['lage']['position'][2].to_f + seite['kantenstaerke']['links'] : 0.0
+      zeile = nil
       felder.each_with_index.flat_map do |f, i|
-        hoehe = (h_ges - fuge * (felder.size - 1)) * (f['anteil'] || 1).to_f / summe
-        z0 = z
-        z += hoehe + fuge
+        if f['neben'] && zeile
+          z0, hoehe = zeile
+        else
+          hoehe = f['hoehe'] ? Formel.auswerten(f['hoehe'], ctx).to_f : frei * (f['anteil'] || 1).to_f / summe
+          z0 = z
+          z += hoehe + fuge
+          zeile = [z0, hoehe]
+        end
+        # Teilbreite: ohne 'breite' die ganze Schrankbreite; 'ab' legt fest, an welcher Seite das Feld sitzt
+        bf = f['breite'] ? Formel.auswerten(f['breite'], ctx).to_f : b
+        xs = f['ab'] == 'rechts' ? b - bf : 0.0
         case f['art']
-        when 'tuer' then tuer(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn, seite_z0)
-        when 'tuer_doppelt' then doppeltuer(tmpl, ctx, pos, f, i + 1, b, hoehe, fuge, z0, d, warn, seite_z0)
-        when 'klappe_oben', 'klappe_unten' then klappe(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn)
-        when 'schublade', 'auszug' then schublade(tmpl, ctx, pos, f, i + 1, b - fuge, hoehe, fuge / 2, z0, d, warn, teile)
+        when 'tuer' then tuer(tmpl, ctx, pos, f, i + 1, bf - fuge, hoehe, xs + fuge / 2, z0, d, warn, seite_z0)
+        when 'tuer_doppelt' then doppeltuer(tmpl, ctx, pos, f, i + 1, bf, hoehe, fuge, z0, d, warn, seite_z0, xs)
+        when 'klappe_oben', 'klappe_unten' then klappe(tmpl, ctx, pos, f, i + 1, bf - fuge, hoehe, xs + fuge / 2, z0, d, warn)
+        when 'schublade', 'auszug' then schublade(tmpl, ctx, pos, f, i + 1, bf - fuge, hoehe, xs + fuge / 2, z0, d, warn, teile)
+        when 'blende' then blende(tmpl, ctx, pos, f, i + 1, bf - fuge, hoehe, xs + fuge / 2, z0, d)
+        when 'eckfront' then eckfront(tmpl, ctx, pos, f, i + 1, hoehe, z0, d, fuge, warn, seite_z0)
+        when 'offen' then [] # Öffnung ohne Front (Gerätenische)
         else
           warn << "Frontfeld #{f['art']} noch nicht umgesetzt"
           []
@@ -181,9 +290,9 @@ module Kp
     end
 
     # Doppeltür: zwei gleich breite Türen, außen Fuge/2, in der Mitte eine volle Fuge; links DIN L, rechts DIN R.
-    def doppeltuer(tmpl, ctx, pos, feld, nr, b, hoehe, fuge, z0, dicke, warn, seite_z0)
+    def doppeltuer(tmpl, ctx, pos, feld, nr, b, hoehe, fuge, z0, dicke, warn, seite_z0, x_off = 0.0)
       bt = (b - 2 * fuge) / 2
-      [['links', fuge / 2, 'l'], ['rechts', fuge / 2 + bt + fuge, 'r']].flat_map do |seite, x0, k|
+      [['links', x_off + fuge / 2, 'l'], ['rechts', x_off + fuge / 2 + bt + fuge, 'r']].flat_map do |seite, x0, k|
         tuer(tmpl, ctx, pos, feld.merge('anschlag' => seite), nr, bt, hoehe, x0, z0, dicke, warn, seite_z0, "tu#{nr}#{k}")
       end
     end
@@ -207,15 +316,64 @@ module Kp
       }
       pctx = teil_ctx(ctx, hoehe, breite, dicke)
       set = @katalog.beschlagset(@std['beschlag_set'])['zuordnung']
-      topfband_ops(teil, pctx, set, feld['beschlag'] || 'topfband', warn, z0, links, seite_z0)
+      if feld['beschlag'] == 'keiner'
+        teil['bezeichnung'] = "#{pos} Gerätefront #{nr}"
+        warn << "#{pos}/#{tid}: Front ohne Beschlagbohrung (Befestigung am Gerät, Bohrbild des Geräteherstellers nötig)"
+      else
+        topfband_ops(teil, pctx, set, feld['beschlag'] || 'topfband', warn, z0, links, seite_z0)
+      end
       griff_ops(teil, pctx, set, cfg['griff'], warn)
       [teil]
+    end
+
+    # Blende: feste Frontplatte ohne Beschlag (Spülen-Blende, Blindfront neben einer Tür).
+    def blende(tmpl, ctx, pos, feld, nr, breite, hoehe, x0, z0, dicke)
+      mat = material('P.front.material')
+      kante = kante('P.front.kante')
+      staerke = kante ? @std['kanten'][kante]['staerke'].to_f : 0.0
+      tid = "bl#{nr}"
+      [{
+        'uid' => "#{@projekt['id']}/#{pos}/#{tid}", 'pos' => pos, 'teil_id' => tid, 'rolle' => 'blende',
+        'bezeichnung' => "#{pos} Blende #{nr}", 'material' => mat,
+        'fertigmass' => { 'l' => breite.round(3), 'w' => hoehe.round(3), 'd' => dicke },
+        'maserung' => 'laenge', 'kanten' => KANTEN.to_h { |k| [k, kante] },
+        'kantenstaerke' => KANTEN.to_h { |k| [k, staerke] },
+        'sichtseite' => 'F2', 'wenden' => false, 'bearbeitungen' => [],
+        'herkunft' => { 'vorlage' => tmpl['code'], 'generator_version' => VERSION },
+        'lage' => { 'position' => [x0 + breite, -dicke, z0], 'ausrichtung' => { 'x' => '-x', 'z' => '+y' } }
+      }]
+    end
+
+    # L-Eckschrank, Falttür (Winkeltür): Flügel 1 an der Front des hinteren Schenkels (Topfbänder am Schenkelende), Flügel 2 an der
+    # Front des vorderen Schenkels. Beide Flügel sind am inneren Eck mit Faltscharnieren verbunden (noch kein Bohrbild).
+    # Vorlagenvariablen: schenkel_t = Tiefe der Schenkel, ecke_rechts = 1 für Ecke hinten rechts (gespiegelt), T = Gesamttiefe der Ecke.
+    def eckfront(tmpl, ctx, pos, feld, nr, hoehe, z0, dicke, fuge, warn, seite_z0)
+      a = ctx[:vars]['B']
+      t = ctx['V']['schenkel_t'] or raise Katalog::Fehler, 'eckfront braucht die Vorlagenvariable schenkel_t'
+      rechts = ctx['V']['ecke_rechts'].to_f.positive?
+      jy = ctx[:vars]['T'] - t # Front des hinteren Schenkels und Ende des vorderen
+      b1 = a - t - fuge
+      b2 = jy - dicke - fuge
+      if rechts
+        f1 = tuer(tmpl, ctx, pos, feld.merge('anschlag' => 'links'), nr, b1, hoehe, fuge / 2, z0, dicke, warn, seite_z0, "ef#{nr}a")
+        f2 = tuer(tmpl, ctx, pos, feld.merge('beschlag' => 'keiner'), nr, b2, hoehe, t, z0, dicke, [], seite_z0, "ef#{nr}b")
+        f2[0]['lage'] = { 'position' => [a - t - dicke, fuge / 2 + b2, z0], 'ausrichtung' => { 'x' => '+z', 'z' => '+x' } }
+      else
+        f1 = tuer(tmpl, ctx, pos, feld.merge('anschlag' => 'rechts'), nr, b1, hoehe, t + fuge / 2, z0, dicke, warn, seite_z0, "ef#{nr}a")
+        f2 = tuer(tmpl, ctx, pos, feld.merge('beschlag' => 'keiner'), nr, b2, hoehe, t, z0, dicke, [], seite_z0, "ef#{nr}b")
+        f2[0]['lage'] = { 'position' => [t + dicke, fuge / 2, z0], 'ausrichtung' => { 'x' => '+z', 'z' => '-x' } }
+      end
+      f1[0]['lage']['position'][1] = jy - dicke
+      f1[0]['bezeichnung'] = "#{pos} Eckfront Flügel 1 (Topfbänder)"
+      f2[0]['bezeichnung'] = "#{pos} Eckfront Flügel 2 (Faltscharnier)"
+      warn << "#{pos}: Faltscharniere zwischen den Eckfront-Flügeln ohne Bohrbild (Hersteller-Referenz nötig)"
+      f1 + f2
     end
 
     # Schublade (Blum LEGRABOX free): Front und Schubkastenboden werden gefräst, die Seiten bekommen die Schienenbohrungen.
     # Rückwand und Metallteile des Systems sind nicht Teil der CNC-Fertigung.
     def schublade(tmpl, ctx, pos, feld, nr, breite, hoehe, x0, z0, dicke, warn, teile)
-      cfg = @std['schubkasten'] || {}
+      cfg = (@std['schubkasten'] || {}).merge(@vorlage_sk || {})
       mat = material('P.front.material')
       kante = kante('P.front.kante')
       staerke = kante ? @std['kanten'][kante]['staerke'].to_f : 0.0
@@ -451,6 +609,10 @@ module Kp
       return false if g['kategorien'] && !g['kategorien'].include?(tmpl['kategorie'])
       return false if g['bauweise'] && !g['bauweise'].include?(@std['bauweise'])
       return false if (g['vorlagen_ausser'] || []).include?(tmpl['code'])
+
+      merkmale = tmpl['merkmale'] || []
+      return false if g['merkmal'] && (g['merkmal'] - merkmale).any?
+      return false if (g['ohne_merkmal'] || []).any? { |m| merkmale.include?(m) }
 
       r['bedingung'].nil? || Formel.auswerten(r['bedingung'], ctx)
     end

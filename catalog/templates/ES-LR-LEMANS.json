@@ -1,0 +1,23 @@
+{
+  "code": "ES-LR-LEMANS",
+  "basis": "ES-LR",
+  "name": "L-Eckschrank rechts mit LeMans-Auszug",
+  "kategorie": "eckschrank",
+  "suchbegriffe": [
+    "eckschrank",
+    "l-ecke",
+    "lemans",
+    "le mans",
+    "nierenauszug",
+    "ecke rechts"
+  ],
+  "einbauten": [
+    {
+      "art": "geraet",
+      "beschlag": "eck_lemans",
+      "geraet": {
+        "typ": "lemans"
+      }
+    }
+  ]
+}

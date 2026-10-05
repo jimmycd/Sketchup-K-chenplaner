@@ -1,0 +1,47 @@
+{
+  "code": "HS-BASIS",
+  "basis": "US-BASIS",
+  "name": "Hochschrank-Korpus",
+  "kategorie": "hochschrank",
+  "abstrakt": true,
+  "beschreibung": "Hochschrank: Seiten durchgehend, Boden unten und Deckel oben im Muster des Bodens (Dübel), aufgesetzte Rückwand.",
+  "merkmale": [
+    "deckel"
+  ],
+  "parameter": {
+    "hoehe": {
+      "default": "=P.hoehen.korpus_hoch"
+    },
+    "tiefe": {
+      "default": "=P.tiefen.hoch"
+    }
+  },
+  "teile_ohne": [
+    "tv",
+    "th"
+  ],
+  "teile_zusatz": [
+    {
+      "id": "dk",
+      "rolle": "deckel",
+      "name": "Deckel",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.innen_b",
+        "breite": "=V.tk"
+      },
+      "position": [
+        "=S",
+        0,
+        "=H-S"
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    }
+  ]
+}

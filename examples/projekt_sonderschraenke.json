@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "id": "kueche_mueller_2026",
-  "name": "Küche Müller",
+  "id": "kueche_sonder_2026",
+  "name": "Sonderschränke (Beispiel)",
   "kataloge": [
     "../catalog"
   ],
@@ -81,25 +81,68 @@
   },
   "zeilen": [
     {
-      "id": "zeile_a",
-      "name": "Zeile A Fensterwand",
+      "id": "zeile_b",
+      "name": "Zeile B Sonderschränke",
       "ebene": "unten",
       "start": [
         0,
         0,
         0
       ],
-      "wandlaenge": 3200,
       "elemente": [
         {
-          "pos": "A1",
-          "vorlage": "US-T1",
-          "breite": 450
+          "pos": "B1",
+          "vorlage": "US-GS-VOLL"
         },
         {
-          "pos": "A2",
-          "vorlage": "US-S2",
-          "breite": 600
+          "pos": "B2",
+          "vorlage": "US-GS-TEIL"
+        },
+        {
+          "pos": "B3",
+          "vorlage": "US-GS-FREI"
+        },
+        {
+          "pos": "B4",
+          "vorlage": "US-SPUE",
+          "breite": 900
+        },
+        {
+          "pos": "B5",
+          "vorlage": "US-HERD-OFEN"
+        },
+        {
+          "pos": "B6",
+          "vorlage": "US-HERD-KF",
+          "breite": 800
+        },
+        {
+          "pos": "B7",
+          "vorlage": "HS-OFEN"
+        },
+        {
+          "pos": "B8",
+          "vorlage": "ES-BLIND-L"
+        },
+        {
+          "pos": "B9",
+          "vorlage": "ES-BLIND-R"
+        },
+        {
+          "pos": "B10",
+          "vorlage": "ES-L-KARUSSELL"
+        },
+        {
+          "pos": "B11",
+          "vorlage": "ES-L-LEMANS"
+        },
+        {
+          "pos": "B12",
+          "vorlage": "ES-LR-KARUSSELL"
+        },
+        {
+          "pos": "B13",
+          "vorlage": "ES-LR-LEMANS"
         }
       ]
     }

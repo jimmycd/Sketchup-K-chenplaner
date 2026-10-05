@@ -1,0 +1,177 @@
+{
+  "code": "HS-OFEN",
+  "basis": "HS-BASIS",
+  "name": "Hochschrank mit Backofen, 2 große Schubladen darunter, Fach oben",
+  "kategorie": "hochschrank",
+  "suchbegriffe": [
+    "hochschrank",
+    "backofen",
+    "ofen",
+    "backofenhochschrank",
+    "große schubladen"
+  ],
+  "beschreibung": "Unten zwei große Frontauszüge (Blum, 70 kg), darüber die Backofennische zwischen zwei festen Zwischenböden (Dübel in den Seiten), oben ein Fach mit Tür und einem Einlegeboden. Die Lochreihe läuft über die ganze Seite (Warnung wegen der Schubladen); Schubladen und Ofen-Höhe sind über die Parameter einstellbar.",
+  "parameter": {
+    "breite": {
+      "default": 600,
+      "werte": [
+        600
+      ],
+      "frei": false
+    },
+    "schub_zone": {
+      "default": 700,
+      "min": 400,
+      "max": 900,
+      "frei": true
+    },
+    "ofen_nische_h": {
+      "default": 600,
+      "min": 585,
+      "max": 700,
+      "frei": true
+    },
+    "lueftung_b": {
+      "default": 500,
+      "min": 200,
+      "max": 560,
+      "frei": true
+    }
+  },
+  "variablen": {
+    "zb1_unten": "=V.schub_zone",
+    "zb2_unten": "=V.schub_zone+S+V.ofen_nische_h"
+  },
+  "teile_zusatz": [
+    {
+      "id": "dk",
+      "rolle": "deckel",
+      "name": "Deckel",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.innen_b",
+        "breite": "=V.tk"
+      },
+      "position": [
+        "=S",
+        0,
+        "=H-S"
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "zb1",
+      "rolle": "zwischenboden",
+      "name": "Zwischenboden unter Ofen",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.innen_b",
+        "breite": "=V.tk"
+      },
+      "position": [
+        "=S",
+        0,
+        "=V.zb1_unten"
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "zb2",
+      "rolle": "zwischenboden",
+      "name": "Zwischenboden über Ofen",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.innen_b",
+        "breite": "=V.tk"
+      },
+      "position": [
+        "=S",
+        0,
+        "=V.zb2_unten"
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    }
+  ],
+  "schubkasten": {
+    "last": 70
+  },
+  "einbauten": [
+    {
+      "art": "geraet",
+      "geraet": {
+        "typ": "backofen",
+        "nischenmass": [
+          560,
+          550,
+          "=V.ofen_nische_h"
+        ]
+      }
+    },
+    {
+      "art": "einlegeboden",
+      "anzahl": 1,
+      "bereich": [
+        "=V.zb2_unten+S",
+        "=H-S"
+      ],
+      "beschlag": "set:bodentraeger"
+    }
+  ],
+  "front": {
+    "typ": "aufschlagend",
+    "aufteilung": "anteile",
+    "felder": [
+      {
+        "art": "auszug",
+        "hoehe": "=(V.schub_zone-3)/2",
+        "beschlag": "schubkastensystem"
+      },
+      {
+        "art": "auszug",
+        "hoehe": "=(V.schub_zone-3)/2",
+        "beschlag": "schubkastensystem"
+      },
+      {
+        "art": "offen",
+        "hoehe": "=V.ofen_nische_h+2*S"
+      },
+      {
+        "art": "tuer",
+        "anteil": 1,
+        "anschlag": "rechts",
+        "beschlag": "topfband"
+      }
+    ]
+  },
+  "bearbeitungen": {
+    "rueckwand": [
+      {
+        "typ": "ausschnitt",
+        "flaeche": "F1",
+        "x": "=B/2",
+        "y": "=V.zb1_unten+S+V.ofen_nische_h/2",
+        "laenge": "=V.lueftung_b",
+        "breite": "=V.ofen_nische_h-40",
+        "eckradius": 20
+      }
+    ]
+  }
+}
