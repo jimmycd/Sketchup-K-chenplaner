@@ -1,0 +1,171 @@
+{
+  "code": "OS-BASIS",
+  "name": "Oberschrank-Korpus (Hängeschrank)",
+  "kategorie": "haengeschrank",
+  "abstrakt": true,
+  "beschreibung": "Grundtyp Oberschrank: Seiten durchgehend über die volle Tiefe, Boden und voller Deckel (keine Traversen) dazwischen. Die Rückwand ist in die Seiten genutet und wird von oben eingeschoben; Boden und Deckel stoßen hinten gegen die Rückwand, die Rückwand wird mit dem Boden verschraubt. Die Rückwand sitzt um V.versatz von der Hinterkante der Seiten nach vorne versetzt (Aufhängeraum bzw. Schattenfuge): V.versatz = Haken-/Mindestmaß des gewählten Schrankaufhängers + V.luft_aufhaenger. Aufhängesystem: aufhaengung.beschlag (Standard set:schrankaufhaenger aus dem Beschlag-Set; je Schrank per Override 'aufhaengung.beschlag' = haefele_aufhaenger_sichtbar oder haefele_aufhaenger_unsichtbar). Einstellbar über Overrides 'parameter.versatz.default' usw. Maße der Aufhänger-Bohrbilder noch nicht hinterlegt (Warnung), siehe Beschlag.",
+  "parameter": {
+    "breite": {
+      "default": 600,
+      "werte": [
+        300,
+        400,
+        450,
+        500,
+        600,
+        800,
+        900,
+        1000,
+        1200
+      ],
+      "frei": true,
+      "min": 150,
+      "max": 1200
+    },
+    "hoehe": {
+      "default": "=P.hoehen.korpus_hs"
+    },
+    "tiefe": {
+      "default": "=P.tiefen.hs"
+    },
+    "luft_aufhaenger": {
+      "default": 2,
+      "min": 0,
+      "max": 30,
+      "frei": true
+    },
+    "versatz": {
+      "default": "=V.aufhaenger.haken_tiefe+V.luft_aufhaenger",
+      "min": 0,
+      "max": 60,
+      "frei": true
+    }
+  },
+  "aufhaengung": {
+    "beschlag": "set:schrankaufhaenger"
+  },
+  "variablen": {
+    "innen_b": "=B-2*S",
+    "tb": "=T-V.versatz-SR",
+    "tk": "=T-V.versatz-SR",
+    "nutueberstand": "=P.rueckwand.nuttiefe-P.rueckwand.luft",
+    "rw_b": "=B-2*S+2*(P.rueckwand.nuttiefe-P.rueckwand.luft)",
+    "rw_h": "=H-1"
+  },
+  "regeln": [
+    "-r_seite_duebel_schraube",
+    "-r_rueckwand_nut"
+  ],
+  "teile": [
+    {
+      "id": "sl",
+      "rolle": "seite_l",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=H",
+        "breite": "=T"
+      },
+      "position": [
+        0,
+        "=T",
+        0
+      ],
+      "ausrichtung": {
+        "x": "+z",
+        "z": "+x"
+      },
+      "kanten": {
+        "hinten": "P.korpus.kante_sichtbar",
+        "links": "P.korpus.kante_sichtbar",
+        "rechts": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "sr",
+      "rolle": "seite_r",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=H",
+        "breite": "=T"
+      },
+      "position": [
+        "=B",
+        0,
+        0
+      ],
+      "ausrichtung": {
+        "x": "+z",
+        "z": "-x"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar",
+        "links": "P.korpus.kante_sichtbar",
+        "rechts": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "bo",
+      "rolle": "boden",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.innen_b",
+        "breite": "=V.tb"
+      },
+      "position": [
+        "=S",
+        0,
+        0
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "de",
+      "rolle": "deckel",
+      "name": "Deckel",
+      "material": "P.korpus.material",
+      "abmessungen": {
+        "laenge": "=V.innen_b",
+        "breite": "=V.tb"
+      },
+      "position": [
+        "=S",
+        0,
+        "=H-S"
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "+z"
+      },
+      "kanten": {
+        "vorne": "P.korpus.kante_sichtbar"
+      }
+    },
+    {
+      "id": "rw",
+      "rolle": "rueckwand",
+      "name": "Rückwand genutet",
+      "material": "hdf_weiss_8",
+      "abmessungen": {
+        "laenge": "=V.rw_b",
+        "breite": "=V.rw_h",
+        "dicke": "=P.rueckwand.staerke"
+      },
+      "position": [
+        "=S-V.nutueberstand",
+        "=T-V.versatz",
+        0
+      ],
+      "ausrichtung": {
+        "x": "+x",
+        "z": "-y"
+      },
+      "maserung": "keine"
+    }
+  ]
+}

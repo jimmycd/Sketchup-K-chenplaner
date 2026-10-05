@@ -14,7 +14,7 @@
     ],
     "bodentraeger": "bodentraeger_5mm",
     "sockelfuss": "sockelfuss_100",
-    "schrankaufhaenger": "<aufhaenger>",
+    "schrankaufhaenger": "haefele_aufhaenger_unsichtbar",
     "griff": "griff_bohrabstand_160",
     "schubkastensystem": "blum_legrabox_free",
     "klappenbeschlag": "blum_aventos_hk_s"
