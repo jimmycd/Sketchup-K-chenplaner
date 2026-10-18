@@ -97,6 +97,7 @@ end
 unless file_loaded?(__FILE__)
   menu = UI.menu('Plugins').add_submenu('Küchenplaner (Dev)')
   menu.add_item('Neu laden') { Kp::Dev.reload(true) }
+  menu.add_item('Editor…') { Kp::Plugin.editor_oeffnen }
   menu.add_item('Selbsttest') { Kp::Plugin.selbsttest }
   menu.add_item('Quellpfad ändern…') do
     Kp::Dev.quellpfad_aendern
